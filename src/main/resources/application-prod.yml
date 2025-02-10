@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: ${PROD_DATASOURCE_URL}
+    username: ${PROD_DATASOURCE_USERNAME}
+    password: ${PROD_DATASOURCE_PASSWORD}
+---
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        show_sql: false
+        format_sql: false
+        jdbc:
+          fetch_size: 100 # 데이터 패치 크기
+          batch_size: 50 # 배치 크기
+---
+logging:
+  level:
+    org.hibernate.SQL: ERROR  # SQL 로그 비활성화
+    org.hibernate.type.descriptor.sql.BasicBinder: ERROR  # 파라미터 로그 비활성화
+    org.hibernate.engine.jdbc.batch.internal.BatchingBatch: ERROR  # 배치 로그 비활성화
+    com.zaxxer.hikari: WARN  # HikariCP 관련 경고만 출력
