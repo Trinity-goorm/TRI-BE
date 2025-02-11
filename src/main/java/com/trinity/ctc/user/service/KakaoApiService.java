@@ -3,13 +3,14 @@ package com.trinity.ctc.user.service;
 import com.trinity.ctc.user.config.KakaoApiProperties;
 import com.trinity.ctc.user.dto.KakaoTokenResponse;
 import com.trinity.ctc.user.dto.KakaoUserInfoResponse;
-import java.util.Map;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 @Service
@@ -26,23 +27,25 @@ public class KakaoApiService {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        Map<String, String> params = Map.of(
-            "grant_type", kakaoApiProperties.getGrantType(),
-            "client_id", kakaoApiProperties.getClientId(),
-            "redirect_uri", kakaoApiProperties.getRedirectUri(),
-            "code", authorizationCode
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+
+        body.add("grant_type", kakaoApiProperties.getGrantType());
+        body.add("client_id", kakaoApiProperties.getClientId());
+        body.add("redirect_uri", kakaoApiProperties.getRedirectUri());
+        body.add("code", authorizationCode);
+
+        HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(body, headers);
+
+        KakaoTokenResponse response = restTemplate.postForObject(
+                kakaoApiProperties.getTokenUrl(),
+                requestEntity,
+                KakaoTokenResponse.class
         );
 
-        HttpEntity<Map<String, String>> requestEntity = new HttpEntity<>(params, headers);
 
-        ResponseEntity<KakaoTokenResponse> response = restTemplate.exchange(
-            kakaoApiProperties.getTokenUrl(),
-            HttpMethod.POST,
-            requestEntity,
-            KakaoTokenResponse.class
-        );
+        return response;
 
-        return response.getBody();
+
     }
 
     public KakaoUserInfoResponse getUserInfo(String accessToken) {

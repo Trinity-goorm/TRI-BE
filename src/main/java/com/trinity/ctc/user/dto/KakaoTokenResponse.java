@@ -11,4 +11,16 @@ public class KakaoTokenResponse {
     @JsonProperty("refresh_token")
     private String refreshToken;
 
+    @JsonProperty("expires_in")
+    private int expiresIn;
+
+    @JsonProperty("refresh_token_expires_in")
+    private int refreshTokenExpiresIn;
+
+    @JsonProperty("scope")
+    private String scope;
+
+    @JsonProperty("token_type")
+    private String tokenType;
+
 }

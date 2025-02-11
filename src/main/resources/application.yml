@@ -16,10 +16,10 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
-  kakao:
-    api:
-      token-url: "https://kauth.kakao.com/oauth/token"
-      client-id: "1a29e3c946385e9bbb1d7d370c86155e" //노출 금지
-      redirect-uri: "http://localhost:5173/auth/kakao/callback"
-      user-info-url: "https://kapi.kakao.com/v2/user/me"
-      grant-type: "authorization_code"
+kakao:
+  api:
+    token-url: "https://kauth.kakao.com/oauth/token"
+    client-id: "1a29e3c946385e9bbb1d7d370c86155e"
+    redirect-uri: "http://localhost:5173/auth/kakao/callback"
+    user-info-url: "https://kapi.kakao.com/v2/user/me"
+    grant-type: "authorization_code"
