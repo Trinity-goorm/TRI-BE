@@ -1,15 +1,23 @@
-package com.trinity.ctc.user.service;
+package com.trinity.ctc.kakao.service;
 
-import com.trinity.ctc.user.dto.KakaoTokenResponse;
-import com.trinity.ctc.user.dto.KakaoUserInfoResponse;
+import com.trinity.ctc.domain.user.entity.User;
+import com.trinity.ctc.kakao.dto.KakaoTokenResponse;
+import com.trinity.ctc.kakao.dto.KakaoUserInfoResponse;
+import com.trinity.ctc.kakao.repository.UserRepository;
+import java.util.Collections;
+import java.util.Optional;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 @Service
 public class AuthService {
 
     private final KakaoApiService kakaoApiService;
+    private final UserRepository userRepository;
 
-    public AuthService(KakaoApiService kakaoApiService) {
+    public AuthService(KakaoApiService kakaoApiService, UserRepository userRepository) {
         this.kakaoApiService = kakaoApiService;
+        this.userRepository = userRepository;
     }
 
     public void authenticateWithKakao(String authorizationCode) {
@@ -18,35 +26,45 @@ public class AuthService {
         KakaoTokenResponse tokenResponse = kakaoApiService.getAccessToken(authorizationCode);
 
         // 2. 사용자 정보 요청
-//        KakaoUserInfoResponse userInfo = kakaoApiService.getUserInfo(tokenResponse.getAccessToken());
+        KakaoUserInfoResponse userInfo = kakaoApiService.getUserInfo(tokenResponse.getAccessToken());
 
         // 3. 사용자 정보 처리 (회원 가입 또는 로그인 처리)
-//        handleUserInfo(userInfo);
+        handleUserInfo(userInfo);
+
     }
 
     private void handleUserInfo(KakaoUserInfoResponse userInfo) {
-        String kakaoId = userInfo.getId();
-        String nickname = userInfo.getProperties().get("nickname");
-        String email = userInfo.getKakaoAccount().getEmail();
+        Long kakaoId = Long.parseLong(userInfo.getId());
 
-        if (isExistingMember(kakaoId)) {
-            createLoginSession(kakaoId);
+        // 회원 존재 여부 확인
+        Optional<User> existingUser = userRepository.findByKakaoId(kakaoId);
+
+        if (existingUser.isPresent()) {
+            // 기존 회원 -> 로그인 세션 생성
+            createLoginSession(existingUser.get());
         } else {
-            registerNewMember(kakaoId, nickname, email);
-            createLoginSession(kakaoId);
+            // 신규 회원 -> 회원 등록 후 세션 생성
+            registerNewMember(kakaoId);
         }
     }
 
-    private boolean isExistingMember(String kakaoId) {
-        // 회원 확인 로직
-        return false;
+
+    private void registerNewMember(Long kakaoId) {
+        User newUser = User.builder()
+            .kakaoId(kakaoId)
+            .normalTicketCount(100)
+            .emptyTicket(10)
+            .build();
+
+        userRepository.save(newUser);
+        createLoginSession(newUser);
     }
 
-    private void registerNewMember(String kakaoId, String nickname, String email) {
-        // 신규 회원 등록 로직
-    }
+    private void createLoginSession(User user) {
+        // Spring Security를 사용하여 인증 세션 생성
+        UsernamePasswordAuthenticationToken authenticationToken =
+            new UsernamePasswordAuthenticationToken(user, null, Collections.emptyList());
 
-    private void createLoginSession(String kakaoId) {
-        // 로그인 세션 생성 로직
+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     }
 }

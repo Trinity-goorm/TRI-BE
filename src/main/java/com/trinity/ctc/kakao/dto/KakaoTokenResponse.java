@@ -1,4 +1,4 @@
-package com.trinity.ctc.user.dto;
+package com.trinity.ctc.kakao.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;

@@ -20,7 +20,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())  // POST 테스트 시 CSRF 비활성화
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // CORS 설정
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("auth/kakao/callback").permitAll()  // 인증 없이 접근 허용
+                .requestMatchers("users/kakao/login").permitAll()  // 인증 없이 접근 허용
                 .anyRequest().authenticated()  // 그 외 경로는 인증 필요
             )  // 기본 로그인 페이지 비활성화
             .httpBasic(basic->basic.disable())

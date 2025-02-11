@@ -1,29 +1,30 @@
-package com.trinity.ctc.user.dto;
+package com.trinity.ctc.kakao.dto;
 
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
 
+@Getter
 public class KakaoUserInfoResponse {
+    @JsonProperty("id")
     private String id;
-    private Map<String, String> properties;
-    private KakaoAccount kakaoAccount;
+//    @JsonProperty("kakao_account")
+//    private KakaoAccount kakaoAccount;
 
-    public String getId() {
-        return id;
-    }
 
-    public Map<String, String> getProperties() {
-        return properties;
-    }
-
-    public KakaoAccount getKakaoAccount() {
-        return kakaoAccount;
-    }
-
-    public static class KakaoAccount {
-        private String email;
-
-        public String getEmail() {
-            return email;
-        }
-    }
+//    @Getter
+//    public static class KakaoAccount {
+//        @JsonProperty("email")
+//        private String email;
+//        @JsonProperty("name")
+//        private String name;
+//        @JsonProperty("gender")
+//        private String gender;
+//        @JsonProperty("birthday")
+//        private String birthday;
+//        @JsonProperty("age_range")
+//        private String ageRange;
+//        @JsonProperty("phone_number")
+//        private String phoneNumber;
+//
+//    }
 }

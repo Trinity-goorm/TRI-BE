@@ -1,13 +1,14 @@
-package com.trinity.ctc.user.service;
+package com.trinity.ctc.kakao.service;
 
-import com.trinity.ctc.user.config.KakaoApiProperties;
-import com.trinity.ctc.user.dto.KakaoTokenResponse;
-import com.trinity.ctc.user.dto.KakaoUserInfoResponse;
+import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE;
+
+import com.trinity.ctc.kakao.config.KakaoApiProperties;
+import com.trinity.ctc.kakao.dto.KakaoTokenResponse;
+import com.trinity.ctc.kakao.dto.KakaoUserInfoResponse;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -36,14 +37,14 @@ public class KakaoApiService {
 
         HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(body, headers);
 
-        KakaoTokenResponse response = restTemplate.postForObject(
+        KakaoTokenResponse tokenResponse = restTemplate.postForObject(
                 kakaoApiProperties.getTokenUrl(),
                 requestEntity,
                 KakaoTokenResponse.class
         );
 
 
-        return response;
+        return tokenResponse;
 
 
     }
@@ -51,16 +52,19 @@ public class KakaoApiService {
     public KakaoUserInfoResponse getUserInfo(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + accessToken);
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
         HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
-        ResponseEntity<KakaoUserInfoResponse> response = restTemplate.exchange(
+        KakaoUserInfoResponse UserInfoResponse = restTemplate.postForObject(
             kakaoApiProperties.getUserInfoUrl(),
-            HttpMethod.GET,
             requestEntity,
             KakaoUserInfoResponse.class
         );
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        System.out.println(UserInfoResponse.getId());
+        ////////////////////////////////////////////////////////////////////////////////////////////
 
-        return response.getBody();
+        return UserInfoResponse;
     }
 }
