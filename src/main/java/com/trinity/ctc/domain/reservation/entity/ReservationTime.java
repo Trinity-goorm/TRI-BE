@@ -2,12 +2,15 @@ package com.trinity.ctc.domain.reservation.entity;
 
 import com.trinity.ctc.domain.seat.entity.SeatAvailability;
 import jakarta.persistence.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 public class ReservationTime {
 
     @Id
@@ -16,6 +19,8 @@ public class ReservationTime {
     private long id;
 
     private LocalDateTime timeSlot;
+
+    @CreatedDate
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "reservationTime")
@@ -23,5 +28,7 @@ public class ReservationTime {
 
     @OneToMany(mappedBy = "reservationTime")
     private List<SeatAvailability> seatAvailabilityList = new ArrayList<>();
+
+
 
 }
