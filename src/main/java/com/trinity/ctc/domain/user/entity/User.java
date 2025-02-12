@@ -12,15 +12,18 @@ import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Builder;
+import lombok.Getter;
 
 @Entity
+@Getter
 public class User {
 
     @Id
     @Column
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    private Long kakaoId;
     private String nickname;
 
     @Enumerated(EnumType.STRING)
@@ -54,4 +57,10 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<Reservation> reservationList = new ArrayList<>();
 
+    @Builder
+    public User(Long kakaoId, Integer normalTicketCount, Integer emptyTicket){
+        this.kakaoId = kakaoId;
+        this.normalTicketCount = normalTicketCount;
+        this.emptyTicketCount = emptyTicket;
+    }
 }
