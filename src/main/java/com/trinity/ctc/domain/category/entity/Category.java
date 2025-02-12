@@ -1,6 +1,6 @@
 package com.trinity.ctc.domain.category.entity;
 
-import com.trinity.ctc.domain.restaurant.entity.Restaurant;
+import com.trinity.ctc.domain.restaurant.entity.RestaurantCategory;
 import com.trinity.ctc.domain.user.entity.UserPreferenceCategory;
 import jakarta.persistence.*;
 
@@ -22,5 +22,5 @@ public class Category {
     private List<UserPreferenceCategory> userPreferenceCategories = new ArrayList<>();
 
     @OneToMany(mappedBy = "category")
-    private List<Restaurant> restaurantList = new ArrayList<>();
+    private List<RestaurantCategory> restaurantCategoryList = new ArrayList<>();
 }

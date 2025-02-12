@@ -26,6 +26,10 @@ public class Restaurant {
     private String operatingHour;
     private String caution;
     private boolean isDeleted = false;
+    private int reviewCount;
+    private double rating;
+    private double latitude;
+    private double longitude;
 
     @OneToMany(mappedBy = "restaurant")
     private List<RestaurantImage> imageUrls = new ArrayList<>();
@@ -39,8 +43,8 @@ public class Restaurant {
     @OneToMany(mappedBy = "restaurant")
     private List<SeatAvailability> seatAvailabilityList = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Category category;
+    @OneToMany(mappedBy = "restaurant")
+    private List<RestaurantCategory> restaurantCategoryList = new ArrayList<>();
 
     @OneToMany(mappedBy = "restaurant")
     private List<Menu> menus = new ArrayList<>();

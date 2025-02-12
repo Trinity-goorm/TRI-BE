@@ -2,7 +2,7 @@ package com.trinity.ctc.domain.user.entity;
 
 import com.trinity.ctc.domain.fcm.entity.Fcm;
 import com.trinity.ctc.domain.like.entity.Likes;
-import com.trinity.ctc.domain.notification.entity.Notification;
+import com.trinity.ctc.domain.notification.entity.NotificationHistory;
 import com.trinity.ctc.domain.payment.entity.PaymentHistory;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.search.entity.SearchHistory;
@@ -12,15 +12,18 @@ import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Builder;
+import lombok.Getter;
 
 @Entity
+@Getter
 public class User {
 
     @Id
     @Column
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    private Long kakaoId;
     private String nickname;
 
     @Enumerated(EnumType.STRING)
@@ -40,7 +43,7 @@ public class User {
     private List<SearchHistory> searchHistoryList = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
-    private List<Notification> notificationList = new ArrayList<>();
+    private List<NotificationHistory> notificationList = new ArrayList<>();
 
     @OneToOne(mappedBy = "user")
     private UserPreference userPreference;
@@ -54,4 +57,10 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<Reservation> reservationList = new ArrayList<>();
 
+    @Builder
+    public User(Long kakaoId, Integer normalTicketCount, Integer emptyTicket){
+        this.kakaoId = kakaoId;
+        this.normalTicketCount = normalTicketCount;
+        this.emptyTicketCount = emptyTicket;
+    }
 }
