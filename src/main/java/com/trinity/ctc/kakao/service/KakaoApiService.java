@@ -1,16 +1,12 @@
 package com.trinity.ctc.kakao.service;
 
-import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE;
-
 import com.trinity.ctc.kakao.config.KakaoApiProperties;
 import com.trinity.ctc.kakao.dto.KakaoLogoutResponse;
 import com.trinity.ctc.kakao.dto.KakaoTokenResponse;
 import com.trinity.ctc.kakao.dto.KakaoUserInfoResponse;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -47,8 +43,6 @@ public class KakaoApiService {
 
 
         return tokenResponse;
-
-
     }
 
     public KakaoUserInfoResponse getUserInfo(String accessToken) {
@@ -58,16 +52,12 @@ public class KakaoApiService {
 
         HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
-        KakaoUserInfoResponse UserInfoResponse = restTemplate.postForObject(
+        KakaoUserInfoResponse kakaoUserInfoResponse = restTemplate.postForObject(
             kakaoApiProperties.getUserInfoUrl(),
             requestEntity,
             KakaoUserInfoResponse.class
         );
-        ////////////////////////////////////////////////////////////////////////////////////////////
-        System.out.println(UserInfoResponse.getId());
-        ////////////////////////////////////////////////////////////////////////////////////////////
-
-        return UserInfoResponse;
+        return kakaoUserInfoResponse;
     }
 
     public KakaoLogoutResponse deleteToken(String accessToken) {

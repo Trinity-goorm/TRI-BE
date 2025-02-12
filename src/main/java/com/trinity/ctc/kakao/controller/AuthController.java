@@ -1,7 +1,7 @@
 package com.trinity.ctc.kakao.controller;
 
 import com.trinity.ctc.kakao.dto.KakaoLogoutResponse;
-import com.trinity.ctc.kakao.dto.KakaoTokenResponse;
+import com.trinity.ctc.kakao.dto.UserLoginResponse;
 import com.trinity.ctc.kakao.service.AuthService;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
@@ -23,12 +23,9 @@ public class AuthController {
     }
 
     @GetMapping("/login")
-    public ResponseEntity<Map<String, String>> kakaoLogin(@RequestParam String code) {
-        KakaoTokenResponse tokenResponse = authService.authenticateWithKakao(code);
-        return ResponseEntity.ok(Map.of(
-            "status", "success",
-            "accessToken", tokenResponse.getAccessToken(),
-            "refreshToken", tokenResponse.getRefreshToken()));
+    public ResponseEntity<?> kakaoLogin(@RequestParam String code) {
+        UserLoginResponse response = authService.authenticateWithKakao(code);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/logout")
