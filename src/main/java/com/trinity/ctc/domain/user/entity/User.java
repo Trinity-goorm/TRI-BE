@@ -2,7 +2,7 @@ package com.trinity.ctc.domain.user.entity;
 
 import com.trinity.ctc.domain.fcm.entity.Fcm;
 import com.trinity.ctc.domain.like.entity.Likes;
-import com.trinity.ctc.domain.notification.entity.Notification;
+import com.trinity.ctc.domain.notification.entity.NotificationHistory;
 import com.trinity.ctc.domain.payment.entity.PaymentHistory;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.search.entity.SearchHistory;
@@ -43,7 +43,7 @@ public class User {
     private List<SearchHistory> searchHistoryList = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
-    private List<Notification> notificationList = new ArrayList<>();
+    private List<NotificationHistory> notificationList = new ArrayList<>();
 
     @OneToOne(mappedBy = "user")
     private UserPreference userPreference;

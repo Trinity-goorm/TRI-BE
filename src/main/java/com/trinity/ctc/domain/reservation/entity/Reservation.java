@@ -24,6 +24,7 @@ public class Reservation {
     @CreatedDate
     private LocalDateTime created_at;
 
+    @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)

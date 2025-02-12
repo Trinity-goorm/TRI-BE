@@ -10,14 +10,12 @@ import java.time.LocalDateTime;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-public class Notification {
+public class NotificationHistory {
 
     @Id
     @Column
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
-    private Boolean isRead;
 
     @Enumerated(EnumType.STRING)
     private NotificationType type;

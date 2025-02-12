@@ -4,7 +4,7 @@ import com.trinity.ctc.domain.reservation.entity.ReservationTime;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
 import jakarta.persistence.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 public class SeatAvailability {
@@ -14,7 +14,7 @@ public class SeatAvailability {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    private LocalDateTime reservationDate;
+    private LocalDate reservationDate;
     private int availableSeats;
 
     @ManyToOne(fetch = FetchType.LAZY)
