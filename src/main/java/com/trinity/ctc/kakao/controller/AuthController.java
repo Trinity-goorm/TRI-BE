@@ -27,7 +27,8 @@ public class AuthController {
         KakaoTokenResponse tokenResponse = authService.authenticateWithKakao(code);
         return ResponseEntity.ok(Map.of(
             "status", "success",
-            "accessToken", tokenResponse.getAccessToken()));
+            "accessToken", tokenResponse.getAccessToken(),
+            "refreshToken", tokenResponse.getRefreshToken()));
     }
 
     @PostMapping("/logout")
