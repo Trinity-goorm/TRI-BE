@@ -21,6 +21,6 @@ public class Category {
     @OneToMany(mappedBy = "category")
     private List<UserPreferenceCategory> userPreferenceCategories = new ArrayList<>();
 
-    @OneToOne(mappedBy = "category")
-    private Restaurant restaurant;
+    @OneToMany(mappedBy = "category")
+    private List<Restaurant> restaurantList = new ArrayList<>();
 }
