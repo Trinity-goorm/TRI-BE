@@ -3,12 +3,14 @@ package com.trinity.ctc.kakao.service;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE;
 
 import com.trinity.ctc.kakao.config.KakaoApiProperties;
+import com.trinity.ctc.kakao.dto.KakaoLogoutResponse;
 import com.trinity.ctc.kakao.dto.KakaoTokenResponse;
 import com.trinity.ctc.kakao.dto.KakaoUserInfoResponse;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -66,5 +68,22 @@ public class KakaoApiService {
         ////////////////////////////////////////////////////////////////////////////////////////////
 
         return UserInfoResponse;
+    }
+
+    public KakaoLogoutResponse deleteToken(String accessToken) {
+        // 1. 요청 헤더에 액세스 토큰 설정
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + accessToken);
+
+        // 2. 카카오 로그아웃 API 요청 전송
+        HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+
+        KakaoLogoutResponse logoutResponse = restTemplate.postForObject(
+            kakaoApiProperties.getLogoutUrl(),
+            requestEntity,
+            KakaoLogoutResponse.class
+        );
+
+        return logoutResponse;
     }
 }

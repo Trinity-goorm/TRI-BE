@@ -23,3 +23,4 @@ kakao:
     redirect-uri: "http://localhost:5173/auth/kakao/callback"
     user-info-url: "https://kapi.kakao.com/v2/user/me"
     grant-type: "authorization_code"
+    logout-url: "https://kapi.kakao.com/v1/user/logout"
