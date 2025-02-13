@@ -9,31 +9,27 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * 날짜 선택 시, 예약시간 + 시간별 좌석상태
+ */
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class GroupedDailyAvailabilityResponse {
     private final String selectedDate; // 선택된 날짜
-    private final List<TimeSlotAvailability> timeSlotAvailabilities; // 타임슬롯별 예약 가능 정보
-
-    @Getter
-    @AllArgsConstructor
-    public static class TimeSlotAvailability {
-        private final String timeSlot; // 타임슬롯 (예: "09:00")
-        private final boolean isAvailable; // 해당 타임슬롯의 예약 가능 여부
-    }
+    private final List<GroupedTimeSlotResponse> groupedTimeSlotResponse; // 타임슬롯별 예약 가능 정보
 
     // 정적 팩토리 메서드
-    public static GroupedDailyAvailabilityResponse fromSingleTimeSlot(LocalDate selectedDate, TimeSlotAvailability timeSlotAvailability) {
+    public static GroupedDailyAvailabilityResponse fromSingleTimeSlot(LocalDate selectedDate, GroupedTimeSlotResponse groupedTimeSlotResponse) {
         return new GroupedDailyAvailabilityResponse(
                 DateTimeUtil.formatToDate(selectedDate),
-                Collections.singletonList(timeSlotAvailability) // 단일 TimeSlot을 리스트로 래핑
+                Collections.singletonList(groupedTimeSlotResponse) // 단일 TimeSlot을 리스트로 래핑
         );
     }
 
-    public static GroupedDailyAvailabilityResponse fromMultipleTimeSlots(LocalDate selectedDate, List<TimeSlotAvailability> timeSlotAvailabilities) {
+    public static GroupedDailyAvailabilityResponse fromMultipleTimeSlots(LocalDate selectedDate, List<GroupedTimeSlotResponse> groupedTimeSlotResponses) {
         return new GroupedDailyAvailabilityResponse(
                 DateTimeUtil.formatToDate(selectedDate),
-                timeSlotAvailabilities
+                groupedTimeSlotResponses
         );
     }
 }

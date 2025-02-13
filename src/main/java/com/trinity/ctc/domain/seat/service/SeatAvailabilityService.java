@@ -1,5 +1,7 @@
 package com.trinity.ctc.domain.seat.service;
 
+import com.trinity.ctc.domain.seat.dto.GroupedSeatResponse;
+import com.trinity.ctc.domain.seat.dto.GroupedTimeSlotResponse;
 import com.trinity.ctc.domain.seat.entity.SeatAvailability;
 import com.trinity.ctc.domain.seat.repository.SeatAvailabilityRepository;
 import com.trinity.ctc.util.formatter.DateTimeUtil;
@@ -46,7 +48,7 @@ public class SeatAvailabilityService {
             .collect(Collectors.groupingBy(sa -> sa.getReservationTime().getTimeSlot()));
 
         // 군집별 예약 가능 여부 판단 및 DTO 변환
-        List<GroupedDailyAvailabilityResponse.TimeSlotAvailability> timeSlotAvailabilities = groupedByTimeslot.entrySet().stream()
+        List<GroupedTimeSlotResponse> groupedTimeSlotResponses = groupedByTimeslot.entrySet().stream()
                 .map(entry -> {
                     LocalTime timeslot = entry.getKey();
                     List<SeatAvailability> seatAvailabilities = entry.getValue();
@@ -55,14 +57,15 @@ public class SeatAvailabilityService {
                     boolean isAvailable = seatAvailabilities.stream()
                             .anyMatch(sa -> SeatAvailabilityValidator.validate(sa, isToday));
 
-                    return new GroupedDailyAvailabilityResponse.TimeSlotAvailability(
-                            DateTimeUtil.formatToHHmm(timeslot), // 타임슬롯
-                            isAvailable // 예약가능 여부
-                    );
+                    List<GroupedSeatResponse> groupedSeatResponses = seatAvailabilities.stream()
+                            .map(GroupedSeatResponse::of)
+                            .toList();
+
+                    return GroupedTimeSlotResponse.fromGroupedSeats(DateTimeUtil.formatToHHmm(timeslot), isAvailable, groupedSeatResponses);
                 })
                 .collect(Collectors.toList());
 
         // 최종 응답 DTO 생성
-        return GroupedDailyAvailabilityResponse.fromMultipleTimeSlots(selectedDate, timeSlotAvailabilities);
+        return GroupedDailyAvailabilityResponse.fromMultipleTimeSlots(selectedDate, groupedTimeSlotResponses);
     }
 }
