@@ -1,6 +1,7 @@
 package com.trinity.ctc.domain.seat.dto;
 
 import com.trinity.ctc.util.formatter.DateTimeUtil;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,15 +15,19 @@ import java.util.List;
  */
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Schema(description = "일별 예약가능 응답")
 public class GroupedDailyAvailabilityResponse {
-    private final String selectedDate; // 선택된 날짜
-    private final List<GroupedTimeSlotResponse> groupedTimeSlotResponse; // 타임슬롯별 예약 가능 정보
 
-    // 정적 팩토리 메서드
+    @Schema(description = "선택된 날짜", example = "2025-02-13")
+    private final String selectedDate;
+
+    @Schema(description = "타임슬롯별 예약 가능 정보", implementation = GroupedTimeSlotResponse.class)
+    private final List<GroupedTimeSlotResponse> groupedTimeSlotResponse;
+
     public static GroupedDailyAvailabilityResponse fromSingleTimeSlot(LocalDate selectedDate, GroupedTimeSlotResponse groupedTimeSlotResponse) {
         return new GroupedDailyAvailabilityResponse(
                 DateTimeUtil.formatToDate(selectedDate),
-                Collections.singletonList(groupedTimeSlotResponse) // 단일 TimeSlot을 리스트로 래핑
+                Collections.singletonList(groupedTimeSlotResponse)
         );
     }
 
