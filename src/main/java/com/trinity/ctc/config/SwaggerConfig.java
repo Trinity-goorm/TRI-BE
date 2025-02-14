@@ -1,27 +1,65 @@
 package com.trinity.ctc.config;
 
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
-import io.swagger.v3.oas.annotations.info.Info;
-import lombok.RequiredArgsConstructor;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.servers.Server;
 import org.springdoc.core.models.GroupedOpenApi;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@OpenAPIDefinition(
-        info = @Info(title = "투개더 API 명세서",
-                description = "COMP322-team12 투개더 API 명세서",
-                version = "v1"))
-@RequiredArgsConstructor
+import java.util.ArrayList;
+import java.util.List;
+
+
 @Configuration
 public class SwaggerConfig {
-    @Bean
-    public GroupedOpenApi chatOpenApi() {
-        // "/v1/**" 경로에 매칭되는 API를 그룹화하여 문서화한다.
-        String[] paths = {"/v1/**"};
 
+    // 서버 URL 주입
+    @Value("${swagger.server-url.local}")
+    private String localServerUrl;
+
+    @Value("${swagger.server-url.production}")
+    private String productionServerUrl;
+
+    @Value("${swagger.group.auth.paths}")
+    private String[] authPaths;
+
+    @Value("${swagger.group.seat.paths}")
+    private String[] seatPaths;
+
+    @Bean
+    public OpenAPI customOpenAPI() {
+        List<Server> servers = new ArrayList<>();
+        servers.add(new Server().url(localServerUrl).description("로컬 서버"));
+        servers.add(new Server().url(productionServerUrl).description("프로덕션 서버"));
+
+        return new OpenAPI()
+                .servers(servers)
+                .info(new Info()
+                        .title("캐치핑 API")
+                        .description("캐치핑 프로젝트의 API 명세서")
+                        .version("v1"));
+    }
+    /**
+     * Auth API 그룹
+     */
+    @Bean
+    public GroupedOpenApi authOpenApi() {
         return GroupedOpenApi.builder()
-                .group("투개더 API v1")  // 그룹 이름을 설정한다.
-                .pathsToMatch(paths)     // 그룹에 속하는 경로 패턴을 지정한다.
+                .group("Auth API")
+                .pathsToMatch(authPaths)
+                .build();
+    }
+
+    /**
+     * Seat API 그룹
+     */
+    @Bean
+    public GroupedOpenApi seatOpenApi() {
+        return GroupedOpenApi.builder()
+                .group("Seat API")
+                .pathsToMatch(seatPaths)
                 .build();
     }
 }
