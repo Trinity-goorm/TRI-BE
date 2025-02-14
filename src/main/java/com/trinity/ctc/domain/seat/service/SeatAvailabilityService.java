@@ -70,6 +70,7 @@ public class SeatAvailabilityService {
      */
     private List<GroupedTimeSlotResponse> createGroupedTimeSlotResponses(Map<LocalTime, List<SeatAvailability>> groupedByTimeslot, boolean isToday) {
         return groupedByTimeslot.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
                 .map(entry -> createGroupedTimeSlotResponse(entry.getKey(), entry.getValue(), isToday))
                 .collect(Collectors.toList());
     }
@@ -90,7 +91,6 @@ public class SeatAvailabilityService {
                 .map(GroupedSeatResponse::of)
                 .toList();
 
-        // 타임슬롯 응답 생성
         return GroupedTimeSlotResponse.fromGroupedSeats(DateTimeUtil.formatToHHmm(timeslot), isAvailable, groupedSeatResponses);
     }
 }
