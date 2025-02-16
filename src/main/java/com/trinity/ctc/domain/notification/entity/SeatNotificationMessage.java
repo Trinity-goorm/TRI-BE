@@ -21,6 +21,6 @@ public class SeatNotificationMessage {
     @JoinColumn(name = "seat_availability_id")
     private SeatAvailability seatAvailability;
 
-    @OneToMany(mappedBy = "seat_notification_message")
+    @OneToMany(mappedBy = "seatNotificationMessage")
     private List<SeatNotification> seatNotificationList = new ArrayList<>();
 }
