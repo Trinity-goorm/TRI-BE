@@ -1,5 +1,6 @@
 package com.trinity.ctc.domain.notification.entity;
 
+import com.trinity.ctc.domain.notification.entity.type.NotificationType;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.user.entity.User;
 import jakarta.persistence.*;
@@ -13,6 +14,12 @@ public class ReservationNotification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @Enumerated(EnumType.STRING)
+    private NotificationType type;
+
+    private String title;
+    private String body;
+    private Long date;
     private LocalDateTime scheduledTime;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -1,11 +1,10 @@
 package com.trinity.ctc.domain.notification.entity;
 
-import com.trinity.ctc.domain.seat.entity.SeatAvailability;
 import com.trinity.ctc.domain.user.entity.User;
 import jakarta.persistence.*;
 
 @Entity
-public class AvailableSeatNotification {
+public class SeatNotification {
 
     @Id
     @Column
@@ -17,6 +16,6 @@ public class AvailableSeatNotification {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "seat_availability_id")
-    private SeatAvailability seatAvailability;
+    @JoinColumn(name = "seat_notification_message_id")
+    private SeatNotificationMessage seatNotificationMessage;
 }
