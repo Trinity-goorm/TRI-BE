@@ -38,3 +38,6 @@ out/
 
 ###
 *.env
+
+### Firebase Admin SDK ###
+catchping-fcmserver-firebase-adminsdk.json
