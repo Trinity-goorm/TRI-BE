@@ -7,12 +7,13 @@ import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.kakao.repository.UserRepository;
 import com.trinity.ctc.util.exception.CustomException;
 import com.trinity.ctc.util.exception.error_code.UserErrorCode;
+import com.trinity.ctc.util.formatter.DateTimeUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Service
@@ -30,9 +31,9 @@ public class FcmService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
-        Long oneMonth = Duration.ofDays(30).toMillis();
-        Date registeredAt = new Date(fcmTokenRequest.getTimestamp());
-        Date expiresAt = new Date(fcmTokenRequest.getTimestamp() + oneMonth);
+        LocalDateTime registeredAt = DateTimeUtil.convertMillisToLocalDateTime(fcmTokenRequest.getTimestamp());
+        LocalDateTime expiresAt = registeredAt.plusDays(30);
+        ;
 
         Fcm fcm = Fcm.builder()
                 .token(fcmTokenRequest.getFcmToken())
@@ -56,9 +57,9 @@ public class FcmService {
      */
     public void renewFcmToken(FcmTokenRequest fcmTokenRequest) {
         String fcmToken = fcmTokenRequest.getFcmToken();
-        Long oneMonth = Duration.ofDays(30).toMillis();
-        Date updatedAt = new Date(fcmTokenRequest.getTimestamp());
-        Date expiresAt = new Date(fcmTokenRequest.getTimestamp() + oneMonth);
+        LocalDateTime updatedAt = DateTimeUtil.convertMillisToLocalDateTime(fcmTokenRequest.getTimestamp());
+        LocalDateTime expiresAt = updatedAt.plusDays(30);
+        ;
 
         fcmRepository.updateToken(fcmToken, updatedAt, expiresAt);
     }

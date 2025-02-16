@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 public interface FcmRepository extends JpaRepository<Fcm, Long> {
@@ -19,5 +20,7 @@ public interface FcmRepository extends JpaRepository<Fcm, Long> {
     @Transactional
     @Modifying
     @Query("UPDATE Fcm f SET f.updatedAt = :updatedAt, f.expiresAt = :expiresAt WHERE f.token = :token")
-    void updateToken(@Param("token") String token, @Param("updatedAt") Date updatedAt, @Param("expiresAt") Date expiresAt);
+    void updateToken(@Param("token") String token,
+                     @Param("updatedAt") LocalDateTime updatedAt,
+                     @Param("expiresAt") LocalDateTime expiresAt);
 }

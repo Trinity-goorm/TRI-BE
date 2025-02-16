@@ -7,7 +7,7 @@ import lombok.Builder;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
@@ -20,16 +20,16 @@ public class Fcm {
     private Long id;
 
     private String token;
-    private Date registeredAt;
-    private Date updatedAt;
-    private Date expiresAt;
+    private LocalDateTime registeredAt;
+    private LocalDateTime updatedAt;
+    private LocalDateTime expiresAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "receiver_id")
     private User user;
 
     @Builder
-    public Fcm(String token, Date registeredAt, Date expiresAt, User user){
+    public Fcm(String token, LocalDateTime registeredAt, LocalDateTime expiresAt, User user){
         this.token = token;
         this.registeredAt = registeredAt;
         this.expiresAt = expiresAt;
