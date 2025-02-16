@@ -1,0 +1,23 @@
+package com.trinity.ctc.domain.fcm.repository;
+
+import com.trinity.ctc.domain.fcm.entity.Fcm;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Date;
+
+public interface FcmRepository extends JpaRepository<Fcm, Long> {
+    @Transactional
+    void deleteByToken(String token);
+
+    @Transactional
+    void deleteByExpiresAtBefore(Date currentDate);
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE Fcm f SET f.updatedAt = :updatedAt, f.expiresAt = :expiresAt WHERE f.token = :token")
+    void updateToken(@Param("token") String token, @Param("updatedAt") Date updatedAt, @Param("expiresAt") Date expiresAt);
+}

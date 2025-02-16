@@ -12,11 +12,15 @@ import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {
 
     @Id
