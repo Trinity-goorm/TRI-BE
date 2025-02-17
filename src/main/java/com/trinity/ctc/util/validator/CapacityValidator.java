@@ -15,4 +15,12 @@ public class CapacityValidator {
             throw new CustomException(SeatErrorCode.BIGGER_MIN_CAPACITY);
         }
     }
+
+    public static void validateAvailableSeats(int availableSeats) {
+        if (availableSeats < 0) {
+            throw new CustomException(SeatErrorCode.CAPACITY_IS_NEGATIVE);
+        } else if (availableSeats == 0) {
+            throw new CustomException(SeatErrorCode.NO_AVAILABLE_SEAT);
+        }
+    }
 }
