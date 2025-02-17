@@ -2,9 +2,7 @@ package com.trinity.ctc.util.formatter;
 
 import com.trinity.ctc.util.validator.DateTimeValidator;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 
 public class DateTimeUtil {
@@ -58,6 +56,13 @@ public class DateTimeUtil {
     public static LocalTime getOneHourLater(LocalDateTime dateTime) {
         LocalDateTime oneHourLater = dateTime.plusHours(1);
         return oneHourLater.toLocalTime();
+    }
+
+    // Long -> LocalDateTime 컨버트
+    public static LocalDateTime convertMillisToLocalDateTime(long timestamp) {
+        return Instant.ofEpochMilli(timestamp)
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
     }
 
     // LocalDate -> LocalDateTime 컨버트

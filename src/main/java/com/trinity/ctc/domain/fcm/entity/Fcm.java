@@ -2,14 +2,16 @@ package com.trinity.ctc.domain.fcm.entity;
 
 import com.trinity.ctc.domain.user.entity.User;
 import jakarta.persistence.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Fcm {
 
     @Id
@@ -18,17 +20,19 @@ public class Fcm {
     private Long id;
 
     private String token;
-
-    @CreatedDate
-    private Date createdAt;
-
-    @LastModifiedDate
-    private Date updatedAt;
-
-    private Date expiresAt;
+    private LocalDateTime registeredAt;
+    private LocalDateTime updatedAt;
+    private LocalDateTime expiresAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "receiver_id")
     private User user;
 
+    @Builder
+    public Fcm(String token, LocalDateTime registeredAt, LocalDateTime expiresAt, User user){
+        this.token = token;
+        this.registeredAt = registeredAt;
+        this.expiresAt = expiresAt;
+        this.user = user;
+    }
 }
