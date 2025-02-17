@@ -60,7 +60,7 @@ public class ReservationService {
         log.info("[예약 성공] 예약 ID: {}", reservation.getId());
 
         // DTO 생성
-        return PreoccupyResponse.of(true);
+        return PreoccupyResponse.of(true, reservation.getId());
     }
 
     /**

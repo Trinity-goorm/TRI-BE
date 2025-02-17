@@ -13,7 +13,11 @@ public class PreoccupyResponse {
     @Schema(description = "요청 성공 여부", example = "true")
     private boolean isSuccess;
 
-    public static PreoccupyResponse of(boolean isSuccess) {
-        return new PreoccupyResponse(isSuccess);
+    @Schema(description = "생성된 예약정보 ID", example = "1")
+    private long reservationId;
+
+
+    public static PreoccupyResponse of(boolean isSuccess, long reservationId) {
+        return new PreoccupyResponse(isSuccess, reservationId);
     }
 }
