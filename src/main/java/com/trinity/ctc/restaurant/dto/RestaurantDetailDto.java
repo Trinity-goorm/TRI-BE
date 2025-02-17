@@ -20,14 +20,15 @@ public class RestaurantDetailDto {
     private String location;
     private String category;
     private double rating;
-    private String operatingHours;
+    private int averagePrice;
+    private String expandedDays;
+    private String timeRange;
     private List<String> facilities;
     private List<String> cautions;
     private List<MenuDto> menus;
     private int wishCount;
 
     public static RestaurantDetailDto fromEntity(Restaurant restaurant) {
-        //식당 평균 가격대 추가
         // 식당 운영시간
         return RestaurantDetailDto.builder()
             .restaurantId(restaurant.getId())
@@ -38,7 +39,11 @@ public class RestaurantDetailDto {
                 .map(rc -> rc.getCategory().getName())
                 .collect(Collectors.joining(", ")))
             .rating(restaurant.getRating())
-            .operatingHours(restaurant.getOperatingHour())
+            .averagePrice(restaurant.getMenus().stream()
+                .mapToInt(MenuDto::getPrices)
+                .sum() / restaurant.getMenus().size())
+            .expandedDays(restaurant.getExpandedDays())
+            .timeRange(restaurant.getTimeRange())
             .facilities(List.of(restaurant.getConvenience().split("\n")))
             .cautions(List.of(restaurant.getCaution().split(", ")))
             .menus(restaurant.getMenus().stream().map(MenuDto::fromEntity).collect(Collectors.toList()))

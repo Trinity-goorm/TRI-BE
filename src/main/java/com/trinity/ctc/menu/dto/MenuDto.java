@@ -16,4 +16,8 @@ public class MenuDto {
             .price(menu.getPrice())
             .build();
     }
+
+    public static int getPrices(Menu menu) {
+        return menu.getPrice();
+    }
 }

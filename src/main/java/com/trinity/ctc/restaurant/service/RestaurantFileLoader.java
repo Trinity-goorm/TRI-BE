@@ -39,19 +39,26 @@ public class RestaurantFileLoader {
         List<Restaurant> restaurants = new ArrayList<>();
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            File file = new ClassPathResource("japan_restaurants_table.json").getFile();
+            File file = new ClassPathResource("crawlingData/중식_restaurants_table.json").getFile();
             JsonNode rootNode = objectMapper.readTree(file);
             for (JsonNode restaurantNode : rootNode) {
                 // 빈 값이 들어오면 기본값 설정
                 String name = restaurantNode.get("name").asText();
                 String address = restaurantNode.get("address").asText();
-                String phoneNumber = restaurantNode.get("phone_number").asText();
+                String phoneNumber = restaurantNode.get("phone_number").decimalValue()
+                    .toPlainString();
+                if (!phoneNumber.equals("")) {
+                    phoneNumber = "0" + phoneNumber.replace(".0", "");
+                }
                 String operatingHour = restaurantNode.get("operating_hour").asText();
+                String expandedDays = restaurantNode.get("expanded_days").asText();
+                String timeRange = restaurantNode.get("time_range").asText();
                 String convenience = restaurantNode.get("convenience").asText();
                 String caution = restaurantNode.get("caution").asText();
 
                 boolean isDeleted = restaurantNode.get("is_deleted").asBoolean();
 
+                phoneNumber = "0"+phoneNumber.substring(1, phoneNumber.length() - 1); // 전화번호 양 끝 따옴표 제거
                 // review & score 기본값 처리 (예외 발생 방지)
                 int reviewCount = 0;
                 double rating = 0.0;
@@ -79,6 +86,8 @@ public class RestaurantFileLoader {
                     .phoneNumber(phoneNumber)
                     .convenience(convenience)
                     .operatingHour(operatingHour)
+                    .expandedDays(expandedDays)
+                    .timeRange(timeRange)
                     .caution(caution)
                     .isDeleted(isDeleted)
                     .reviewCount(reviewCount)
@@ -121,7 +130,7 @@ public class RestaurantFileLoader {
                 restaurant.addCategory(restaurantCategory);
 
 //                //메뉴 연결
-                File menuFile = new ClassPathResource("japan_menus_table.json").getFile();
+                File menuFile = new ClassPathResource("crawlingData/중식_menus_table.json").getFile();
                 JsonNode menusNode = objectMapper.readTree(menuFile);
 
                 List<Menu> menuList = new ArrayList<>();

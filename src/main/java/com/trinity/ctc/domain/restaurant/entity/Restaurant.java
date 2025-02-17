@@ -26,6 +26,8 @@ public class Restaurant {
     private String phoneNumber;
     private String convenience;
     private String operatingHour;
+    private String expandedDays;
+    private String timeRange;
     private String caution;
     private boolean isDeleted = false;
     private int reviewCount;
@@ -50,12 +52,14 @@ public class Restaurant {
     private List<Menu> menus = new ArrayList<>();
 
     @Builder
-    public Restaurant(String name, String address, String phoneNumber, String convenience, String operatingHour, String caution, boolean isDeleted, int reviewCount, double rating, List<RestaurantImage> imageUrls, List<Menu> menus) {
+    public Restaurant(String name, String address, String phoneNumber, String convenience, String operatingHour, String expandedDays, String timeRange,String caution, boolean isDeleted, int reviewCount, double rating, List<RestaurantImage> imageUrls, List<Menu> menus) {
         this.name = name;
         this.address = address;
         this.phoneNumber = phoneNumber;
         this.convenience = convenience;
         this.operatingHour = operatingHour;
+        this.expandedDays = expandedDays;
+        this.timeRange = timeRange;
         this.caution = caution;
         this.isDeleted = isDeleted;
         this.reviewCount = reviewCount;

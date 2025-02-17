@@ -17,7 +17,7 @@ public class CategoryFileLoader {
         List<Category> categories = new ArrayList<>();
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            File file = new ClassPathResource("categories.json").getFile();
+            File file = new ClassPathResource("crawlingData/categories.json").getFile();
             JsonNode rootNode = objectMapper.readTree(file);
 
             for (JsonNode node : rootNode) {
