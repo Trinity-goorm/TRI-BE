@@ -2,6 +2,7 @@ package com.trinity.ctc.domain.seat.entity;
 
 import com.trinity.ctc.domain.reservation.entity.ReservationTime;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
+import com.trinity.ctc.util.validator.CapacityValidator;
 import jakarta.persistence.*;
 import lombok.Getter;
 
@@ -30,4 +31,10 @@ public class SeatAvailability {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seat_type_id")
     private SeatType seatType;
+
+    /* 내부 로직 */
+    public void preoccupyOneSeat() {
+        CapacityValidator.validateAvailableSeats(this.availableSeats);
+        availableSeats--;
+    }
 }
