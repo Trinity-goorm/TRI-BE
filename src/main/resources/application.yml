@@ -35,10 +35,17 @@ swagger:
       paths: /api/auth/**
     seat:
       paths: /api/seats/**
+    fcm:
+      paths: /api/fcmTokens/**
 springdoc:
   api-docs:
     path: /api-docs # OpenAPI 명세 기본 경로
   swagger-ui:
     path: /swagger-ui.html # Swagger UI 기본 경로
+---
+firebase:
+  project-id: catchping-fcmserver
+  key-path: catchping-fcmserver-firebase-adminsdk.json
+
 
 

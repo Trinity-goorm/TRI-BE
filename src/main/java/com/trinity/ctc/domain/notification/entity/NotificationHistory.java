@@ -1,9 +1,9 @@
 package com.trinity.ctc.domain.notification.entity;
 
+import com.trinity.ctc.domain.notification.entity.errorCode.FcmErrorCode;
 import com.trinity.ctc.domain.notification.entity.type.NotificationType;
 import com.trinity.ctc.domain.user.entity.User;
 import jakarta.persistence.*;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
@@ -20,10 +20,12 @@ public class NotificationHistory {
     @Enumerated(EnumType.STRING)
     private NotificationType type;
 
-    @CreatedDate
-    private LocalDateTime createdAt;
+    private String message;
+    private LocalDateTime sentAt;
+    private Boolean isSent = false;
 
-    private LocalDateTime sendingAt;
+    @Enumerated(EnumType.STRING)
+    private FcmErrorCode errorCode;
 
     private Boolean isDeleted = false;
 
