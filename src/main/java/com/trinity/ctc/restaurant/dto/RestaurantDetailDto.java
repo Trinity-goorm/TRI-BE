@@ -50,5 +50,18 @@ public class RestaurantDetailDto {
             .wishCount(restaurant.getLikeList().size())
             .build();
     }
+
+    public static RestaurantDetailDto fromLike(Restaurant restaurant) {
+        return RestaurantDetailDto.builder()
+            .restaurantId(restaurant.getId())
+            .name(restaurant.getName())
+            .imageUrls(restaurant.getImageUrls().stream().map(RestaurantImage::getUrl).collect(Collectors.toList()))
+            .location(restaurant.getAddress())
+            .category(restaurant.getRestaurantCategoryList().stream()
+                .map(rc -> rc.getCategory().getName())
+                .collect(Collectors.joining(", ")))
+            .rating(restaurant.getRating())
+            .build();
+    }
 }
 

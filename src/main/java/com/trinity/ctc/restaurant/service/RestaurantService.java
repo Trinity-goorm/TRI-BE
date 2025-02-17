@@ -29,9 +29,9 @@ public class RestaurantService {
     @Transactional(readOnly = true)
     public RestaurantDetailDto getRestaurantDetail(Long restaurantId) {
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
-            .orElseThrow(() -> new IllegalArgumentException("해당 식당을 찾을 수 없습니다. ID: " + restaurantId));
+            .orElseThrow(
+                () -> new IllegalArgumentException("해당 식당을 찾을 수 없습니다. ID: " + restaurantId));
 
         return RestaurantDetailDto.fromEntity(restaurant);
     }
-
 }
