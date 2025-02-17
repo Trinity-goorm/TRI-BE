@@ -28,6 +28,9 @@ public class SwaggerConfig {
     @Value("${swagger.group.seat.paths}")
     private String[] seatPaths;
 
+    @Value("/api/reservations/**")
+    private String[] reservationPaths;
+
     @Bean
     public OpenAPI customOpenAPI() {
         List<Server> servers = new ArrayList<>();
@@ -60,6 +63,17 @@ public class SwaggerConfig {
         return GroupedOpenApi.builder()
                 .group("Seat API")
                 .pathsToMatch(seatPaths)
+                .build();
+    }
+
+    /**
+     * Seat API 그룹
+     */
+    @Bean
+    public GroupedOpenApi reservationOpenApi() {
+        return GroupedOpenApi.builder()
+                .group("Reservation API")
+                .pathsToMatch(reservationPaths)
                 .build();
     }
 }
