@@ -35,6 +35,8 @@ swagger:
       paths: /api/auth/**
     seat:
       paths: /api/seats/**
+    fcm:
+      paths: /api/fcmTokens/**
 springdoc:
   api-docs:
     path: /api-docs # OpenAPI 명세 기본 경로
