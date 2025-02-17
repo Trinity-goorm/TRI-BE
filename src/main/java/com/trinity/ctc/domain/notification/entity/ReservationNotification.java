@@ -4,9 +4,14 @@ import com.trinity.ctc.domain.notification.entity.type.NotificationType;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.user.entity.User;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+@Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ReservationNotification {
 
     @Id
@@ -19,7 +24,7 @@ public class ReservationNotification {
 
     private String title;
     private String body;
-    private Long date;
+    private String url;
     private LocalDateTime scheduledTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -29,4 +34,16 @@ public class ReservationNotification {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reservation_id")
     private Reservation reservation;
+
+    @Builder
+    public ReservationNotification (NotificationType type, String title, String body, String url,
+                                    LocalDateTime scheduledTime, User user, Reservation reservation) {
+        this.type = type;
+        this.title = title;
+        this.body = body;
+        this.url = url;
+        this.scheduledTime = scheduledTime;
+        this.user = user;
+        this.reservation = reservation;
+    }
 }
