@@ -2,21 +2,23 @@ package com.trinity.ctc.domain.notification.service;
 
 import com.trinity.ctc.domain.notification.entity.ReservationNotification;
 import com.trinity.ctc.domain.notification.entity.type.NotificationType;
-import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
-import com.trinity.ctc.event.ReservationCanceledEvent;
-import com.trinity.ctc.event.ReservationSuccessEvent;
 import com.trinity.ctc.domain.notification.repository.ReservationNotificationRepository;
 import com.trinity.ctc.domain.notification.util.NotificationMessageUtil;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
+import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
 import com.trinity.ctc.domain.user.entity.User;
+import com.trinity.ctc.event.ReservationCanceledEvent;
+import com.trinity.ctc.event.ReservationSuccessEvent;
 import com.trinity.ctc.kakao.repository.UserRepository;
 import com.trinity.ctc.util.exception.CustomException;
 import com.trinity.ctc.util.exception.error_code.ReservationErrorCode;
 import com.trinity.ctc.util.exception.error_code.UserErrorCode;
+import com.trinity.ctc.util.formatter.DateTimeUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,6 +63,7 @@ public class NotificationService {
         LocalDate reservedDate = reservation.getReservationDate();
         LocalTime reservedTime = reservation.getReservationTime().getTimeSlot();
         Long reservationId = reservation.getId();
+        LocalDateTime scheduledTime = DateTimeUtil.combineWithDate(reservedDate, LocalTime.of(8, 0));
 
         String title = NotificationMessageUtil.formatDailyNotificationTitle(userName, restaurantName);
         String body = NotificationMessageUtil.formatDailyNotificationBody(restaurantName, reservedDate, reservedTime);
@@ -72,6 +75,7 @@ public class NotificationService {
                 .body(body)
                 .url(url)
                 .user(user)
+                .scheduledTime(scheduledTime)
                 .reservation(reservation)
                 .build();
 
@@ -92,6 +96,8 @@ public class NotificationService {
         LocalDate reservedDate = reservation.getReservationDate();
         LocalTime reservedTime = reservation.getReservationTime().getTimeSlot();
         Long reservationId = reservation.getId();
+        LocalDateTime scheduledTime = DateTimeUtil.combineWithDate(reservedDate, reservedTime).minusHours(1);
+
 
         String title = NotificationMessageUtil.formatHourBeforeNotificationTitle(userName, restaurantName);
         String body = NotificationMessageUtil.formatHourBeforeNotificationBody(restaurantName, reservedDate, reservedTime);
@@ -103,6 +109,7 @@ public class NotificationService {
                 .body(body)
                 .url(url)
                 .user(user)
+                .scheduledTime(scheduledTime)
                 .reservation(reservation)
                 .build();
 
@@ -116,5 +123,10 @@ public class NotificationService {
     public void deleteReservationNotification(ReservationCanceledEvent reservationEvent) {
         long reservationId = reservationEvent.getReservation().getId();
         reservationNotificationRepository.deleteAllByReservation(reservationId);
+    }
+
+//    @Scheduled
+    public void sendReservationNotification() {
+
     }
 }
