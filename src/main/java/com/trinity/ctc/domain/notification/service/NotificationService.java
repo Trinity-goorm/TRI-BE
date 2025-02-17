@@ -2,10 +2,11 @@ package com.trinity.ctc.domain.notification.service;
 
 import com.trinity.ctc.domain.notification.entity.ReservationNotification;
 import com.trinity.ctc.domain.notification.entity.type.NotificationType;
+import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
+import com.trinity.ctc.event.ReservationCanceledEvent;
 import com.trinity.ctc.event.ReservationSuccessEvent;
 import com.trinity.ctc.domain.notification.repository.ReservationNotificationRepository;
 import com.trinity.ctc.domain.notification.util.NotificationMessageUtil;
-import com.trinity.ctc.domain.reservation.Repository.ReservationRepository;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.kakao.repository.UserRepository;
@@ -106,5 +107,14 @@ public class NotificationService {
                 .build();
 
         return reservationNotification;
+    }
+
+    /**
+     * 예약 취소 시, 해당 예약에 대한 알림을 취소하는 메서드
+     * @param reservationEvent
+     */
+    public void deleteReservationNotification(ReservationCanceledEvent reservationEvent) {
+        long reservationId = reservationEvent.getReservation().getId();
+        reservationNotificationRepository.deleteAllByReservation(reservationId);
     }
 }

@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface SeatAvailabilityRepository extends JpaRepository<SeatAvailability, Long> {
@@ -26,4 +25,14 @@ public interface SeatAvailabilityRepository extends JpaRepository<SeatAvailabili
             "AND sa.reservationDate = :selectedDate")
     List<SeatAvailability> findAvailableSeatsForDate(@Param("restaurantId") Long restaurantId,
                                                      @Param("selectedDate") LocalDate selectedDate);
+
+    @Query("SELECT sa FROM SeatAvailability sa " +
+            "WHERE sa.restaurant.id = :restaurantId " +
+            "AND sa.reservationDate = :selectedDate " +
+            "AND sa.reservationTime.timeSlot = :reservationTime " +
+            "AND sa.seatType.id = :seatTypeId" )
+    SeatAvailability findByReservationData(@Param("restaurantId") Long restaurantId,
+                                           @Param("selectedDate") LocalDate selectedDate,
+                                           @Param("reservationTime") LocalTime reservationTime,
+                                           @Param("seatTypeId") Long seatTypeId);
 }

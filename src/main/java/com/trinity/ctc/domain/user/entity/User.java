@@ -9,14 +9,13 @@ import com.trinity.ctc.domain.search.entity.SearchHistory;
 import com.trinity.ctc.domain.user.status.Sex;
 import com.trinity.ctc.domain.user.status.UserStatus;
 import jakarta.persistence.*;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -36,6 +35,8 @@ public class User {
     private String phoneNumber;
     private Integer normalTicketCount;
     private Integer emptyTicketCount;
+
+    @Enumerated(EnumType.STRING)
     private Sex sex;
     private String imageUrl;
     private Boolean isDeleted;
