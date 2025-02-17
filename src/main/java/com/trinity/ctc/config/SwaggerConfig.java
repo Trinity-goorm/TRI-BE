@@ -31,6 +31,9 @@ public class SwaggerConfig {
     @Value("${swagger.group.fcm.paths}")
     private String[] fcmPaths;
 
+    @Value("/api/reservations/**")
+    private String[] reservationPaths;
+
     @Bean
     public OpenAPI customOpenAPI() {
         List<Server> servers = new ArrayList<>();
@@ -74,6 +77,17 @@ public class SwaggerConfig {
         return GroupedOpenApi.builder()
                 .group("Fcm API")
                 .pathsToMatch(fcmPaths)
+                .build();
+    }
+
+    /**
+     * Seat API 그룹
+     */
+    @Bean
+    public GroupedOpenApi reservationOpenApi() {
+        return GroupedOpenApi.builder()
+                .group("Reservation API")
+                .pathsToMatch(reservationPaths)
                 .build();
     }
 }

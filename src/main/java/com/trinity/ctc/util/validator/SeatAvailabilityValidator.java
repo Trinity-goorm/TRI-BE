@@ -17,6 +17,10 @@ public class SeatAvailabilityValidator {
                 .anyMatch(sa -> SeatAvailabilityValidator.validate(sa, isToday));
     }
 
+    public static boolean checkAvailability(SeatAvailability seatAvailability) {
+        return seatAvailability.getAvailableSeats() > 0;
+    }
+
     private static boolean checkAvailabilityForToday(SeatAvailability seatAvailability) {
         LocalTime oneHourLater = LocalTime.now().plusHours(1);
         return seatAvailability.getAvailableSeats() > 0 &&
