@@ -75,4 +75,23 @@ public class ReservationController {
         ReservationResultResponse result = reservationService.cancelPreoccupy(reservationId, userId);
         return ResponseEntity.ok(result);
     }
+
+    @PostMapping("/cancel")
+    @Operation(
+            summary = "완료된 예약 취소 기능",
+            description = "예약시점을 검증 후 완료된 예약을 취소하는 기능. 예약상태가 CANCELED로 변경"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "완료된 예약 취소 성공",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = ReservationResultResponse.class)
+            )
+    )
+    public ResponseEntity<ReservationResultResponse> cancelReservation(@RequestParam long reservationId) {
+        ReservationResultResponse result = reservationService.cancelReservation(reservationId);
+        return ResponseEntity.ok(result);
+    }
 }
+
