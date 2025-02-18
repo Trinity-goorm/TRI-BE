@@ -65,4 +65,8 @@ public class Reservation {
     public void completeReservation() {
         this.status = ReservationStatus.COMPLETED;
     }
+
+    public void cancelReservation() {
+        this.status = ReservationStatus.CANCELLED;
+    }
 }
