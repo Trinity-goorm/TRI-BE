@@ -1,10 +1,9 @@
 package com.trinity.ctc.listener;
 
-import com.trinity.ctc.domain.seat.service.SeatAvailabilityService;
+import com.trinity.ctc.domain.notification.service.NotificationService;
+import com.trinity.ctc.event.PreOccupancyCanceledEvent;
 import com.trinity.ctc.event.ReservationCanceledEvent;
 import com.trinity.ctc.event.ReservationCompleteEvent;
-import com.trinity.ctc.domain.notification.service.NotificationService;
-import com.trinity.ctc.kakao.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -15,25 +14,27 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class ReservationEventListener {
-    private final UserRepository userRepository;
     private final NotificationService notificationService;
-    private final SeatAvailabilityService seatAvailabilityService;
 
     @Async
     @EventListener
     public void handleReservationSuccessEvent(ReservationCompleteEvent reservationEvent) {
-        notificationService.registerReservationNotification(reservationEvent);
+        notificationService.registerReservationNotification(reservationEvent.getUserId(), reservationEvent.getReservationId());
     }
 
     @Async
     @EventListener
     public void handleReservationCanceledEvent(ReservationCanceledEvent reservationEvent) {
-        /* id(long)와 빈자리 여부(boolean)를 반환해야 함
-        SeatUpdateResultDto seatUpdateResultDto = seatAvailabilityService.increaseSeatCount(reservationEvent);
+//        빈자리 알림 발송
+//        if(reservationEvent.getSeatAvailability().getAvailableSeats() == 1) notificationService.sendSeatNotification(reservationEvent.getSeatAvailability().getId());
+        notificationService.deleteReservationNotification(reservationEvent.getReservationId());
+    }
 
-        if(seatUpdateResultDto.isEmptySeat()) notificationService.sendSeatNotification(reservationEvent);
-        */
-        notificationService.deleteReservationNotification(reservationEvent);
+    @Async
+    @EventListener
+    public void handlePreOccupancyCanceledEvent(PreOccupancyCanceledEvent preOccupancyCanceledEvent) {
+//        빈자리 알림 발송
+//        if(reservationEvent.getSeatAvailability().getAvailableSeats() == 1) notificationService.sendSeatNotification(reservationEvent.getSeatAvailability().getId());
     }
 }
 

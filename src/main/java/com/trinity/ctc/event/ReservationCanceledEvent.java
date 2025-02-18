@@ -1,15 +1,15 @@
 package com.trinity.ctc.event;
 
-import com.trinity.ctc.domain.reservation.entity.Reservation;
+import com.trinity.ctc.domain.seat.entity.SeatAvailability;
 import lombok.Getter;
 
 @Getter
 public class ReservationCanceledEvent {
-    private final Long userId;
-    private final Reservation reservation;
+    private final Long reservationId;
+    private final SeatAvailability seatAvailability;
 
-    public ReservationCanceledEvent(long userId, Reservation reservation) {
-        this.userId = userId;
-        this.reservation = reservation;
+    public ReservationCanceledEvent(Long reservationId, SeatAvailability seatAvailability) {
+        this.reservationId = reservationId;
+        this.seatAvailability = seatAvailability;
     }
 }

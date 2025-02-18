@@ -15,8 +15,6 @@ import com.trinity.ctc.domain.notification.util.NotificationMessageUtil;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
 import com.trinity.ctc.domain.user.entity.User;
-import com.trinity.ctc.event.ReservationCanceledEvent;
-import com.trinity.ctc.event.ReservationCompleteEvent;
 import com.trinity.ctc.kakao.repository.UserRepository;
 import com.trinity.ctc.util.exception.CustomException;
 import com.trinity.ctc.util.exception.error_code.ReservationErrorCode;
@@ -52,14 +50,15 @@ public class NotificationService {
 
     /**
      * 예약 이벤트를 통해 예약 알림에 필요한 entity(user, reservation)를 받아오고, 예약 알림 entity을 DB에 저장하는 메서드
-     * @param reservationEvent
+     * @param userId
+     * @param reservationId
      */
     @Transactional
-    public void registerReservationNotification(ReservationCompleteEvent reservationEvent) {
-        User user = userRepository.findById(reservationEvent.getUserId()).orElseThrow(()
+    public void registerReservationNotification(Long userId, Long reservationId) {
+        User user = userRepository.findById(userId).orElseThrow(()
                 -> new CustomException(UserErrorCode.NOT_FOUND));
 
-        Reservation reservation = reservationRepository.findById(reservationEvent.getReservationId()).orElseThrow(()
+        Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(()
                 -> new CustomException(ReservationErrorCode.NOT_FOUND));
 
         ReservationNotification dailyNotification = formattingDailyNotification(user, reservation);
@@ -137,10 +136,9 @@ public class NotificationService {
 
     /**
      * 예약 취소 시, 해당 예약에 대한 알림을 취소하는 메서드
-     * @param reservationEvent
+     * @param reservationId
      */
-    public void deleteReservationNotification(ReservationCanceledEvent reservationEvent) {
-        long reservationId = reservationEvent.getReservation().getId();
+    public void deleteReservationNotification(Long reservationId) {
         reservationNotificationRepository.deleteAllByReservation(reservationId);
     }
 

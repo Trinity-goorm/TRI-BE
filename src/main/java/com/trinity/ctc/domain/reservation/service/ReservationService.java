@@ -15,6 +15,7 @@ import com.trinity.ctc.domain.seat.entity.SeatType;
 import com.trinity.ctc.domain.seat.repository.SeatAvailabilityRepository;
 import com.trinity.ctc.domain.seat.repository.SeatTypeRepository;
 import com.trinity.ctc.domain.user.entity.User;
+import com.trinity.ctc.event.ReservationCanceledEvent;
 import com.trinity.ctc.event.ReservationCompleteEvent;
 import com.trinity.ctc.kakao.repository.UserRepository;
 import com.trinity.ctc.util.exception.CustomException;
@@ -114,6 +115,42 @@ public class ReservationService {
 
         // 결과 반환
         return ReservationResultResponse.of(true, reservationId, reservation.getRestaurant().getName(), reservation.getReservationDate(), reservation.getReservationTime().getTimeSlot());
+    }
+
+    @Transactional
+    public ReservationResultResponse cancelReservation(long reservationId) {
+        log.info("[예약 정보] 예약정보 ID: {}", reservationId);
+
+        // 예약정보 가져오기
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new CustomException(ReservationErrorCode.NOT_FOUND));
+
+        // 예약정보 완료여부 검증
+        ReservationValidator.isCompleted(reservation.getStatus());
+
+        // 예약정보 상태 변경
+        reservation.cancelReservation();
+
+        // 예약시점 검증 (날짜기준 이틀 전인가?)
+        boolean isCODPassed = ReservationValidator.checkCOD(reservation.getReservationDate());
+
+        // 티켓 반환 로직
+        User user = reservation.getUser();
+        log.info("[티켓 반환 전] 반환여부: {}, 일반티켓 수: {}", isCODPassed, user.getNormalTicketCount());
+        if (isCODPassed) {
+            user.returnNormalTickets();
+        }
+        log.info("[티켓 반환 후] 반환여부: {}, 일반티켓 수: {}", isCODPassed, user.getNormalTicketCount());
+
+        // 좌석 수 반환
+        SeatAvailability seatAvailability = seatAvailabilityRepository.findByReservationData(reservation.getRestaurant().getId(), reservation.getReservationDate(), reservation.getReservationTime().getTimeSlot(), reservation.getSeatType().getId());
+        log.info("[예약 취소 전] 가용좌석 수: {}", seatAvailability.getAvailableSeats());
+        seatAvailability.cancelOneReservation();
+        log.info("[예약 취소 후] 가용좌석 수: {}", seatAvailability.getAvailableSeats());
+
+        eventPublisher.publishEvent(new ReservationCanceledEvent(reservationId, seatAvailability));
+
+        return ReservationResultResponse.of(true, reservationId, reservation.getRestaurant().getName(), reservation.getReservationDate(), reservation.getReservationTime().getTimeSlot(), isCODPassed);
     }
 
     /**

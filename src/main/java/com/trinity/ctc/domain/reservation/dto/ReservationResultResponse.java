@@ -1,6 +1,5 @@
 package com.trinity.ctc.domain.reservation.dto;
 
-import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.util.formatter.DateTimeUtil;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
@@ -30,7 +29,14 @@ public class ReservationResultResponse {
     @Schema(description = "예약시간 (HH:mm)", example = "09:00")
     private final String reservationTime;
 
+    @Schema(description = "티켓 반환 여부", example = "true", nullable = true)
+    private final Boolean isTicketReturned;
+
     public static ReservationResultResponse of(boolean success, long reservationId, String restaurantName, LocalDate reservationDate, LocalTime reservationTime) {
-        return new ReservationResultResponse(success, reservationId, restaurantName, DateTimeUtil.formatToDate(reservationDate), DateTimeUtil.formatToHHmm(reservationTime));
+        return new ReservationResultResponse(success, reservationId, restaurantName, DateTimeUtil.formatToDate(reservationDate), DateTimeUtil.formatToHHmm(reservationTime), null);
+    }
+
+    public static ReservationResultResponse of(boolean success, long reservationId, String restaurantName, LocalDate reservationDate, LocalTime reservationTime, boolean ticketReturned) {
+        return new ReservationResultResponse(success, reservationId, restaurantName, DateTimeUtil.formatToDate(reservationDate), DateTimeUtil.formatToHHmm(reservationTime), ticketReturned);
     }
 }

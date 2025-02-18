@@ -8,6 +8,7 @@ import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.search.entity.SearchHistory;
 import com.trinity.ctc.domain.user.status.Sex;
 import com.trinity.ctc.domain.user.status.UserStatus;
+import com.trinity.ctc.util.validator.TicketValidator;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -67,5 +68,15 @@ public class User {
         this.kakaoId = kakaoId;
         this.normalTicketCount = normalTicketCount;
         this.emptyTicketCount = emptyTicket;
+    }
+
+    /* 내부 메서드 */
+    public void returnNormalTickets() {
+        this.normalTicketCount += 10;
+    }
+
+    public void payNormalTickets() {
+        TicketValidator.validateTicketCount(this.normalTicketCount, 10);
+        this.normalTicketCount--;
     }
 }
