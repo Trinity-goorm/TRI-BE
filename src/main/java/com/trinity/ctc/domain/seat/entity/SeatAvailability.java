@@ -37,4 +37,9 @@ public class SeatAvailability {
         CapacityValidator.validateAvailableSeats(this.availableSeats);
         availableSeats--;
     }
+
+    public void cancelOneReservation() {
+        CapacityValidator.validateAvailableSeats(this.availableSeats);
+        availableSeats++;
+    }
 }
