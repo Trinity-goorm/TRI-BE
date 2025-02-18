@@ -14,6 +14,7 @@ import com.trinity.ctc.domain.notification.repository.ReservationNotificationRep
 import com.trinity.ctc.domain.notification.util.NotificationMessageUtil;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
+import com.trinity.ctc.domain.restaurant.repository.RestaurantRepository;
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.event.ReservationCanceledEvent;
 import com.trinity.ctc.event.ReservationSuccessEvent;
@@ -38,11 +39,11 @@ import static com.trinity.ctc.util.formatter.DateTimeUtil.combineWithDate;
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
-    private final ReservationNotificationRepository reservationNotificationRepository;
     private final UserRepository userRepository;
-    private final ReservationRepository reservationRepository;
     private final FcmRepository fcmRepository;
+    private final ReservationRepository reservationRepository;
     private final NotificationHistoryRepository notificationHistoryRepository;
+    private final ReservationNotificationRepository reservationNotificationRepository;
 
     /**
      * 예약 이벤트를 통해 예약 알림에 필요한 entity(user, reservation)를 받아오고, 예약 알림 entity을 DB에 저장하는 메서드

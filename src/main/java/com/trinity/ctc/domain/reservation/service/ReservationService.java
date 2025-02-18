@@ -8,7 +8,7 @@ import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
 import com.trinity.ctc.domain.reservation.repository.ReservationTimeRepository;
 import com.trinity.ctc.domain.reservation.status.ReservationStatus;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
-import com.trinity.ctc.domain.restaurant.entity.repository.RestaurantRepository;
+import com.trinity.ctc.domain.restaurant.repository.RestaurantRepository;
 import com.trinity.ctc.domain.seat.entity.SeatAvailability;
 import com.trinity.ctc.domain.seat.entity.SeatType;
 import com.trinity.ctc.domain.seat.repository.SeatAvailabilityRepository;
@@ -36,6 +36,7 @@ public class ReservationService {
 
     /**
      * 선점하기
+     *
      * @param reservationRequest
      * @return 선점성공여부
      */
@@ -65,6 +66,7 @@ public class ReservationService {
 
     /**
      * 선점가능상태 검증
+     *
      * @param reservationRequest
      * @return 선점대상 좌석정보
      */
@@ -89,6 +91,7 @@ public class ReservationService {
 
     /**
      * 예약정보 생성
+     *
      * @param reservationRequest
      * @return 예약정보
      */
