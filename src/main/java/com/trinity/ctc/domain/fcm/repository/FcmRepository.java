@@ -23,4 +23,7 @@ public interface FcmRepository extends JpaRepository<Fcm, Long> {
     void updateToken(@Param("token") String token,
                      @Param("updatedAt") LocalDateTime updatedAt,
                      @Param("expiresAt") LocalDateTime expiresAt);
+
+    @Query("SELECT f.token FROM Fcm f WHERE f.user.id = :userId")
+    String findByUser(@Param("userId") Long userId);
 }

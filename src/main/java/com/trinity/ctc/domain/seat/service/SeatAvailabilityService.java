@@ -1,12 +1,9 @@
 package com.trinity.ctc.domain.seat.service;
 
-import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.seat.dto.GroupedSeatResponse;
 import com.trinity.ctc.domain.seat.dto.GroupedTimeSlotResponse;
-import com.trinity.ctc.domain.seat.dto.SeatUpdateResultDto;
 import com.trinity.ctc.domain.seat.entity.SeatAvailability;
 import com.trinity.ctc.domain.seat.repository.SeatAvailabilityRepository;
-import com.trinity.ctc.event.ReservationCanceledEvent;
 import com.trinity.ctc.util.formatter.DateTimeUtil;
 import com.trinity.ctc.util.helper.GroupingHelper;
 import com.trinity.ctc.util.validator.DateTimeValidator;
@@ -95,9 +92,5 @@ public class SeatAvailabilityService {
                 .toList();
 
         return GroupedTimeSlotResponse.fromGroupedSeats(DateTimeUtil.formatToHHmm(timeslot), isAvailable, groupedSeatResponses);
-    }
-
-    public void increaseSeatCount(ReservationCanceledEvent reservationEvent) {
-        // return new SeatUpdateResultDto(0, false);
     }
 }

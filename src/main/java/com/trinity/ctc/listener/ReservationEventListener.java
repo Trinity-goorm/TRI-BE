@@ -1,6 +1,5 @@
 package com.trinity.ctc.listener;
 
-import com.trinity.ctc.domain.seat.dto.SeatUpdateResultDto;
 import com.trinity.ctc.domain.seat.service.SeatAvailabilityService;
 import com.trinity.ctc.event.ReservationCanceledEvent;
 import com.trinity.ctc.event.ReservationSuccessEvent;
