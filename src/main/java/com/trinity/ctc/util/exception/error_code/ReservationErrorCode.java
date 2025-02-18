@@ -13,7 +13,8 @@ public enum ReservationErrorCode implements ErrorCode {
     NOT_FOUND(HttpStatus.NOT_FOUND, "해당 예약정보를 찾을 수 없습니다."),
 
     NOT_PREOCCUPIED(HttpStatus.BAD_REQUEST, "예약이 선점상태가 아닙니다."),
-    ALREADY_COMPLETED(HttpStatus.BAD_REQUEST, "이미 예약(결제)완료 된 예약입니다.");
+    ALREADY_COMPLETED(HttpStatus.BAD_REQUEST, "이미 예약(결제)완료 된 예약입니다."),
+    NOT_COMPLETED(HttpStatus.BAD_REQUEST, "예약이 완료상태가 아닙니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
