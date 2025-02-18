@@ -84,6 +84,24 @@ public class ReservationService {
         return ReservationResultResponse.of(true, reservationId, reservation.getRestaurant().getName(), reservation.getReservationDate(), reservation.getReservationTime().getTimeSlot());
     }
 
+    @Transactional
+    public ReservationResultResponse cancelPreoccupy(long reservationId, long userId) {
+        log.info("[예약 정보] 예약정보 ID: {}, 예약자 ID: {}", reservationId, userId);
+
+        // 예약정보 가져오기
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new CustomException(ReservationErrorCode.NOT_FOUND));
+
+        // 예약정보 선점여부 검증
+        ReservationValidator.isPreoccupied(reservation.getStatus());
+
+        // 예약정보 취소 상태로 변경
+        reservation.cancelReservation();
+
+        // 결과 반환
+        return ReservationResultResponse.of(true, reservationId, reservation.getRestaurant().getName(), reservation.getReservationDate(), reservation.getReservationTime().getTimeSlot());
+    }
+
     /**
      * 선점가능상태 검증
      * @param reservationRequest
