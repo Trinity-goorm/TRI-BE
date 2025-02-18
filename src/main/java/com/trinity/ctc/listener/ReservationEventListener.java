@@ -2,7 +2,7 @@ package com.trinity.ctc.listener;
 
 import com.trinity.ctc.domain.seat.service.SeatAvailabilityService;
 import com.trinity.ctc.event.ReservationCanceledEvent;
-import com.trinity.ctc.event.ReservationSuccessEvent;
+import com.trinity.ctc.event.ReservationCompleteEvent;
 import com.trinity.ctc.domain.notification.service.NotificationService;
 import com.trinity.ctc.kakao.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 @Slf4j
 @Component
@@ -22,10 +21,8 @@ public class ReservationEventListener {
 
     @Async
     @EventListener
-    public void handleReservationSuccessEvent(ReservationSuccessEvent reservationEvent) {
-        log.info("THere????????????????");
+    public void handleReservationSuccessEvent(ReservationCompleteEvent reservationEvent) {
         notificationService.registerReservationNotification(reservationEvent);
-
     }
 
     @Async

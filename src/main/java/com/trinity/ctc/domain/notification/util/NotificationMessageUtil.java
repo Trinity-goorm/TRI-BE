@@ -11,7 +11,7 @@ public class NotificationMessageUtil {
     }
 
     public static String formatDailyNotificationBody(String restaurantName, LocalDate date, LocalTime time) {
-        return MessageFormat.format("식당: {0}\r\n 날짜: {1}\r\n시간: {2}",
+        return MessageFormat.format("식당: {0}\r\n날짜: {1}\r\n시간: {2}",
                                     restaurantName, date, time);
     }
 
@@ -21,7 +21,7 @@ public class NotificationMessageUtil {
     }
 
     public static String formatHourBeforeNotificationBody(String restaurantName, LocalDate date, LocalTime time) {
-        return MessageFormat.format("식당: {0}\r\n 날짜: {1}\r\n시간: {2}",
+        return MessageFormat.format("식당: {0}\r\n날짜: {1}\r\n시간: {2}",
                                     restaurantName, date, time);
     }
 
@@ -34,7 +34,7 @@ public class NotificationMessageUtil {
     }
 
     public static String formatSeatNotificationBody(LocalDate date, LocalTime time, int min, int max) {
-        return MessageFormat.format("날짜: {0}\r\n시간: {1}\r\n좌석: {2} ~ {3}",
+        return MessageFormat.format("날짜: {0}\r\n시간: {1}\r\n인원: {2}~{3}명",
                                     date, time, min, max);
     }
 

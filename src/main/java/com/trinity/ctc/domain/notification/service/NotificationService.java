@@ -16,7 +16,7 @@ import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.event.ReservationCanceledEvent;
-import com.trinity.ctc.event.ReservationSuccessEvent;
+import com.trinity.ctc.event.ReservationCompleteEvent;
 import com.trinity.ctc.kakao.repository.UserRepository;
 import com.trinity.ctc.util.exception.CustomException;
 import com.trinity.ctc.util.exception.error_code.ReservationErrorCode;
@@ -28,6 +28,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -47,14 +48,14 @@ public class NotificationService {
     private final NotificationHistoryRepository notificationHistoryRepository;
     private final ReservationNotificationRepository reservationNotificationRepository;
 
-
-    private final ApplicationEventPublisher publisher;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * 예약 이벤트를 통해 예약 알림에 필요한 entity(user, reservation)를 받아오고, 예약 알림 entity을 DB에 저장하는 메서드
      * @param reservationEvent
      */
-    public void registerReservationNotification(ReservationSuccessEvent reservationEvent) {
+    @Transactional
+    public void registerReservationNotification(ReservationCompleteEvent reservationEvent) {
         User user = userRepository.findById(reservationEvent.getUserId()).orElseThrow(()
                 -> new CustomException(UserErrorCode.NOT_FOUND));
 
@@ -122,7 +123,7 @@ public class NotificationService {
         String url = NotificationMessageUtil.formatReservationNotificationUrl(reservationId);
 
         ReservationNotification reservationNotification = ReservationNotification.builder()
-                .type(NotificationType.DAILY_NOTIFICATION)
+                .type(NotificationType.BEFORE_ONE_HOUR_NOTIFICATION)
                 .title(title)
                 .body(body)
                 .url(url)
@@ -146,8 +147,8 @@ public class NotificationService {
     /**
      * 매일 8시에 당일 예약 알림을 보내는 메서드(매일 8시에 실행되도록 스케줄링)
      */
-    @Scheduled(cron = "0 0 8 * * ?") // 매일 8시에 실행
-    private void sendDailyReservationNotification() {
+    @Scheduled(cron = "0 10 17 * * ?") // 매일 8시에 실행
+    public void sendDailyReservationNotification() {
         LocalDate today = LocalDate.now();
         List<ReservationNotification> reservationNotificationList = reservationNotificationRepository
                 .findAllByTypeAndDate(NotificationType.DAILY_NOTIFICATION, today);
@@ -168,8 +169,8 @@ public class NotificationService {
     /**
      * 예약 1시간 전 알림을 보내는 메서드(운영시간 내에서 1시간 단위로 실행되도록 스케줄링)
      */
-    @Scheduled(cron = "0 0 11-23/1 * *  ?") // 11 ~ 23시 동안 1시간 단위로 실행
-    private void sendHourBeforeReservationNotification() {
+    @Scheduled(cron = "0 0/1 11-23 * *  ?") // 11 ~ 23시 동안 1시간 단위로 실행
+    public void sendHourBeforeReservationNotification() {
         LocalDateTime now = DateTimeUtil.truncateToMinute(LocalDateTime.now());
 
         List<ReservationNotification> reservationNotificationList = reservationNotificationRepository
@@ -266,6 +267,7 @@ public class NotificationService {
     /**
      * 전송된 알림 히스토리를 전부 history 테이블에 저장하고  메서드
      * @param notificationHistoryList
+     * @param reservationNotificationIdList
      */
     private void processNotificationData (List<NotificationHistory> notificationHistoryList,
                                               List<Long> reservationNotificationIdList) {
