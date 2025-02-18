@@ -15,31 +15,24 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class RestaurantFileLoader {
 
     private final RestaurantRepository restaurantRepository;
-    private final RestaurantImageRepository restaurantImageRepository;
-    private final RestaurantCategoryRepository restaurantCategoryRepository;
     private final CategoryRepository categoryRepository;
 
-    public RestaurantFileLoader(RestaurantRepository restaurantRepository, RestaurantImageRepository restaurantImageRepository, RestaurantCategoryRepository restaurantCategoryRepository,
-        CategoryRepository categoryRepository) {
-        this.restaurantRepository = restaurantRepository;
-        this.restaurantImageRepository = restaurantImageRepository;
-        this.restaurantCategoryRepository = restaurantCategoryRepository;
-        this.categoryRepository = categoryRepository;
-    }
     @Transactional
     public List<Restaurant> loadRestaurantsFromFile(List<Category> categories) {
         List<Restaurant> restaurants = new ArrayList<>();
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            File file = new ClassPathResource("crawlingData/중식_restaurants_table.json").getFile();
+            File file = new ClassPathResource("crawlingData/restaurant/restaurants_table.json").getFile();
             JsonNode rootNode = objectMapper.readTree(file);
             for (JsonNode restaurantNode : rootNode) {
                 // 빈 값이 들어오면 기본값 설정
@@ -130,7 +123,7 @@ public class RestaurantFileLoader {
                 restaurant.addCategory(restaurantCategory);
 
 //                //메뉴 연결
-                File menuFile = new ClassPathResource("crawlingData/중식_menus_table.json").getFile();
+                File menuFile = new ClassPathResource("crawlingData/menu/menus_table.json").getFile();
                 JsonNode menusNode = objectMapper.readTree(menuFile);
 
                 List<Menu> menuList = new ArrayList<>();
