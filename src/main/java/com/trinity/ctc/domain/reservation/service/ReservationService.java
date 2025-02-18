@@ -8,7 +8,7 @@ import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
 import com.trinity.ctc.domain.reservation.repository.ReservationTimeRepository;
 import com.trinity.ctc.domain.reservation.status.ReservationStatus;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
-import com.trinity.ctc.domain.restaurant.entity.repository.RestaurantRepository;
+import com.trinity.ctc.domain.restaurant.repository.RestaurantRepository;
 import com.trinity.ctc.domain.seat.entity.SeatAvailability;
 import com.trinity.ctc.domain.seat.entity.SeatType;
 import com.trinity.ctc.domain.seat.repository.SeatAvailabilityRepository;
