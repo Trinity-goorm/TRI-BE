@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Getter
+@Schema(description = "예약정보 전달")
 public class ReservationRequest {
 
     @Schema(description = "예약자 ID", example = "1")
