@@ -2,10 +2,12 @@ package com.trinity.ctc.domain.restaurant.entity;
 
 import jakarta.persistence.*;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @NoArgsConstructor
+@Getter
 public class Menu {
 
     @Id

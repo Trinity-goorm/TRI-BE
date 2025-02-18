@@ -4,10 +4,12 @@ import com.trinity.ctc.domain.category.entity.Category;
 import com.trinity.ctc.domain.restaurant.entity.compositeKey.RestaurantCategoryKey;
 import jakarta.persistence.*;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @NoArgsConstructor
+@Getter
 public class RestaurantCategory {
 
     @EmbeddedId
