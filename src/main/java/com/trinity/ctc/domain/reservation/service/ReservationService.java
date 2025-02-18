@@ -98,6 +98,12 @@ public class ReservationService {
         // 예약정보 취소 상태로 변경
         reservation.cancelReservation();
 
+        // 가용좌석 증가 (더티체킹)
+        SeatAvailability seatAvailability = seatAvailabilityRepository.findByReservationData(reservation.getRestaurant().getId(), reservation.getReservationDate(), reservation.getReservationTime().getTimeSlot(), reservation.getSeatType().getId());
+        log.info("[예약 취소 전] 가용좌석 수: {}", seatAvailability.getAvailableSeats());
+        seatAvailability.cancelOneReservation();
+        log.info("[예약 취소 후] 가용좌석 수: {}", seatAvailability.getAvailableSeats());
+
         // 결과 반환
         return ReservationResultResponse.of(true, reservationId, reservation.getRestaurant().getName(), reservation.getReservationDate(), reservation.getReservationTime().getTimeSlot());
     }
