@@ -2,6 +2,7 @@ package com.trinity.ctc.domain.reservation.service;
 
 import com.trinity.ctc.domain.reservation.dto.PreoccupyResponse;
 import com.trinity.ctc.domain.reservation.dto.ReservationRequest;
+import com.trinity.ctc.domain.reservation.dto.ReservationResultResponse;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.reservation.entity.ReservationTime;
 import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
@@ -17,6 +18,7 @@ import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.kakao.repository.UserRepository;
 import com.trinity.ctc.util.exception.CustomException;
 import com.trinity.ctc.util.exception.error_code.*;
+import com.trinity.ctc.util.validator.ReservationValidator;
 import com.trinity.ctc.util.validator.SeatAvailabilityValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -62,6 +64,25 @@ public class ReservationService {
 
         // DTO 생성
         return PreoccupyResponse.of(true, reservation.getId());
+    }
+
+    @Transactional
+    public ReservationResultResponse complete(long reservationId, long userId) {
+
+        log.info("[예약 정보] 예약정보 ID: {}, 예약자 ID: {}", reservationId, userId);
+
+        // 예약정보 가져오기
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new CustomException(ReservationErrorCode.NOT_FOUND));
+
+        // 예약정보 선점여부 검증
+        ReservationValidator.isPreoccupied(reservation.getStatus());
+
+        // 예약정보 완료상태로 변경
+        reservation.completeReservation();
+
+        // 결과 반환
+        return ReservationResultResponse.of(true, reservationId, reservation.getRestaurant().getName(), reservation.getReservationDate(), reservation.getReservationTime().getTimeSlot());
     }
 
     /**

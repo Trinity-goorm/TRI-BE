@@ -12,9 +12,9 @@ import com.trinity.ctc.domain.notification.entity.type.NotificationType;
 import com.trinity.ctc.domain.notification.repository.NotificationHistoryRepository;
 import com.trinity.ctc.domain.notification.repository.ReservationNotificationRepository;
 import com.trinity.ctc.domain.notification.util.NotificationMessageUtil;
+import com.trinity.ctc.domain.reservation.dto.ReservationFinalizedRequest;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
-import com.trinity.ctc.domain.restaurant.repository.RestaurantRepository;
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.event.ReservationCanceledEvent;
 import com.trinity.ctc.event.ReservationSuccessEvent;
@@ -24,6 +24,8 @@ import com.trinity.ctc.util.exception.error_code.ReservationErrorCode;
 import com.trinity.ctc.util.exception.error_code.UserErrorCode;
 import com.trinity.ctc.util.formatter.DateTimeUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -35,6 +37,7 @@ import java.util.*;
 
 import static com.trinity.ctc.util.formatter.DateTimeUtil.combineWithDate;
 
+@Slf4j
 @EnableAsync
 @Service
 @RequiredArgsConstructor
@@ -44,6 +47,9 @@ public class NotificationService {
     private final ReservationRepository reservationRepository;
     private final NotificationHistoryRepository notificationHistoryRepository;
     private final ReservationNotificationRepository reservationNotificationRepository;
+
+
+    private final ApplicationEventPublisher publisher;
 
     /**
      * 예약 이벤트를 통해 예약 알림에 필요한 entity(user, reservation)를 받아오고, 예약 알림 entity을 DB에 저장하는 메서드
@@ -266,5 +272,12 @@ public class NotificationService {
                                               List<Long> reservationNotificationIdList) {
         notificationHistoryRepository.saveAll(notificationHistoryList);
         reservationNotificationRepository.deleteAllById(reservationNotificationIdList);
+    }
+
+    public void testRegisterNotification() {
+        ReservationFinalizedRequest request = new ReservationFinalizedRequest(1L, 1L);
+
+        log.info("Here????????????????");
+        publisher.publishEvent(new ReservationSuccessEvent(request));
     }
 }

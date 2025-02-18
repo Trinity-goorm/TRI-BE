@@ -7,6 +7,7 @@ import com.trinity.ctc.domain.notification.service.NotificationService;
 import com.trinity.ctc.kakao.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -20,13 +21,15 @@ public class ReservationEventListener {
     private final SeatAvailabilityService seatAvailabilityService;
 
     @Async
-    @TransactionalEventListener
+    @EventListener
     public void handleReservationSuccessEvent(ReservationSuccessEvent reservationEvent) {
+        log.info("THere????????????????");
         notificationService.registerReservationNotification(reservationEvent);
+
     }
 
     @Async
-    @TransactionalEventListener
+    @EventListener
     public void handleReservationCanceledEvent(ReservationCanceledEvent reservationEvent) {
         /* id(long)와 빈자리 여부(boolean)를 반환해야 함
         SeatUpdateResultDto seatUpdateResultDto = seatAvailabilityService.increaseSeatCount(reservationEvent);
