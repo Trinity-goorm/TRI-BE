@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/restaurants/like")
+@RequestMapping("api/restaurants/like")
 @RequiredArgsConstructor
 public class LikeController {
 
