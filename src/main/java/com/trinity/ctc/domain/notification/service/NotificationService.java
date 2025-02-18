@@ -12,7 +12,6 @@ import com.trinity.ctc.domain.notification.entity.type.NotificationType;
 import com.trinity.ctc.domain.notification.repository.NotificationHistoryRepository;
 import com.trinity.ctc.domain.notification.repository.ReservationNotificationRepository;
 import com.trinity.ctc.domain.notification.util.NotificationMessageUtil;
-import com.trinity.ctc.domain.reservation.dto.ReservationFinalizedRequest;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
 import com.trinity.ctc.domain.user.entity.User;
@@ -252,7 +251,7 @@ public class NotificationService {
         messageHistory.put("title", notification.getTitle());
         messageHistory.put("body", notification.getBody());
         messageHistory.put("url", notification.getUrl());
-        
+
         NotificationHistory notificationHistory = NotificationHistory.builder()
                 .type(type)
                 .message(messageHistory)
@@ -272,12 +271,5 @@ public class NotificationService {
                                               List<Long> reservationNotificationIdList) {
         notificationHistoryRepository.saveAll(notificationHistoryList);
         reservationNotificationRepository.deleteAllById(reservationNotificationIdList);
-    }
-
-    public void testRegisterNotification() {
-        ReservationFinalizedRequest request = new ReservationFinalizedRequest(1L, 1L);
-
-        log.info("Here????????????????");
-        publisher.publishEvent(new ReservationSuccessEvent(request));
     }
 }
