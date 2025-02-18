@@ -60,4 +60,9 @@ public class Reservation {
         this.reservationTime = reservationTime;
         this.seatType = seatType;
     }
+
+    /* 내부 메서드 */
+    public void completeReservation() {
+        this.status = ReservationStatus.COMPLETED;
+    }
 }

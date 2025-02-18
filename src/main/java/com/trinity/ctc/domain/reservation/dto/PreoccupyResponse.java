@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@Schema
+@Schema(description = "예약선점 성공여부 반환")
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class PreoccupyResponse {
 

@@ -1,4 +1,4 @@
-package com.trinity.ctc.domain.restaurant.entity.repository;
+package com.trinity.ctc.domain.restaurant.repository;
 
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
 import org.springframework.data.jpa.repository.JpaRepository;
