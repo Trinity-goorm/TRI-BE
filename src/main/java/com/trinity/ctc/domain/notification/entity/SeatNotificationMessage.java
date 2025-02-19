@@ -2,11 +2,13 @@ package com.trinity.ctc.domain.notification.entity;
 
 import com.trinity.ctc.domain.seat.entity.SeatAvailability;
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Getter
 public class SeatNotificationMessage {
     @Id
     @Column

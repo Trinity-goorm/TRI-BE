@@ -2,8 +2,10 @@ package com.trinity.ctc.domain.notification.entity;
 
 import com.trinity.ctc.domain.user.entity.User;
 import jakarta.persistence.*;
+import lombok.Getter;
 
 @Entity
+@Getter
 public class SeatNotification {
 
     @Id
