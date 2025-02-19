@@ -5,6 +5,8 @@ import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.trinity.ctc.domain.fcm.repository.FcmRepository;
 import com.trinity.ctc.domain.notification.dto.FcmSendingResultDto;
+import com.trinity.ctc.domain.notification.dto.SubscriptionListResponse;
+import com.trinity.ctc.domain.notification.dto.SubscriptionResponse;
 import com.trinity.ctc.domain.notification.entity.NotificationHistory;
 import com.trinity.ctc.domain.notification.entity.ReservationNotification;
 import com.trinity.ctc.domain.notification.entity.SeatNotification;
@@ -339,7 +341,7 @@ public class NotificationService {
                 .orElseGet(() -> registerSeatNotificationMessage(seatId));
 
         // 이미 신청 내역이 있을 시, 409 반환
-        seatNotificationRepository.findByUserId(userId)
+        seatNotificationRepository.findByUserId(userId, seatNotificationMessage)
                 .ifPresent(notification -> {
                     log.info("이미 신청 내역이 존재합니다. userId: {}", userId);
                     throw new CustomException(NotificationErrorCode.ALREADY_SUBSCRIBED);
@@ -353,7 +355,7 @@ public class NotificationService {
         seatNotificationRepository.save(seatNotification);
     }
 
-    public SeatNotificationMessage registerSeatNotificationMessage(long seatId) {
+    private SeatNotificationMessage registerSeatNotificationMessage(long seatId) {
         SeatAvailability seat = seatAvailabilityRepository.findById(seatId).orElseThrow(() -> new CustomException(SeatErrorCode.NOT_FOUND));
 
         // 빈자리 알림 메세지에 필요한 정보 변수 선언
@@ -378,5 +380,35 @@ public class NotificationService {
                 .build();
 
         return seatNotificationMessageRepository.save(message);
+    }
+
+    @Transactional
+    public void cancelSubscribeSeatNotification(Long seatNotificationId) {
+        seatNotificationRepository.deleteById(seatNotificationId);
+    }
+
+    @Transactional
+    public SubscriptionListResponse getSeatNotifications(long userId) {
+        List<SeatNotification> seatNotificationList = seatNotificationRepository.findAllByUserId(userId);
+        List<SubscriptionResponse> subscriptionResponseList = new ArrayList<>();
+        log.info("조회된 SeatNotification 개수: {}", seatNotificationList.size());
+
+
+        for(SeatNotification notification : seatNotificationList) {
+            int subscriberCount = seatNotificationRepository.countBySeatNotificationMessage(notification.getSeatNotificationMessage());
+
+            log.info("SeatNotification ID: {}, 관련 SeatAvailability ID: {}, 구독자 수: {}",
+                    notification.getId(),
+                    notification.getSeatNotificationMessage().getSeatAvailability().getId(),
+                    subscriberCount);
+
+            SubscriptionResponse subscriptionResponse = SubscriptionResponse.of(notification.getId(), notification.getSeatNotificationMessage().getSeatAvailability(), subscriberCount);
+            subscriptionResponseList.add(subscriptionResponse);
+            log.info("response: " + subscriptionResponse.getSeatNotificationId());
+        }
+
+        SubscriptionListResponse subscriptionListResponse = new SubscriptionListResponse(subscriptionResponseList.size(), subscriptionResponseList);
+
+        return subscriptionListResponse;
     }
 }
