@@ -4,7 +4,7 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.trinity.ctc.util.exception.CustomException;
-import com.trinity.ctc.util.exception.error_code.FirebaseErrorCode;
+import com.trinity.ctc.util.exception.error_code.FcmErrorCode;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,7 +37,7 @@ public class FirebaseInitializer {
             }
 
         } catch (IOException e) {
-            throw new CustomException(FirebaseErrorCode.FIREBASE_INITIALIZATION_FAILED);
+            throw new CustomException(FcmErrorCode.FIREBASE_INITIALIZATION_FAILED);
         }
     }
 }

@@ -15,7 +15,7 @@ public class SeatNotificationMessage {
 
     private String title;
     private String body;
-    private Long date;
+    private String Url;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seat_availability_id")

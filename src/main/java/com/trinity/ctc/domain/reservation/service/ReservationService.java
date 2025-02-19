@@ -15,6 +15,8 @@ import com.trinity.ctc.domain.seat.entity.SeatType;
 import com.trinity.ctc.domain.seat.repository.SeatAvailabilityRepository;
 import com.trinity.ctc.domain.seat.repository.SeatTypeRepository;
 import com.trinity.ctc.domain.user.entity.User;
+import com.trinity.ctc.event.ReservationCanceledEvent;
+import com.trinity.ctc.event.ReservationCompleteEvent;
 import com.trinity.ctc.kakao.repository.UserRepository;
 import com.trinity.ctc.util.exception.CustomException;
 import com.trinity.ctc.util.exception.error_code.*;
@@ -22,6 +24,7 @@ import com.trinity.ctc.util.validator.ReservationValidator;
 import com.trinity.ctc.util.validator.SeatAvailabilityValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,8 +42,11 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
 
+    //  이벤트 발행하는 인터페이스
+    private final ApplicationEventPublisher eventPublisher;
     /**
      * 선점하기
+     *
      * @param reservationRequest
      * @return 선점성공여부
      */
@@ -97,6 +103,9 @@ public class ReservationService {
 
         // 예약정보 완료상태로 변경
         reservation.completeReservation();
+
+        // 예약 완료 이벤트 발행
+        eventPublisher.publishEvent(new ReservationCompleteEvent(userId, reservationId));
 
         // 결과 반환
         return ReservationResultResponse.of(true, reservationId, reservation.getRestaurant().getName(), reservation.getReservationDate(), reservation.getReservationTime().getTimeSlot());
@@ -157,11 +166,14 @@ public class ReservationService {
         seatAvailability.cancelOneReservation();
         log.info("[예약 취소 후] 가용좌석 수: {}", seatAvailability.getAvailableSeats());
 
+        eventPublisher.publishEvent(new ReservationCanceledEvent(reservationId, seatAvailability));
+
         return ReservationResultResponse.of(true, reservationId, reservation.getRestaurant().getName(), reservation.getReservationDate(), reservation.getReservationTime().getTimeSlot(), isCODPassed);
     }
 
     /**
      * 선점가능상태 검증
+     *
      * @param reservationRequest
      * @return 선점대상 좌석정보
      */
@@ -186,6 +198,7 @@ public class ReservationService {
 
     /**
      * 예약정보 생성
+     *
      * @param reservationRequest
      * @return 예약정보
      */

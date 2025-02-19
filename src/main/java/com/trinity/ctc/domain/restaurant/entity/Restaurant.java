@@ -5,7 +5,10 @@ import com.trinity.ctc.domain.like.entity.Likes;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.seat.entity.SeatAvailability;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,9 +30,9 @@ public class Restaurant {
     private String caution;
     private boolean isDeleted = false;
     private int reviewCount;
-    private double rating;
-    private double latitude;
-    private double longitude;
+//    private double rating;
+//    private double latitude;
+//    private double longitude;
 
     @OneToMany(mappedBy = "restaurant")
     private List<RestaurantImage> imageUrls = new ArrayList<>();
