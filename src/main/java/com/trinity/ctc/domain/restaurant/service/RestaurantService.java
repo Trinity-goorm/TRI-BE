@@ -2,14 +2,14 @@ package com.trinity.ctc.domain.restaurant.service;
 
 import com.trinity.ctc.domain.category.repository.CategoryRepository;
 import com.trinity.ctc.domain.category.entity.Category;
-import com.trinity.ctc.domain.reservation.dto.ReservationAvailabilityDto;
+import com.trinity.ctc.domain.reservation.dto.ReservationAvailabilityResponse;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
 import com.trinity.ctc.domain.seat.service.SeatAvailabilityService;
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.kakao.repository.UserRepository;
 import com.trinity.ctc.domain.like.repository.LikeRepository;
-import com.trinity.ctc.domain.restaurant.dto.RestaurantListDto;
-import com.trinity.ctc.domain.restaurant.dto.RestaurantDetailDto;
+import com.trinity.ctc.domain.restaurant.dto.RestaurantListResponse;
+import com.trinity.ctc.domain.restaurant.dto.RestaurantDetailResponse;
 import com.trinity.ctc.domain.restaurant.repository.RestaurantRepository;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,16 +36,16 @@ public class RestaurantService {
         restaurantRepository.saveAll(restaurants);
     }
     @Transactional(readOnly = true)
-    public RestaurantDetailDto getRestaurantDetail(Long restaurantId) {
+    public RestaurantDetailResponse getRestaurantDetail(Long restaurantId) {
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
             .orElseThrow(
                 () -> new IllegalArgumentException("해당 식당을 찾을 수 없습니다. ID: " + restaurantId));
 
-        return RestaurantDetailDto.fromEntity(restaurant);
+        return RestaurantDetailResponse.fromEntity(restaurant);
     }
 
     @Transactional(readOnly = true)
-    public List<RestaurantListDto> getRestaurantsByCategory(Long categoryId, Long userId) {
+    public List<RestaurantListResponse> getRestaurantsByCategory(Long categoryId, Long userId) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다. ID: " + userId));
 
@@ -55,17 +55,17 @@ public class RestaurantService {
         return convertToRestaurantDtoList(restaurants, user);
     }
 
-    public List<RestaurantListDto> convertToRestaurantDtoList(List<Restaurant> restaurants, User user) {
+    public List<RestaurantListResponse> convertToRestaurantDtoList(List<Restaurant> restaurants, User user) {
         return restaurants.stream()
             .map(restaurant -> {
                 boolean isWishlisted = likeRepository.existsByUserAndRestaurant(user, restaurant);
 
                 // 14일간 날짜별 예약 가능 여부 조회
-                List<ReservationAvailabilityDto> reservation = seatAvailabilityService
+                List<ReservationAvailabilityResponse> reservation = seatAvailabilityService
                     .getAvailabilityForNext14Days(restaurant.getId());
 
                 log.info("reservation 사이즈: {}", reservation.size());
-                return RestaurantListDto.fromEntity(restaurant, isWishlisted, reservation);
+                return RestaurantListResponse.fromEntity(restaurant, isWishlisted, reservation);
             })
             .collect(Collectors.toList());
     }

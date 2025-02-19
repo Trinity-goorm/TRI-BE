@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 @Getter
 @Builder
-public class RestaurantDetailDto {
+public class RestaurantDetailResponse {
 
     private Long restaurantId;
     private String name;
@@ -27,9 +27,9 @@ public class RestaurantDetailDto {
     private List<MenuDto> menus;
     private int wishCount;
 
-    public static RestaurantDetailDto fromEntity(Restaurant restaurant) {
+    public static RestaurantDetailResponse fromEntity(Restaurant restaurant) {
         // 식당 운영시간
-        return RestaurantDetailDto.builder()
+        return RestaurantDetailResponse.builder()
             .restaurantId(restaurant.getId())
             .name(restaurant.getName())
             .imageUrls(restaurant.getImageUrls().stream().map(RestaurantImage::getUrl).collect(Collectors.toList()))
@@ -50,8 +50,8 @@ public class RestaurantDetailDto {
             .build();
     }
 
-    public static RestaurantDetailDto fromLike(Restaurant restaurant) {
-        return RestaurantDetailDto.builder()
+    public static RestaurantDetailResponse fromLike(Restaurant restaurant) {
+        return RestaurantDetailResponse.builder()
             .restaurantId(restaurant.getId())
             .name(restaurant.getName())
             .imageUrls(restaurant.getImageUrls().stream().map(RestaurantImage::getUrl).collect(Collectors.toList()))

@@ -1,6 +1,6 @@
 package com.trinity.ctc.domain.search.service;
 
-import com.trinity.ctc.domain.restaurant.dto.RestaurantListDto;
+import com.trinity.ctc.domain.restaurant.dto.RestaurantListResponse;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
 import com.trinity.ctc.domain.restaurant.repository.RestaurantRepository;
 import com.trinity.ctc.domain.restaurant.service.RestaurantService;
@@ -19,7 +19,7 @@ public class SearchService {
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public List<RestaurantListDto> search(String keyword, Long userId) {
+    public List<RestaurantListResponse> search(String keyword, Long userId) {
         List<Restaurant> restaurants = restaurantRepository.searchRestaurants(keyword);
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다. ID: " + userId));
