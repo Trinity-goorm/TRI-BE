@@ -1,4 +1,4 @@
-package com.trinity.ctc.menu.dto;
+package com.trinity.ctc.domain.restaurant.dto;
 
 import com.trinity.ctc.domain.restaurant.entity.Menu;
 import lombok.Builder;

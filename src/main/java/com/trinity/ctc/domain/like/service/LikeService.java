@@ -1,12 +1,12 @@
-package com.trinity.ctc.like.service;
+package com.trinity.ctc.domain.like.service;
 
 import com.trinity.ctc.domain.like.entity.Likes;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.kakao.repository.UserRepository;
-import com.trinity.ctc.like.repository.LikeRepository;
-import com.trinity.ctc.restaurant.dto.RestaurantDetailDto;
-import com.trinity.ctc.restaurant.repository.RestaurantRepository;
+import com.trinity.ctc.domain.like.repository.LikeRepository;
+import com.trinity.ctc.domain.restaurant.dto.RestaurantDetailDto;
+import com.trinity.ctc.domain.restaurant.repository.RestaurantRepository;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;

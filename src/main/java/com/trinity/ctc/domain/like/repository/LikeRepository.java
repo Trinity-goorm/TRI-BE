@@ -1,4 +1,4 @@
-package com.trinity.ctc.like.repository;
+package com.trinity.ctc.domain.like.repository;
 
 import com.trinity.ctc.domain.like.entity.Likes;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;

@@ -1,8 +1,8 @@
-package com.trinity.ctc.restaurant.controller;
+package com.trinity.ctc.domain.restaurant.controller;
 
-import com.trinity.ctc.restaurant.dto.RestaurantCategoryListDto;
-import com.trinity.ctc.restaurant.dto.RestaurantDetailDto;
-import com.trinity.ctc.restaurant.service.RestaurantService;
+import com.trinity.ctc.domain.restaurant.dto.RestaurantCategoryListDto;
+import com.trinity.ctc.domain.restaurant.dto.RestaurantDetailDto;
+import com.trinity.ctc.domain.restaurant.service.RestaurantService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

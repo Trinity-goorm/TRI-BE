@@ -1,7 +1,7 @@
-package com.trinity.ctc.like.controller;
+package com.trinity.ctc.domain.like.controller;
 
-import com.trinity.ctc.like.service.LikeService;
-import com.trinity.ctc.restaurant.dto.RestaurantDetailDto;
+import com.trinity.ctc.domain.like.service.LikeService;
+import com.trinity.ctc.domain.restaurant.dto.RestaurantDetailDto;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;

@@ -1,14 +1,14 @@
-package com.trinity.ctc.restaurant.service;
+package com.trinity.ctc.domain.restaurant.service;
 
 import com.trinity.ctc.category.repository.CategoryRepository;
 import com.trinity.ctc.domain.category.entity.Category;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.kakao.repository.UserRepository;
-import com.trinity.ctc.like.repository.LikeRepository;
-import com.trinity.ctc.restaurant.dto.RestaurantCategoryListDto;
-import com.trinity.ctc.restaurant.dto.RestaurantDetailDto;
-import com.trinity.ctc.restaurant.repository.RestaurantRepository;
+import com.trinity.ctc.domain.like.repository.LikeRepository;
+import com.trinity.ctc.domain.restaurant.dto.RestaurantCategoryListDto;
+import com.trinity.ctc.domain.restaurant.dto.RestaurantDetailDto;
+import com.trinity.ctc.domain.restaurant.repository.RestaurantRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;

@@ -1,9 +1,8 @@
-package com.trinity.ctc.restaurant.dto;
+package com.trinity.ctc.domain.restaurant.dto;
 
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
 
 import com.trinity.ctc.domain.restaurant.entity.RestaurantImage;
-import com.trinity.ctc.menu.dto.MenuDto;
 import lombok.Builder;
 import lombok.Getter;
 
