@@ -1,0 +1,14 @@
+[
+  {"name": "중식", "is_deleted": false},
+  {"name": "일식", "is_deleted": false},
+  {"name": "브런치", "is_deleted": false},
+  {"name": "파스타", "is_deleted": false},
+  {"name": "이탈리안", "is_deleted": false},
+  {"name": "이자카야", "is_deleted": false},
+  {"name": "한식", "is_deleted": false},
+  {"name": "치킨", "is_deleted": false},
+  {"name": "스테이크", "is_deleted": false},
+  {"name": "고깃집", "is_deleted": false},
+  {"name": "다이닝바", "is_deleted": false},
+  {"name": "오마카세", "is_deleted": false}
+]

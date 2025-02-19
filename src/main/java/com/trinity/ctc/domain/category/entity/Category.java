@@ -6,8 +6,13 @@ import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
+@NoArgsConstructor
+@Getter
 public class Category {
 
     @Id
@@ -23,4 +28,10 @@ public class Category {
 
     @OneToMany(mappedBy = "category")
     private List<RestaurantCategory> restaurantCategoryList = new ArrayList<>();
+
+    @Builder
+    public Category(String name, Boolean isDeleted) {
+        this.name = name;
+        this.isDeleted = isDeleted;
+    }
 }

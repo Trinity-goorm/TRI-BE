@@ -1,5 +1,6 @@
 package com.trinity.ctc.domain.seat.service;
 
+import com.trinity.ctc.domain.reservation.dto.ReservationAvailabilityDto;
 import com.trinity.ctc.domain.seat.dto.GroupedSeatResponse;
 import com.trinity.ctc.domain.seat.dto.GroupedTimeSlotResponse;
 import com.trinity.ctc.domain.seat.entity.SeatAvailability;
@@ -9,6 +10,7 @@ import com.trinity.ctc.util.helper.GroupingHelper;
 import com.trinity.ctc.util.validator.DateTimeValidator;
 import com.trinity.ctc.domain.seat.dto.GroupedDailyAvailabilityResponse;
 import com.trinity.ctc.util.validator.SeatAvailabilityValidator;
+import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -48,6 +50,25 @@ public class SeatAvailabilityService {
         return GroupedDailyAvailabilityResponse.fromMultipleTimeSlots(selectedDate, groupedTimeSlotResponses);
     }
 
+    /**
+     * 14일간의 날짜별 예약 가능 여부 반환
+     * @param restaurantId
+     * @return 날짜별 예약 가능 여부 리스트 (ReservationAvailabilityDto 형태)
+     */
+    @Transactional(readOnly = true)
+    public List<ReservationAvailabilityDto> getAvailabilityForNext14Days(Long restaurantId) {
+        LocalDate today = LocalDate.now();
+
+        return IntStream.range(0, 14)
+            .mapToObj(i -> {
+                LocalDate targetDate = today.plusDays(i);
+                List<SeatAvailability> availableSeatList= fetchAvailableSeats(restaurantId, targetDate);
+                // 예약 가능 여부 판단
+                boolean isAvailable = SeatAvailabilityValidator.isAnySeatAvailable(availableSeatList, isToday(targetDate));
+                return new ReservationAvailabilityDto(targetDate, isAvailable);
+            })
+            .collect(Collectors.toList());
+    }
 
     /* 내부 메서드 */
     /**

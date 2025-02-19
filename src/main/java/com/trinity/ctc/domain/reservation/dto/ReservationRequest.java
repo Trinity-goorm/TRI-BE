@@ -20,7 +20,7 @@ public class ReservationRequest {
     @Schema(description = "좌석타입 ID", example = "1")
     private long seatTypeId;
 
-    @Schema(description = "선택한 예약일 (yyyy-MM-dd)", example = "2025-02-15")
+    @Schema(description = "선택한 예약일 (yyyy-MM-dd)", example = "2025-02-18")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate selectedDate;
 
