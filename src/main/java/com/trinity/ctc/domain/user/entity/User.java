@@ -77,6 +77,6 @@ public class User {
 
     public void payNormalTickets() {
         TicketValidator.validateTicketCount(this.normalTicketCount, 10);
-        this.normalTicketCount--;
+        this.normalTicketCount -= 10;
     }
 }
