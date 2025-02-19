@@ -1,4 +1,4 @@
-package com.trinity.ctc.domain.notification.entity.type;
+package com.trinity.ctc.domain.notification.type;
 
 import lombok.Getter;
 
