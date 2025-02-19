@@ -14,7 +14,9 @@ public enum ReservationErrorCode implements ErrorCode {
 
     NOT_PREOCCUPIED(HttpStatus.BAD_REQUEST, "예약이 선점상태가 아닙니다."),
     ALREADY_COMPLETED(HttpStatus.BAD_REQUEST, "이미 예약(결제)완료 된 예약입니다."),
-    NOT_COMPLETED(HttpStatus.BAD_REQUEST, "예약이 완료상태가 아닙니다.");
+    NOT_COMPLETED(HttpStatus.BAD_REQUEST, "예약이 완료상태가 아닙니다."),
+
+    ALREADY_RESERVED_BY_USER(HttpStatus.BAD_REQUEST, "이미 선점, 완료 된 예약입니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
