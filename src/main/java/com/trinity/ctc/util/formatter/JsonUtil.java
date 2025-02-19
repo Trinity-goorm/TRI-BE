@@ -12,13 +12,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.List;
 import java.util.Map;
 
 @RequiredArgsConstructor
 @Converter
 @Slf4j
-public class JsonConverter implements AttributeConverter<Map<String, Object>, String> {
+public class JsonUtil implements AttributeConverter<Map<String, Object>, String> {
     private final ObjectMapper objectMapper;
 
     @Override

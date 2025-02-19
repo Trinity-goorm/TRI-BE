@@ -11,7 +11,7 @@ import com.trinity.ctc.domain.notification.entity.result.SentResult;
 import com.trinity.ctc.domain.notification.entity.type.NotificationType;
 import com.trinity.ctc.domain.notification.repository.NotificationHistoryRepository;
 import com.trinity.ctc.domain.notification.repository.ReservationNotificationRepository;
-import com.trinity.ctc.domain.notification.util.NotificationMessageUtil;
+import com.trinity.ctc.domain.notification.util.fomatter.NotificationMessageUtil;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
 import com.trinity.ctc.domain.user.entity.User;

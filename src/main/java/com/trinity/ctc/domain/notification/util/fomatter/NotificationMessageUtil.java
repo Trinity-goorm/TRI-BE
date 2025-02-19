@@ -1,4 +1,4 @@
-package com.trinity.ctc.domain.notification.util;
+package com.trinity.ctc.domain.notification.util.fomatter;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;
