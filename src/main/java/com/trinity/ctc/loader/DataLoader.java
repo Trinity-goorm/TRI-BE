@@ -1,6 +1,6 @@
 package com.trinity.ctc.loader;
 
-import com.trinity.ctc.category.service.CategoryService;
+import com.trinity.ctc.domain.category.service.CategoryService;
 import com.trinity.ctc.domain.restaurant.service.RestaurantService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;

@@ -2,14 +2,12 @@ package com.trinity.ctc.domain.restaurant.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.trinity.ctc.category.repository.CategoryRepository;
+import com.trinity.ctc.domain.category.repository.CategoryRepository;
 import com.trinity.ctc.domain.category.entity.Category;
 import com.trinity.ctc.domain.restaurant.entity.Menu;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
 import com.trinity.ctc.domain.restaurant.entity.RestaurantCategory;
 import com.trinity.ctc.domain.restaurant.entity.RestaurantImage;
-import com.trinity.ctc.domain.restaurant.repository.RestaurantCategoryRepository;
-import com.trinity.ctc.domain.restaurant.repository.RestaurantImageRepository;
 import com.trinity.ctc.domain.restaurant.repository.RestaurantRepository;
 import java.io.File;
 import java.io.IOException;

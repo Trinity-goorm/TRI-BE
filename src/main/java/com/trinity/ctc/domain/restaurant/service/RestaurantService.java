@@ -1,6 +1,6 @@
 package com.trinity.ctc.domain.restaurant.service;
 
-import com.trinity.ctc.category.repository.CategoryRepository;
+import com.trinity.ctc.domain.category.repository.CategoryRepository;
 import com.trinity.ctc.domain.category.entity.Category;
 import com.trinity.ctc.domain.reservation.dto.ReservationAvailabilityDto;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
