@@ -21,10 +21,18 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             "AND r.reservationTime.timeSlot = :reservationTime " +
             "AND r.seatType.id = :seatTypeId " +
             "AND r.status IN (:statuses)")
-    boolean existsByReservationData(@Param("userId") Long userId,
+    boolean existsByReservationDataV1(@Param("userId") Long userId,
                                     @Param("restaurantId") Long restaurantId,
                                     @Param("selectedDate") LocalDate selectedDate,
                                     @Param("reservationTime") LocalTime reservationTime,
                                     @Param("seatTypeId") Long seatTypeId,
                                     @Param("statuses") List<ReservationStatus> statuses);
+
+
+    @Query("SELECT r FROM Reservation r " +
+            "WHERE r.user.id = :userId " +
+            "AND r.status IN (:statuses)")
+    List<Reservation> findByUserIdAndStatusIn(@Param("userId") Long userId,
+                                              @Param("statuses") List<ReservationStatus> statuses);
+
 }
