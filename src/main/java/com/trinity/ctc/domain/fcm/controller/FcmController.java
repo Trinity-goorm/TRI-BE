@@ -26,7 +26,7 @@ public class FcmController {
     )
     @ApiResponse(
             responseCode = "204",
-            description = "성공"
+            description = "갱신 성공"
     )
     public ResponseEntity<Void> renewFcmToken(@RequestBody FcmTokenRequest fcmTokenRequest) {
         fcmService.renewFcmToken(fcmTokenRequest);

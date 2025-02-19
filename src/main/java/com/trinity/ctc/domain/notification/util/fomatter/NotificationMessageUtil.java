@@ -30,7 +30,7 @@ public class NotificationMessageUtil {
         return MessageFormat.format("http://localhost:5173/reservation/{0}", reservationId);
     }
 
-    public static String formatSeatNotificationTitle(String userName, String restaurantName) {
+    public static String formatSeatNotificationTitle(String restaurantName) {
         return MessageFormat.format("[캐치핑] {0}에 빈자리가 생겼어요!", restaurantName);
     }
 

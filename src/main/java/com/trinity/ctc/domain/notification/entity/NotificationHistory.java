@@ -1,8 +1,8 @@
 package com.trinity.ctc.domain.notification.entity;
 
 import com.google.firebase.messaging.MessagingErrorCode;
-import com.trinity.ctc.domain.notification.entity.result.SentResult;
-import com.trinity.ctc.domain.notification.entity.type.NotificationType;
+import com.trinity.ctc.domain.notification.result.SentResult;
+import com.trinity.ctc.domain.notification.type.NotificationType;
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.util.formatter.JsonUtil;
 import jakarta.persistence.*;

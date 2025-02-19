@@ -1,7 +1,7 @@
 package com.trinity.ctc.domain.notification.dto;
 
 import com.google.firebase.messaging.MessagingErrorCode;
-import com.trinity.ctc.domain.notification.entity.result.SentResult;
+import com.trinity.ctc.domain.notification.result.SentResult;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

@@ -8,6 +8,7 @@ import com.trinity.ctc.domain.reservation.entity.ReservationTime;
 import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
 import com.trinity.ctc.domain.reservation.repository.ReservationTimeRepository;
 import com.trinity.ctc.domain.reservation.status.ReservationStatus;
+import com.trinity.ctc.domain.reservation.validator.ReservationValidator;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
 import com.trinity.ctc.domain.restaurant.repository.RestaurantRepository;
 import com.trinity.ctc.domain.seat.entity.SeatAvailability;
@@ -20,13 +21,14 @@ import com.trinity.ctc.event.ReservationCompleteEvent;
 import com.trinity.ctc.kakao.repository.UserRepository;
 import com.trinity.ctc.util.exception.CustomException;
 import com.trinity.ctc.util.exception.error_code.*;
-import com.trinity.ctc.util.validator.ReservationValidator;
 import com.trinity.ctc.util.validator.SeatAvailabilityValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -41,6 +43,8 @@ public class ReservationService {
 
     //  이벤트 발행하는 인터페이스
     private final ApplicationEventPublisher eventPublisher;
+    private final ReservationValidator reservationValidator;
+
     /**
      * 선점하기
      *
@@ -53,6 +57,9 @@ public class ReservationService {
                 reservationRequest.getSelectedDate(), reservationRequest.getReservationTime(),
                 reservationRequest.getRestaurantId(), reservationRequest.getUserId(), reservationRequest.getSeatTypeId());
 
+        // 사용자 예약이력 검증
+        reservationValidator.validateUserReservation(reservationRequest);
+
         // 검증 (좌석 남은 자리 확인)
         SeatAvailability seatAvailability = validateSeatAvailability(reservationRequest);
 
@@ -60,6 +67,11 @@ public class ReservationService {
         log.info("[좌석 선점] 기존 좌석 수: {}", seatAvailability.getAvailableSeats());
         seatAvailability.preoccupyOneSeat();
         log.info("[좌석 선점 완료] 남은 좌석 수: {}", seatAvailability.getAvailableSeats());
+
+        // 티켓 차감
+        User user = userRepository.findById(reservationRequest.getUserId())
+                .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
+        user.payNormalTickets();
 
         // 예약정보 생성 -> 저장
         Reservation reservation = createReservation(reservationRequest);
