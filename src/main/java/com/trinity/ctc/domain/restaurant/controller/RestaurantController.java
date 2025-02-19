@@ -1,6 +1,6 @@
 package com.trinity.ctc.domain.restaurant.controller;
 
-import com.trinity.ctc.domain.restaurant.dto.RestaurantCategoryListDto;
+import com.trinity.ctc.domain.restaurant.dto.RestaurantListDto;
 import com.trinity.ctc.domain.restaurant.dto.RestaurantDetailDto;
 import com.trinity.ctc.domain.restaurant.service.RestaurantService;
 import java.util.List;
@@ -25,7 +25,7 @@ public class RestaurantController {
     }
 
     @GetMapping("/category/{categoryId}/{userId}")
-    public ResponseEntity<List<RestaurantCategoryListDto>> getRestaurantsByCategory(
+    public ResponseEntity<List<RestaurantListDto>> getRestaurantsByCategory(
         @PathVariable Long categoryId, @PathVariable Long userId) {
         return ResponseEntity.ok(restaurantService.getRestaurantsByCategory(categoryId, userId));
     }

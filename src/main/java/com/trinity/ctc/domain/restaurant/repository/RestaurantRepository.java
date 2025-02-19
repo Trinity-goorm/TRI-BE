@@ -12,4 +12,13 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
 
     @Query("SELECT r FROM Restaurant r JOIN r.restaurantCategoryList rc WHERE rc.category.id = :categoryId")
     List<Restaurant> findByCategory(@Param("categoryId") Long categoryId);
+
+    @Query("SELECT DISTINCT r FROM Restaurant r " +
+        "LEFT JOIN r.menus m " +
+        "LEFT JOIN r.restaurantCategoryList rc " +
+        "LEFT JOIN rc.category c " +
+        "WHERE LOWER(r.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+        "OR LOWER(m.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+        "OR LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%')) ")
+    List<Restaurant> searchRestaurants(@Param("keyword") String keyword);
 }

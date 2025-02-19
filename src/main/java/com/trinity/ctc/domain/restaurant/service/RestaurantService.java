@@ -8,7 +8,7 @@ import com.trinity.ctc.domain.seat.service.SeatAvailabilityService;
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.kakao.repository.UserRepository;
 import com.trinity.ctc.domain.like.repository.LikeRepository;
-import com.trinity.ctc.domain.restaurant.dto.RestaurantCategoryListDto;
+import com.trinity.ctc.domain.restaurant.dto.RestaurantListDto;
 import com.trinity.ctc.domain.restaurant.dto.RestaurantDetailDto;
 import com.trinity.ctc.domain.restaurant.repository.RestaurantRepository;
 import java.util.List;
@@ -45,12 +45,17 @@ public class RestaurantService {
     }
 
     @Transactional(readOnly = true)
-    public List<RestaurantCategoryListDto> getRestaurantsByCategory(Long categoryId, Long userId) {
+    public List<RestaurantListDto> getRestaurantsByCategory(Long categoryId, Long userId) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다. ID: " + userId));
 
         List<Restaurant> restaurants = restaurantRepository.findByCategory(categoryId);
         log.info("restaurants: {}", restaurants.size());
+
+        return convertToRestaurantDtoList(restaurants, user);
+    }
+
+    public List<RestaurantListDto> convertToRestaurantDtoList(List<Restaurant> restaurants, User user) {
         return restaurants.stream()
             .map(restaurant -> {
                 boolean isWishlisted = likeRepository.existsByUserAndRestaurant(user, restaurant);
@@ -60,8 +65,9 @@ public class RestaurantService {
                     .getAvailabilityForNext14Days(restaurant.getId());
 
                 log.info("reservation 사이즈: {}", reservation.size());
-                return RestaurantCategoryListDto.fromEntity(restaurant, isWishlisted, reservation);
+                return RestaurantListDto.fromEntity(restaurant, isWishlisted, reservation);
             })
             .collect(Collectors.toList());
     }
+
 }
