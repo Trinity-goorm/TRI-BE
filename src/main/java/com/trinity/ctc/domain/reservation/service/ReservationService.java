@@ -25,6 +25,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -47,6 +50,16 @@ public class ReservationService {
                 reservationRequest.getSelectedDate(), reservationRequest.getReservationTime(),
                 reservationRequest.getRestaurantId(), reservationRequest.getUserId(), reservationRequest.getSeatTypeId());
 
+        // 해당 사용자 기반 예약정보 검증
+        List<ReservationStatus> reservationStatusList = new ArrayList<>();
+        reservationStatusList.add(ReservationStatus.IN_PROGRESS);
+        reservationStatusList.add(ReservationStatus.COMPLETED);
+        boolean isExist = reservationRepository.existsByReservationData(reservationRequest.getUserId(), reservationRequest.getRestaurantId(), reservationRequest.getSelectedDate(), reservationRequest.getReservationTime(), reservationRequest.getSeatTypeId(), reservationStatusList);
+
+        if (isExist) {
+            throw new CustomException(ReservationErrorCode.ALREADY_RESERVED_BY_USER);
+        }
+
         // 검증 (좌석 남은 자리 확인)
         SeatAvailability seatAvailability = validateSeatAvailability(reservationRequest);
 
@@ -54,6 +67,11 @@ public class ReservationService {
         log.info("[좌석 선점] 기존 좌석 수: {}", seatAvailability.getAvailableSeats());
         seatAvailability.preoccupyOneSeat();
         log.info("[좌석 선점 완료] 남은 좌석 수: {}", seatAvailability.getAvailableSeats());
+
+        // 티켓 차감
+        User user = userRepository.findById(reservationRequest.getUserId())
+                .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
+        user.payNormalTickets();
 
         // 예약정보 생성 -> 저장
         Reservation reservation = createReservation(reservationRequest);
