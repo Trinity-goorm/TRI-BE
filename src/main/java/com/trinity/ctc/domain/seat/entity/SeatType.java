@@ -14,7 +14,7 @@ public class SeatType {
     @Id
     @Column
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     private int minCapacity;
     private int maxCapacity;
