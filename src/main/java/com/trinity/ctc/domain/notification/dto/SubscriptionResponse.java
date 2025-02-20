@@ -1,12 +1,16 @@
 package com.trinity.ctc.domain.notification.dto;
 
+import com.trinity.ctc.domain.restaurant.entity.RestaurantImage;
 import com.trinity.ctc.domain.seat.entity.SeatAvailability;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @AllArgsConstructor
@@ -18,6 +22,12 @@ public class SubscriptionResponse {
 
     @Schema(description = "식당 이름", example = "이가네양꼬치")
     private String restaurantName;
+
+    @ArraySchema(schema = @Schema(description = "식당 카테고리 리스트", example = "중식, 일식"))
+    private List<String> restaurantCategory;
+
+    @ArraySchema(schema = @Schema(description = "식당 사진 URL 리스트", example = "img1.kakaocdn.net/..., img2.kakaocdn.net/..."))
+    private List<String> restaurantImageUrl;
 
     @Schema(description = "빈자리 예약 날짜", example = "2025-02-26")
     private LocalDate date;
@@ -37,6 +47,9 @@ public class SubscriptionResponse {
     public static SubscriptionResponse of (long seatNotificationId, SeatAvailability seatAvailability, int subscriberCount) {
         return new SubscriptionResponse(seatNotificationId,
                 seatAvailability.getRestaurant().getName(),
+                seatAvailability.getRestaurant().getRestaurantCategoryList().stream()
+                        .map(restaurantCategory -> restaurantCategory.getCategory().getName()).collect(Collectors.toList()),
+                seatAvailability.getRestaurant().getImageUrls().stream().map(RestaurantImage::getUrl).collect(Collectors.toList()),
                 seatAvailability.getReservationDate(),
                 seatAvailability.getReservationTime().getTimeSlot(),
                 seatAvailability.getSeatType().getMinCapacity(),

@@ -2,7 +2,6 @@ package com.trinity.ctc.domain.notification.controller;
 
 import com.trinity.ctc.domain.notification.dto.SubscriptionListResponse;
 import com.trinity.ctc.domain.notification.service.NotificationService;
-import com.trinity.ctc.domain.reservation.dto.ReservationResultResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
