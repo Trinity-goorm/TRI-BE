@@ -5,6 +5,7 @@ public class SortingStrategyFactory {
         return switch (sortType) {
             case "highest_average_price" -> new SortByHighestAveragePrice();
             case "lowest_average_price" -> new SortByLowestAveragePrice();
+            case "highest_rating" -> new SortByHighestRating();
             default -> throw new IllegalStateException("Unexpected value: " + sortType);
         };
     }
