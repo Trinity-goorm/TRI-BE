@@ -1,8 +1,7 @@
 package com.trinity.ctc.domain.seat.service;
 
-import com.trinity.ctc.domain.reservation.dto.ReservationAvailabilityDto;
-import com.trinity.ctc.domain.seat.dto.GroupedDailyAvailabilityResponse;
 import com.trinity.ctc.domain.reservation.dto.ReservationAvailabilityResponse;
+import com.trinity.ctc.domain.seat.dto.GroupedDailyAvailabilityResponse;
 import com.trinity.ctc.domain.seat.dto.GroupedSeatResponse;
 import com.trinity.ctc.domain.seat.dto.GroupedTimeSlotResponse;
 import com.trinity.ctc.domain.seat.entity.SeatAvailability;
