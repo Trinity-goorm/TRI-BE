@@ -1,6 +1,6 @@
-package com.trinity.ctc.category.service;
+package com.trinity.ctc.domain.category.service;
 
-import com.trinity.ctc.category.repository.CategoryBatchInsert;
+import com.trinity.ctc.domain.category.repository.CategoryBatchInsert;
 import com.trinity.ctc.domain.category.entity.Category;
 import org.springframework.stereotype.Service;
 import java.util.List;

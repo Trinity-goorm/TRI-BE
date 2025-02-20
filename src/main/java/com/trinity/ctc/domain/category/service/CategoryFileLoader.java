@@ -1,4 +1,4 @@
-package com.trinity.ctc.category.service;
+package com.trinity.ctc.domain.category.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -1,6 +1,6 @@
 package com.trinity.ctc.domain.seat.service;
 
-import com.trinity.ctc.domain.reservation.dto.ReservationAvailabilityDto;
+import com.trinity.ctc.domain.reservation.dto.ReservationAvailabilityResponse;
 import com.trinity.ctc.domain.seat.dto.GroupedSeatResponse;
 import com.trinity.ctc.domain.seat.dto.GroupedTimeSlotResponse;
 import com.trinity.ctc.domain.seat.entity.SeatAvailability;
@@ -56,7 +56,7 @@ public class SeatAvailabilityService {
      * @return 날짜별 예약 가능 여부 리스트 (ReservationAvailabilityDto 형태)
      */
     @Transactional(readOnly = true)
-    public List<ReservationAvailabilityDto> getAvailabilityForNext14Days(Long restaurantId) {
+    public List<ReservationAvailabilityResponse> getAvailabilityForNext14Days(Long restaurantId) {
         LocalDate today = LocalDate.now();
 
         return IntStream.range(0, 14)
@@ -65,7 +65,7 @@ public class SeatAvailabilityService {
                 List<SeatAvailability> availableSeatList= fetchAvailableSeats(restaurantId, targetDate);
                 // 예약 가능 여부 판단
                 boolean isAvailable = SeatAvailabilityValidator.isAnySeatAvailable(availableSeatList, isToday(targetDate));
-                return new ReservationAvailabilityDto(targetDate, isAvailable);
+                return new ReservationAvailabilityResponse(targetDate, isAvailable);
             })
             .collect(Collectors.toList());
     }
