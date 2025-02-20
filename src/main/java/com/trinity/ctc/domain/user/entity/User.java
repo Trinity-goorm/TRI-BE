@@ -79,4 +79,8 @@ public class User {
         TicketValidator.validateTicketCount(this.normalTicketCount, 10);
         this.normalTicketCount -= 10;
     }
+
+    public void useEmptyTicket() {
+        this.emptyTicketCount--;
+    }
 }

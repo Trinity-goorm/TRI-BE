@@ -5,7 +5,7 @@ import com.trinity.ctc.domain.restaurant.entity.Restaurant;
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.kakao.repository.UserRepository;
 import com.trinity.ctc.domain.like.repository.LikeRepository;
-import com.trinity.ctc.domain.restaurant.dto.RestaurantDetailDto;
+import com.trinity.ctc.domain.restaurant.dto.RestaurantDetailResponse;
 import com.trinity.ctc.domain.restaurant.repository.RestaurantRepository;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -57,14 +57,14 @@ public class LikeService {
     }
 
     @Transactional
-    public List<RestaurantDetailDto> getLikeList(Long userId) {
+    public List<RestaurantDetailResponse> getLikeList(Long userId) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다. ID: " + userId));
 
         List<Likes> likes = likeRepository.findByUser(user);
 
         return likes.stream()
-            .map(like -> RestaurantDetailDto.fromLike(like.getRestaurant()))
+            .map(like -> RestaurantDetailResponse.fromLike(like.getRestaurant()))
             .collect(Collectors.toList());
     }
 }

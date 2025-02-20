@@ -1,7 +1,7 @@
 package com.trinity.ctc.domain.notification.repository;
 
 import com.trinity.ctc.domain.notification.entity.ReservationNotification;
-import com.trinity.ctc.domain.notification.entity.type.NotificationType;
+import com.trinity.ctc.domain.notification.type.NotificationType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -23,7 +23,7 @@ public interface ReservationNotificationRepository extends JpaRepository<Reserva
 
     @Query("Select r FROM ReservationNotification r WHERE r.type = :notificationType AND DATE(r.scheduledTime) = :scheduledDate")
     List<ReservationNotification> findAllByTypeAndDate(@Param("notificationType") NotificationType notificationtype,
-                                                                @Param("scheduledDate") LocalDate scheduledDate);
+                                                       @Param("scheduledDate") LocalDate scheduledDate);
 
     @Query("Select r FROM ReservationNotification r WHERE r.type = :notificationType AND r.scheduledTime = :scheduledTime")
     List<ReservationNotification> findAllByTypeAndDateTime(@Param("notificationType") NotificationType notificationType,

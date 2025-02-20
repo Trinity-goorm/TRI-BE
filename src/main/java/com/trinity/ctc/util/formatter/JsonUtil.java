@@ -12,13 +12,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.List;
 import java.util.Map;
 
 @RequiredArgsConstructor
 @Converter
 @Slf4j
-public class JsonConverter implements AttributeConverter<Map<String, Object>, String> {
+/**
+ * JSON 데이터 타입(DB)과 Map 자료형을 서로 변환해주는 컨버터
+ * JSON 데이터를 문자열로만 전달하는 것이 아니라 내부의 값을 사용해야 할 경우
+ *
+ * 사용 예시. NotificationHistory Entity의 message column
+ * @Convert(converter = JsonUtil.class)
+ * private Map<String, String> message;
+ */
+public class JsonUtil implements AttributeConverter<Map<String, Object>, String> {
     private final ObjectMapper objectMapper;
 
     @Override
