@@ -1,7 +1,7 @@
 package com.trinity.ctc.domain.like.controller;
 
 import com.trinity.ctc.domain.like.service.LikeService;
-import com.trinity.ctc.domain.restaurant.dto.RestaurantDetailDto;
+import com.trinity.ctc.domain.restaurant.dto.RestaurantDetailResponse;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -44,7 +44,7 @@ public class LikeController {
     }
 
     @GetMapping("{userId}")
-    public ResponseEntity<List<RestaurantDetailDto>> getLikeList(@PathVariable Long userId) {
+    public ResponseEntity<List<RestaurantDetailResponse>> getLikeList(@PathVariable Long userId) {
         return ResponseEntity.ok(likeService.getLikeList(userId));
     }
 }

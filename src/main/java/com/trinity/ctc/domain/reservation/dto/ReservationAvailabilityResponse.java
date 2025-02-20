@@ -6,7 +6,7 @@ import java.time.LocalDate;
 
 @Getter
 @AllArgsConstructor
-public class ReservationAvailabilityDto {
+public class ReservationAvailabilityResponse {
     private LocalDate date;
     private boolean available;
 }

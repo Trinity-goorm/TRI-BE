@@ -37,6 +37,7 @@ public class Restaurant {
     private boolean isDeleted = false;
     private int reviewCount;
     private double rating;
+    private int averagePrice;
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RestaurantImage> imageUrls = new ArrayList<>();
@@ -57,7 +58,7 @@ public class Restaurant {
     private List<Menu> menus = new ArrayList<>();
 
     @Builder
-    public Restaurant(String name, String address, String phoneNumber, String convenience, String operatingHour, String expandedDays, String timeRange,String caution, boolean isDeleted, int reviewCount, double rating, List<RestaurantImage> imageUrls, List<Menu> menus) {
+    public Restaurant(String name, String address, String phoneNumber, String convenience, String operatingHour, String expandedDays, String timeRange,String caution, boolean isDeleted, int reviewCount, double rating, int averagePrice, List<RestaurantImage> imageUrls, List<Menu> menus) {
         this.name = name;
         this.address = address;
         this.phoneNumber = phoneNumber;
@@ -72,6 +73,7 @@ public class Restaurant {
         this.imageUrls = (imageUrls != null) ? imageUrls : new ArrayList<>();
         this.menus = (menus != null) ? menus : new ArrayList<>();
         this.restaurantCategoryList = new ArrayList<>();
+        this.averagePrice = averagePrice;
     }
 
     public Restaurant addImageList(List<RestaurantImage> images) {
