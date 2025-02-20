@@ -10,7 +10,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class RestaurantListResponse {
+public class RestaurantPreviewResponse {
 
     private Long restaurantId;
     private String name;
@@ -25,9 +25,9 @@ public class RestaurantListResponse {
     private List<ReservationAvailabilityResponse> reservation; // 날짜별 예약 가능 여부 리스트로 변경
 
 
-    public static RestaurantListResponse fromEntity(Restaurant restaurant, boolean isWishlisted, List<ReservationAvailabilityResponse> reservation) {
+    public static RestaurantPreviewResponse fromEntity(Restaurant restaurant, boolean isWishlisted, List<ReservationAvailabilityResponse> reservation) {
 
-        return RestaurantListResponse.builder()
+        return RestaurantPreviewResponse.builder()
             .restaurantId(restaurant.getId())
             .name(restaurant.getName())
             .rating(restaurant.getRating())
@@ -40,18 +40,9 @@ public class RestaurantListResponse {
             .imageUrls(restaurant.getImageUrls().stream()
                 .map(RestaurantImage::getUrl)
                 .collect(Collectors.toList()))
-
-            .averagePrice(calculateAveragePrice(restaurant))
+            .averagePrice(restaurant.getAveragePrice())
             .isWishlisted(isWishlisted)
             .reservation(reservation)
             .build();
     }
-
-    private static int calculateAveragePrice(Restaurant restaurant) {
-        return (int) restaurant.getMenus().stream()
-            .mapToInt(menu -> menu.getPrice())
-            .average()
-            .orElse(0.0);
-    }
-
 }

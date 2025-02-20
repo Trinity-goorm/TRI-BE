@@ -1,6 +1,7 @@
 package com.trinity.ctc.domain.search.controller;
 
-import com.trinity.ctc.domain.restaurant.dto.RestaurantListResponse;
+import com.trinity.ctc.domain.restaurant.dto.RestaurantPreviewResponse;
+import com.trinity.ctc.domain.restaurant.dto.RestaurantPreviewRequest;
 import com.trinity.ctc.domain.search.service.SearchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,9 +16,11 @@ public class SearchController {
 
     private final SearchService searchService;
 
-    @GetMapping("{userId}")
-    public ResponseEntity<List<RestaurantListResponse>> getRestaurantsBySearch(@RequestParam String keyword, @PathVariable Long userId) {
-        return ResponseEntity.ok(searchService.search(keyword, userId));
+    //검색어로 식당 검색
+    @PostMapping()
+    public ResponseEntity<List<RestaurantPreviewResponse>> getRestaurantsBySearch(@RequestBody
+    RestaurantPreviewRequest request, @RequestParam String keyword) {
+        return ResponseEntity.ok(searchService.search(request, keyword));
     }
 
 }

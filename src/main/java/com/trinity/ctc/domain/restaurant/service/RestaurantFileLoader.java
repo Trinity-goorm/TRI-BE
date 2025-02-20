@@ -39,10 +39,10 @@ public class RestaurantFileLoader {
                 JsonNode menusNode = readJsonFile(menuPath);
 
                 for (JsonNode restaurantNode : rootNode) {
-                    Restaurant restaurant = parseRestaurant(restaurantNode);
                     List<RestaurantImage> images = parseImages(restaurantNode);
                     List<Menu> menuList = parseMenus(menusNode, restaurantNode);
 
+                    Restaurant restaurant = parseRestaurant(restaurantNode,menuList);
                     restaurant.addImageList(images);
                     restaurant.addMenuList(menuList);
 
@@ -62,7 +62,13 @@ public class RestaurantFileLoader {
         return objectMapper.readTree(file);
     }
 
-    private Restaurant parseRestaurant(JsonNode restaurantNode) {
+    private Restaurant parseRestaurant(JsonNode restaurantNode, List<Menu> menuList) {
+        int sum = 0;
+        for (Menu menu : menuList) {
+            sum += menu.getPrice();
+        }
+        int length = menuList.size();
+
         String name = restaurantNode.get("name").asText();
         String address = restaurantNode.get("address").asText();
         String phoneNumber = formatPhoneNumber(restaurantNode.get("phone_number").decimalValue().toPlainString());
@@ -88,6 +94,7 @@ public class RestaurantFileLoader {
             .isDeleted(isDeleted)
             .reviewCount(reviewCount)
             .rating(rating)
+            .averagePrice(length>0 ? sum/menuList.size() : 0)
             .build();
     }
 
