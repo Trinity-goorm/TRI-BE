@@ -30,11 +30,18 @@ public class RestaurantService {
     private final LikeRepository likeRepository;
     private final SeatAvailabilityService seatAvailabilityService;
 
+    @Transactional(readOnly = true)
+    public List<Restaurant> getAllRestaurants() {
+        log.info("[SELECT] 모든 레스토랑 획득");
+        return restaurantRepository.findAll();
+    }
+
     public void insertRestaurantsFromFile() {
         List<Category> categories = categoryRepository.findAll();
         List<Restaurant> restaurants = fileLoader.loadRestaurantsFromFile(categories);
         restaurantRepository.saveAll(restaurants);
     }
+
     @Transactional(readOnly = true)
     public RestaurantDetailDto getRestaurantDetail(Long restaurantId) {
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
