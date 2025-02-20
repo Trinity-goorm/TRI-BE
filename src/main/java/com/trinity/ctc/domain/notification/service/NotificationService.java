@@ -1,8 +1,7 @@
 package com.trinity.ctc.domain.notification.service;
 
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.FirebaseMessagingException;
-import com.google.firebase.messaging.Message;
+import com.google.firebase.ErrorCode;
+import com.google.firebase.messaging.*;
 import com.trinity.ctc.domain.fcm.repository.FcmRepository;
 import com.trinity.ctc.domain.notification.dto.FcmSendingResultDto;
 import com.trinity.ctc.domain.notification.dto.SubscriptionListResponse;
@@ -25,10 +24,7 @@ import com.trinity.ctc.domain.seat.repository.SeatAvailabilityRepository;
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.kakao.repository.UserRepository;
 import com.trinity.ctc.util.exception.CustomException;
-import com.trinity.ctc.util.exception.error_code.NotificationErrorCode;
-import com.trinity.ctc.util.exception.error_code.ReservationErrorCode;
-import com.trinity.ctc.util.exception.error_code.SeatErrorCode;
-import com.trinity.ctc.util.exception.error_code.UserErrorCode;
+import com.trinity.ctc.util.exception.error_code.*;
 import com.trinity.ctc.util.formatter.DateTimeUtil;
 import com.trinity.ctc.util.validator.TicketValidator;
 import lombok.RequiredArgsConstructor;
@@ -193,8 +189,10 @@ public class NotificationService {
             notificationHistoryList.add(notificationHistory);
             reservationNotificationIdList.add(notification.getId());
         }
-        // 전송된 알림 히스토리를 전부 history 테이블에 저장하고 전송한 알림을 table에서 삭제하는 메서드
-        processNotificationData(notificationHistoryList, reservationNotificationIdList);
+        // 전송된 알림 히스토리를 전부 history 테이블에 저장하는 메서드
+        saveNotificationHistory(notificationHistoryList);
+        // 전송한 예약 알림을 table에서 삭제하는 메서드
+        deleteSentReservationNotification(reservationNotificationIdList);
     }
 
 
@@ -222,8 +220,10 @@ public class NotificationService {
             notificationHistoryList.add(notificationHistory);
             reservationNotificationIdList.add(notification.getId());
         }
-        // 전송된 알림 히스토리를 전부 history 테이블에 저장하고 전송한 알림을 table에서 삭제하는 메서드
-        processNotificationData(notificationHistoryList, reservationNotificationIdList);
+        // 전송된 알림 히스토리를 전부 history 테이블에 저장하는 메서드
+        saveNotificationHistory(notificationHistoryList);
+        // 전송한 예약 알림을 table에서 삭제하는 메서드
+        deleteSentReservationNotification(reservationNotificationIdList);
     }
 
     /**
@@ -237,7 +237,7 @@ public class NotificationService {
         // 보낼 FCM 메세지 빌드
         Message message = buildReservationNotification(notification);
         // FCM 메세지 전송 및 전송 결과 반환
-        FcmSendingResultDto result = sendNotification(message);
+        FcmSendingResultDto result = sendEachNotification(message);
         return buildNotificationHistory(notification, result, type);
     }
 
@@ -268,7 +268,7 @@ public class NotificationService {
      * @param message FCM 메세지 객체
      * @return
      */
-    private FcmSendingResultDto sendNotification(Message message) {
+    private FcmSendingResultDto sendEachNotification(Message message) {
         // FCM 메세지 전송 결과를 담는 DTO
         FcmSendingResultDto result;
 
@@ -282,10 +282,6 @@ public class NotificationService {
             result = new FcmSendingResultDto(LocalDateTime.now(), SentResult.FAILED, e.getMessagingErrorCode());
         }
         return result;
-    }
-
-    private void sendMulticastNotification() {
-
     }
 
     /**
@@ -317,16 +313,18 @@ public class NotificationService {
     }
 
     /**
-     * 전송된 알림 히스토리를 전부 history 테이블에 저장하고 전송한 알림을 table에서 삭제하는 메서드
-     *
-     * @param notificationHistoryList       알림 history Entity 리스트
-     * @param reservationNotificationIdList 예약 알림 Id 리스트
+     * 전송된 알림 히스토리를 전부 history 테이블에 저장
+     * @param notificationHistoryList 알림 history Entity 리스트
      */
-    private void processNotificationData(List<NotificationHistory> notificationHistoryList,
-                                         List<Long> reservationNotificationIdList) {
-        // 알림 history 리스트 저장
+    private void saveNotificationHistory(List<NotificationHistory> notificationHistoryList) {
         notificationHistoryRepository.saveAll(notificationHistoryList);
-        // 전송된 알림 내역 삭제
+    }
+
+    /**
+     * 전송한 예약 알림을 table에서 삭제하는 메서드
+     * @param reservationNotificationIdList
+     */
+    private void deleteSentReservationNotification(List<Long> reservationNotificationIdList) {
         reservationNotificationRepository.deleteAllById(reservationNotificationIdList);
     }
 
@@ -410,5 +408,110 @@ public class NotificationService {
         SubscriptionListResponse subscriptionListResponse = new SubscriptionListResponse(subscriptionResponseList.size(), subscriptionResponseList);
 
         return subscriptionListResponse;
+    }
+
+    // 빈자리 알림 발송 시작점
+    @Transactional
+    public void sendSeatNotification(long seatId) {
+        // 빈자리 알림 메세지 정보(구독한 빈자리 알림)
+        SeatNotificationMessage seatNotificationMessage = seatNotificationMessageRepository.findBySeatId(seatId)
+                .orElseThrow(() -> new CustomException(NotificationErrorCode.NOT_FOUND));
+
+        // 빈자리 알림 정보 가져오기(구독자 정보)
+        List<SeatNotification> seatNotificationList = seatNotificationRepository.findAllBySeatId(seatId);
+
+        // 알림 타입 세팅
+        NotificationType type = NotificationType.SEAT_NOTIFICATION;
+
+        List<FcmSendingResultDto> resultList = handleMulticastNotification(seatNotificationMessage, seatNotificationList);
+
+
+        List<NotificationHistory> notificationHistoryList = buildMulticastNotificationHistory(seatNotificationList, seatNotificationMessage, type, resultList);
+
+        // 전송된 알림 히스토리를 전부 history 테이블에 저장하는 메서드
+        saveNotificationHistory(notificationHistoryList);
+    }
+
+    private List<FcmSendingResultDto> handleMulticastNotification(SeatNotificationMessage seatNotificationMessage, List<SeatNotification> seatNotificationList) {
+        MulticastMessage multicastMessage = buildSeatNotifications(seatNotificationMessage, seatNotificationList);
+
+        // FCM 메세지 전송 및 전송 결과 반환
+        List<FcmSendingResultDto> resultList = sendMulticastNotification(multicastMessage);
+
+
+        return resultList;
+    }
+
+    private MulticastMessage buildSeatNotifications(SeatNotificationMessage seatNotificationMessage, List<SeatNotification> seatNotificationList) {
+        List<String> tokenList = new ArrayList<>();
+        for(SeatNotification notification : seatNotificationList) {
+            String token = fcmRepository.findByUser(notification.getUser().getId());
+            tokenList.add(token);
+        }
+
+        // FCM 메시지 빌드
+        MulticastMessage message = MulticastMessage.builder()
+                .putData("title", seatNotificationMessage.getTitle())
+                .putData("body", seatNotificationMessage.getBody())
+                .putData("url", seatNotificationMessage.getUrl())
+                .addAllTokens(tokenList)
+                .build();
+
+        return message;
+    }
+
+    private List<FcmSendingResultDto> sendMulticastNotification(MulticastMessage message) {
+        // FCM 메세지 전송 결과를 담는 DTO
+        List<FcmSendingResultDto> resultList = new ArrayList<>();
+
+        try {
+            // FCM 서버에 메세지 전송
+            List<SendResponse> sendResponseList = FirebaseMessaging.getInstance().sendEachForMulticast(message).getResponses();
+            // 전송 결과(전송 시간, 전송 상태)
+            for(int i = 0; i < sendResponseList.size(); i++) {
+                SendResponse sendResponse = sendResponseList.get(i);
+                LocalDateTime time = LocalDateTime.now();
+
+                if(sendResponse.isSuccessful()){
+                    FcmSendingResultDto fcmSendingResultDto = new FcmSendingResultDto(time, SentResult.SUCCESS);
+                } else {
+                    FcmSendingResultDto fcmSendingResultDto = new FcmSendingResultDto(time, SentResult.FAILED, sendResponse.getException().getMessagingErrorCode());
+                }
+            }
+        } catch (FirebaseMessagingException e) {
+            // 전송 결과(전송 시간, 전송 상태, 에러 코드
+            throw new CustomException(FcmErrorCode.SENDING_REQUEST_FAILED);
+        }
+
+        return resultList;
+    }
+
+
+    private List<NotificationHistory> buildMulticastNotificationHistory(List<SeatNotification> seatNotificationList,
+                                                                        SeatNotificationMessage seatNotificationMessage,
+                                                                        NotificationType type, List<FcmSendingResultDto> resultList) {
+        List<NotificationHistory> notificationHistoryList = new ArrayList<>();
+
+        // 보낸 FCM 메세지를 JSON으로 저장하기 위해 Map 사용
+        Map<String, String> messageHistory = new HashMap<>();
+        messageHistory.put("title", seatNotificationMessage.getTitle());
+        messageHistory.put("body", seatNotificationMessage.getBody());
+        messageHistory.put("url", seatNotificationMessage.getUrl());
+
+        for(int i = 0; i < seatNotificationList.size(); i++) {
+            NotificationHistory notificationHistory = NotificationHistory.builder()
+                    .type(type)
+                    .message(messageHistory)
+                    .sentAt(resultList.get(i).getSentAt())
+                    .sentResult(resultList.get(i).getSentResult())
+                    .errorCode(resultList.get(i).getErrorCode())
+                    .user(seatNotificationList.get(i).getUser())
+                    .build();
+
+            notificationHistoryList.add(notificationHistory);
+        }
+        // 알림 history 빌드
+
+        return notificationHistoryList;
     }
 }

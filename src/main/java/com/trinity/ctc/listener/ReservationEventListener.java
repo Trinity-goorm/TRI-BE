@@ -25,8 +25,8 @@ public class ReservationEventListener {
     @Async
     @EventListener
     public void handleReservationCanceledEvent(ReservationCanceledEvent reservationEvent) {
-//        빈자리 알림 발송
-//        if(reservationEvent.getSeatAvailability().getAvailableSeats() == 1) notificationService.sendSeatNotification(reservationEvent.getSeatAvailability().getId());
+//        빈자리 알림 발송 -> 빈자리 여부 검증을...?
+        if(reservationEvent.getSeatAvailability().getAvailableSeats() == 1) notificationService.sendSeatNotification(reservationEvent.getSeatAvailability().getId());
         notificationService.deleteReservationNotification(reservationEvent.getReservationId());
     }
 
