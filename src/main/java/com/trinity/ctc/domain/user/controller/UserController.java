@@ -35,12 +35,7 @@ public class UserController {
             description = "사용자가 선호 카테고리를 3개 미만으로 선택 시, 400 반환"
     )
     public ResponseEntity<Void> saveOnboardingInformation(@RequestBody OnboardingRequest onboardingRequest) {
-        log.info("요청 보냄");
-
         userService.saveOnboardingInformation(onboardingRequest);
-
-
-
         return ResponseEntity.ok().build();
     }
 }
