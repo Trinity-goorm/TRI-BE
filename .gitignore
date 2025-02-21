@@ -38,6 +38,7 @@ out/
 
 ###
 *.env
+*.log
 
 ###
 !**/src/main/java/resources/crawlingData/*

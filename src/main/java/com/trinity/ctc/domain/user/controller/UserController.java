@@ -1,6 +1,7 @@
 package com.trinity.ctc.domain.user.controller;
 
 import com.trinity.ctc.domain.user.dto.OnboardingRequest;
+import com.trinity.ctc.domain.user.dto.UserDetailResponse;
 import com.trinity.ctc.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -8,10 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/users")
@@ -37,5 +35,19 @@ public class UserController {
     public ResponseEntity<Void> saveOnboardingInformation(@RequestBody OnboardingRequest onboardingRequest) {
         userService.saveOnboardingInformation(onboardingRequest);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/detail")
+    @Operation(
+            summary = "사용자 프로필 정보 반환",
+            description = "사용자 프로필 정보를 반환하는 API"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "성공"
+    )
+    public ResponseEntity<UserDetailResponse> getUserDetail(@RequestParam long userId) {
+        UserDetailResponse result = userService.getUserDetail(userId);
+        return ResponseEntity.ok(result);
     }
 }

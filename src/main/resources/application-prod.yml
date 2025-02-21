@@ -22,3 +22,9 @@ logging:
     org.hibernate.type.descriptor.sql.BasicBinder: ERROR  # 파라미터 로그 비활성화
     org.hibernate.engine.jdbc.batch.internal.BatchingBatch: ERROR  # 배치 로그 비활성화
     com.zaxxer.hikari: WARN  # HikariCP 관련 경고만 출력
+
+---
+common:
+  seat:
+    available:
+      count: 10
