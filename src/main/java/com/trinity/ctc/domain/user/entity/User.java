@@ -69,15 +69,11 @@ public class User {
     private List<Reservation> reservationList = new ArrayList<>();
 
     @Builder
-    public User(Long kakaoId, Integer normalTicketCount, Integer emptyTicket, long id, Sex sex, LocalDate birthday, String phoneNumber, UserPreference userPreference) {
+    public User(Long kakaoId, Integer normalTicketCount, Integer emptyTicket, UserStatus status) {
         this.kakaoId = kakaoId;
         this.normalTicketCount = normalTicketCount;
         this.emptyTicketCount = emptyTicket;
-        this.id = id;
-        this.sex = sex;
-        this.birthday = birthday;
-        this.phoneNumber = phoneNumber;
-        this.userPreference = userPreference;
+        this.status = status;
     }
 
     /* 내부 메서드 */

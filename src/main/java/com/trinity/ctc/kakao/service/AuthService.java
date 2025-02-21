@@ -1,13 +1,16 @@
 package com.trinity.ctc.kakao.service;
 
 import com.trinity.ctc.domain.user.entity.User;
+import com.trinity.ctc.domain.user.status.UserStatus;
 import com.trinity.ctc.kakao.dto.KakaoLogoutResponse;
 import com.trinity.ctc.kakao.dto.KakaoTokenResponse;
 import com.trinity.ctc.kakao.dto.KakaoUserInfoResponse;
 import com.trinity.ctc.kakao.dto.UserLoginResponse;
 import com.trinity.ctc.domain.user.repository.UserRepository;
+
 import java.util.Collections;
 import java.util.Optional;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -34,7 +37,7 @@ public class AuthService {
         KakaoUserInfoResponse userInfo = kakaoApiService.getUserInfo(tokenResponse.getAccessToken());
 
         // 3. 사용자 정보 처리 (회원 가입 또는 로그인 처리)
-        UserLoginResponse response =  handleUserInfo(userInfo, tokenResponse);
+        UserLoginResponse response = handleUserInfo(userInfo, tokenResponse);
 
         return response;
     }
@@ -52,17 +55,18 @@ public class AuthService {
 
         } else {
             User newUser = registerNewMember(kakaoId);
-            return UserLoginResponse.newUser(newUser,tokenResponse);
+            return UserLoginResponse.newUser(newUser, tokenResponse);
         }
     }
 
 
     private User registerNewMember(Long kakaoId) {
         User newUser = User.builder()
-            .kakaoId(kakaoId)
-            .normalTicketCount(100)
-            .emptyTicket(10)
-            .build();
+                .kakaoId(kakaoId)
+                .normalTicketCount(100)
+                .emptyTicket(10)
+                .status(UserStatus.TEMPORARILY_UNAVAILABLE)
+                .build();
 
         userRepository.save(newUser);
         createLoginSession(newUser);
@@ -72,7 +76,7 @@ public class AuthService {
     private void createLoginSession(User user) {
         // Spring Security를 사용하여 인증 세션 생성
         UsernamePasswordAuthenticationToken authenticationToken =
-            new UsernamePasswordAuthenticationToken(user, null, Collections.emptyList());
+                new UsernamePasswordAuthenticationToken(user, null, Collections.emptyList());
 
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     }
