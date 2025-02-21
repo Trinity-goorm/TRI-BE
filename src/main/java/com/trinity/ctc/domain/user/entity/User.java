@@ -3,9 +3,11 @@ package com.trinity.ctc.domain.user.entity;
 import com.trinity.ctc.domain.fcm.entity.Fcm;
 import com.trinity.ctc.domain.like.entity.Likes;
 import com.trinity.ctc.domain.notification.entity.NotificationHistory;
+import com.trinity.ctc.domain.notification.entity.SeatNotificationMessage;
 import com.trinity.ctc.domain.payment.entity.PaymentHistory;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.search.entity.SearchHistory;
+import com.trinity.ctc.domain.user.dto.OnboardingRequest;
 import com.trinity.ctc.domain.user.status.Sex;
 import com.trinity.ctc.domain.user.status.UserStatus;
 import com.trinity.ctc.util.validator.TicketValidator;
@@ -15,6 +17,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +42,8 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private Sex sex;
+
+    private LocalDate birthday;
     private String imageUrl;
     private Boolean isDeleted;
 
@@ -64,10 +69,15 @@ public class User {
     private List<Reservation> reservationList = new ArrayList<>();
 
     @Builder
-    public User(Long kakaoId, Integer normalTicketCount, Integer emptyTicket){
+    public User(Long kakaoId, Integer normalTicketCount, Integer emptyTicket, long id, Sex sex, LocalDate birthday, String phoneNumber, UserPreference userPreference) {
         this.kakaoId = kakaoId;
         this.normalTicketCount = normalTicketCount;
         this.emptyTicketCount = emptyTicket;
+        this.id = id;
+        this.sex = sex;
+        this.birthday = birthday;
+        this.phoneNumber = phoneNumber;
+        this.userPreference = userPreference;
     }
 
     /* 내부 메서드 */
@@ -82,5 +92,12 @@ public class User {
 
     public void useEmptyTicket() {
         this.emptyTicketCount--;
+    }
+
+    public void updateOnboardingInformation(OnboardingRequest onboardingRequest, UserPreference userPreference) {
+        this.sex = onboardingRequest.getSex();
+        this.birthday = onboardingRequest.getBirthday();
+        this.phoneNumber = onboardingRequest.getPhoneNumber();
+        this.userPreference = userPreference;
     }
 }

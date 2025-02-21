@@ -18,7 +18,7 @@ import com.trinity.ctc.domain.seat.repository.SeatTypeRepository;
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.event.ReservationCanceledEvent;
 import com.trinity.ctc.event.ReservationCompleteEvent;
-import com.trinity.ctc.kakao.repository.UserRepository;
+import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.util.exception.CustomException;
 import com.trinity.ctc.util.exception.error_code.*;
 import com.trinity.ctc.util.validator.SeatAvailabilityValidator;
@@ -27,8 +27,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Slf4j
 @Service

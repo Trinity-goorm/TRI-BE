@@ -10,7 +10,7 @@ import com.trinity.ctc.domain.search.repository.SearchRepository;
 import com.trinity.ctc.domain.search.sorting.SortingStrategy;
 import com.trinity.ctc.domain.search.sorting.SortingStrategyFactory;
 import com.trinity.ctc.domain.user.entity.User;
-import com.trinity.ctc.kakao.repository.UserRepository;
+import com.trinity.ctc.domain.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;

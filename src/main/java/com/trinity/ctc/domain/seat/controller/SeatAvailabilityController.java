@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 
-@RestController
 @RequestMapping("/api/seats")
 @RequiredArgsConstructor
 @Tag(name = "Seat", description = "좌석 관련 API")

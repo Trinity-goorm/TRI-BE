@@ -11,7 +11,7 @@ import com.trinity.ctc.domain.restaurant.repository.RestaurantRepository;
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.domain.user.entity.UserPreference;
 import com.trinity.ctc.domain.user.repository.UserPreferenceRepository;
-import com.trinity.ctc.kakao.repository.UserRepository;
+import com.trinity.ctc.domain.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +42,7 @@ public class RestaurantRecommendationService {
         UserPreference userPreference = userPreferenceRepository.findByUserId(userId);
 
         log.info("userPreference 가져오기: {}", userPreference);
-        List<String> preferredCategories = userPreference.getUserPReferenceCategoryList().stream()
+        List<String> preferredCategories = userPreference.getUserPreferenceCategoryList().stream()
             .map(upc -> upc.getCategory().getName())
             .collect(Collectors.toList());
 
