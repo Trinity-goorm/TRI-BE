@@ -33,6 +33,8 @@ public class SeatAvailabilityBatchService {
 
     @Value("${batch.insert.size:1000}")
     private int batchSize;
+    @Value("${common.seat.available.count:1}")
+    private int availableSeatCount;
 
     @Transactional
     public void batchInsertSeatAvailabilityV1() {
@@ -41,7 +43,7 @@ public class SeatAvailabilityBatchService {
         List<SeatAvailability> seatAvailabilities = prepareSeatAvailabilityData(DateRangeMode.NEXT_MONTH);
 
         int totalSize = seatAvailabilities.size();
-        log.info("🚀 INSERT할 SeatAvailability 데이터 개수: {}", totalSize);
+        log.info("🚀 INSERT 할 SeatAvailability 데이터 개수: {}", totalSize);
 
         for (int i = 0; i < totalSize; i++) {
             entityManager.persist(seatAvailabilities.get(i));
@@ -81,7 +83,7 @@ public class SeatAvailabilityBatchService {
             for (Restaurant restaurant : restaurants) {
                 for (ReservationTime reservationTime : reservationTimes) {
                     for (SeatType seatType : seatTypes) {
-                        seatAvailabilities.add(SeatAvailability.create(restaurant, reservationDate, reservationTime, seatType, 10));
+                        seatAvailabilities.add(SeatAvailability.create(restaurant, reservationDate, reservationTime, seatType, availableSeatCount));
                     }
                 }
             }
