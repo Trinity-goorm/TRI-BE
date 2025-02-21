@@ -5,6 +5,7 @@ import com.trinity.ctc.domain.restaurant.dto.RestaurantPreviewResponse;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
 import com.trinity.ctc.domain.restaurant.repository.RestaurantRepository;
 import com.trinity.ctc.domain.restaurant.service.RestaurantService;
+import com.trinity.ctc.domain.search.dto.SearchHistoryResponse;
 import com.trinity.ctc.domain.search.entity.SearchHistory;
 import com.trinity.ctc.domain.search.repository.SearchRepository;
 import com.trinity.ctc.domain.search.sorting.SortingStrategy;
@@ -45,7 +46,7 @@ public class SearchService {
         return restaurantService.convertToRestaurantDtoList(restaurants,user);
     }
 
-    public List<String> getSearchHistory(Long userId) {
+    public List<SearchHistoryResponse> getSearchHistory(Long userId) {
         return searchRepository.findTopByUserIdOrderByCreatedAtDesc(userId, PageRequest.of(0, 15));
     }
 

@@ -1,5 +1,6 @@
 package com.trinity.ctc.domain.search.repository;
 
+import com.trinity.ctc.domain.search.dto.SearchHistoryResponse;
 import com.trinity.ctc.domain.search.entity.SearchHistory;
 import com.trinity.ctc.domain.user.entity.User;
 import java.util.List;
@@ -12,8 +13,11 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface SearchRepository extends JpaRepository<SearchHistory, Long> {
-    @Query("SELECT s.keyword FROM SearchHistory s WHERE s.user.id = :userId ORDER BY s.createdAt DESC")
-    List<String> findTopByUserIdOrderByCreatedAtDesc(@Param("userId") Long userId, Pageable pageable);
+    @Query("SELECT new com.trinity.ctc.domain.search.dto.SearchHistoryResponse(s.id, s.keyword) "
+        + "FROM SearchHistory s "
+        + "WHERE s.user.id = :userId "
+        + "ORDER BY s.createdAt DESC")
+    List<SearchHistoryResponse> findTopByUserIdOrderByCreatedAtDesc(@Param("userId") Long userId, Pageable pageable);
 
     Optional<SearchHistory> findByKeywordAndUser(String keyword, User user);
 }

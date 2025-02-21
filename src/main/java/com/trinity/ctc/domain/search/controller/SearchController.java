@@ -2,6 +2,7 @@ package com.trinity.ctc.domain.search.controller;
 
 import com.trinity.ctc.domain.restaurant.dto.RestaurantPreviewRequest;
 import com.trinity.ctc.domain.restaurant.dto.RestaurantPreviewResponse;
+import com.trinity.ctc.domain.search.dto.SearchHistoryResponse;
 import com.trinity.ctc.domain.search.service.SearchService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,7 @@ public class SearchController {
     }
 
     @GetMapping("/history/{userId}")
-    public ResponseEntity<List<String>> getSearchHistory(@PathVariable Long userId) {
+    public ResponseEntity<List<SearchHistoryResponse>> getSearchHistory(@PathVariable Long userId) {
         return ResponseEntity.ok(searchService.getSearchHistory(userId));
     }
 }
