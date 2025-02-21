@@ -54,6 +54,7 @@ public class RestaurantDetailResponse {
             .name(restaurant.getName())
             .imageUrls(restaurant.getImageUrls().stream().map(RestaurantImage::getUrl).collect(Collectors.toList()))
             .location(restaurant.getAddress())
+            .averagePrice(restaurant.getAveragePrice())
             .category(restaurant.getRestaurantCategoryList().stream()
                 .map(rc -> rc.getCategory().getName())
                 .collect(Collectors.joining(", ")))
