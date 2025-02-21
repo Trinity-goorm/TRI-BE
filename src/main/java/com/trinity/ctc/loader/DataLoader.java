@@ -2,25 +2,39 @@ package com.trinity.ctc.loader;
 
 import com.trinity.ctc.domain.category.service.CategoryService;
 import com.trinity.ctc.domain.restaurant.service.RestaurantService;
-import org.springframework.boot.CommandLineRunner;
+import com.trinity.ctc.domain.seat.service.SeatAvailabilityBatchService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.shell.standard.ShellComponent;
+import org.springframework.shell.standard.ShellMethod;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DataLoader implements CommandLineRunner {
+@ShellComponent
+@RequiredArgsConstructor
+public class DataLoader {
 
     private final CategoryService categoryService;
     private final RestaurantService restaurantService;
+    private final SeatAvailabilityBatchService seatAvailabilityBatchService;
 
-    public DataLoader(CategoryService categoryService, RestaurantService restaurantService) {
-        this.categoryService = categoryService;
-        this.restaurantService = restaurantService;
+    /**
+     * 판교 식당 및 카테고리 크롤링 데이터 삽입
+     */
+    @ShellMethod(key = "load-crawling-data", value = "카테고리 및 레스토랑 데이터 로딩")
+    public void loadDataManually() {
+        System.out.println("=== crawling 데이터 로딩 시작 ===");
+        categoryService.insertCategoriesFromFile();
+        restaurantService.insertRestaurantsFromFile();
+        System.out.println("=== crawling 데이터 로딩 완료 ===");
     }
 
-    @Override
-    public void run(String... args) {
-        categoryService.insertCategoriesFromFile();
-        //동일 카테고리
-        restaurantService.insertRestaurantsFromFile();
-        System.out.println("Data loaded successfully");
+    /**
+     * 더미데이터 삽입용. 이번달, 다음달 한달치 예약정보 삽입
+     */
+    @ShellMethod(key = "load-seats-data", value = "SeatAvailability 더미 데이터 삽입")
+    public void seatAvailabilityDummyInsertion() {
+        System.out.println("=== SeatAvailability 데이터 생성 시작 ===");
+        seatAvailabilityBatchService.batchInsertSeatAvailabilityDummy();
+        System.out.println("=== SeatAvailability 데이터 생성 완료 ===");
     }
 }

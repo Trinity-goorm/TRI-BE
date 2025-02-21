@@ -40,6 +40,9 @@ dependencies {
 
 	// firebase-admin
 	implementation 'com.google.firebase:firebase-admin:9.4.3'
+
+	// spring shell
+	implementation 'org.springframework.shell:spring-shell-starter:3.2.3'
 }
 
 tasks.named('test') {
