@@ -7,21 +7,21 @@ VALUES
     (2, FALSE, 40, 'FEMALE', 2, 'https://example.com/image2.jpg', 'UserTwo', '010-3333-4444', 'AVAILABLE'),
     (5, TRUE, 70, 'MALE', 3, 'https://example.com/image3.jpg', 'UserThree', '010-5555-6666', 'AVAILABLE');
 
--- UserPreference 테이블 더미 데이터 삽입
-INSERT INTO ctc.user_preference (max_price, min_price, id, user_id)
-VALUES
-    (50000, 10000, 1, 1),
-    (70000, 20000, 2, 2),
-    (60000, 15000, 3, 3);
-
--- UserPreferenceCategory 테이블 더미 데이터 삽입
-INSERT INTO ctc.user_preference_category (category_id, user_preference_id)
-VALUES
-    (1, 1),
-    (2, 1),
-    (3, 2),
-    (1, 3),
-    (2, 3);
+# -- UserPreference 테이블 더미 데이터 삽입
+# INSERT INTO ctc.user_preference (max_price, min_price, id, user_id)
+# VALUES
+#     (50000, 10000, 1, 1),
+#     (70000, 20000, 2, 2),
+#     (60000, 15000, 3, 3);
+#
+# # -- UserPreferenceCategory 테이블 더미 데이터 삽입user.phone_number
+# INSERT INTO ctc.user_preference_category (category_id, user_preference_id)
+# VALUES
+#     (1, 1),
+#     (2, 1),
+#     (3, 2),
+#     (1, 3),
+#     (2, 3);
 
 -- Reservation Time 테이블
 INSERT INTO ctc.reservation_time

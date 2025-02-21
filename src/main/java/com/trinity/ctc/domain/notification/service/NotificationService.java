@@ -1,6 +1,5 @@
 package com.trinity.ctc.domain.notification.service;
 
-import com.google.firebase.ErrorCode;
 import com.google.firebase.messaging.*;
 import com.trinity.ctc.domain.fcm.repository.FcmRepository;
 import com.trinity.ctc.domain.notification.dto.FcmSendingResultDto;
@@ -22,13 +21,14 @@ import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
 import com.trinity.ctc.domain.seat.entity.SeatAvailability;
 import com.trinity.ctc.domain.seat.repository.SeatAvailabilityRepository;
 import com.trinity.ctc.domain.user.entity.User;
-import com.trinity.ctc.kakao.repository.UserRepository;
+import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.util.exception.CustomException;
 import com.trinity.ctc.util.exception.error_code.*;
 import com.trinity.ctc.util.formatter.DateTimeUtil;
 import com.trinity.ctc.util.validator.TicketValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -54,6 +54,8 @@ public class NotificationService {
     private final SeatAvailabilityRepository seatAvailabilityRepository;
     private final SeatNotificationMessageRepository seatNotificationMessageRepository;
     private final SeatNotificationRepository seatNotificationRepository;
+
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * 예약 이벤트를 통해 예약 알림에 필요한 entity(user, reservation)를 받아오고, 예약 알림 entity을 DB에 저장하는 메서드
@@ -199,7 +201,7 @@ public class NotificationService {
     /**
      * 예약 1시간 전 알림을 보내는 메서드(운영시간 내에서 1시간 단위로 실행되도록 스케줄링)
      */
-    @Scheduled(cron = "0 0 11-23/1 * *  ?") // 11 ~ 23시 동안 1시간 단위로 실행
+    @Scheduled(cron = "0 0 11-23/1 * * ?") // 11 ~ 23시 동안 1시간 단위로 실행
     public void sendHourBeforeReservationNotification() {
         LocalDateTime now = DateTimeUtil.truncateToMinute(LocalDateTime.now());
 
@@ -514,4 +516,5 @@ public class NotificationService {
 
         return notificationHistoryList;
     }
+
 }

@@ -7,6 +7,8 @@ import static org.mockito.Mockito.when;
 
 import com.trinity.ctc.domain.user.entity.User;
 import java.util.Optional;
+
+import com.trinity.ctc.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

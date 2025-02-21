@@ -4,7 +4,7 @@ import com.trinity.ctc.domain.fcm.dto.FcmTokenRequest;
 import com.trinity.ctc.domain.fcm.entity.Fcm;
 import com.trinity.ctc.domain.fcm.repository.FcmRepository;
 import com.trinity.ctc.domain.user.entity.User;
-import com.trinity.ctc.kakao.repository.UserRepository;
+import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.util.exception.CustomException;
 import com.trinity.ctc.util.exception.error_code.UserErrorCode;
 import com.trinity.ctc.util.formatter.DateTimeUtil;

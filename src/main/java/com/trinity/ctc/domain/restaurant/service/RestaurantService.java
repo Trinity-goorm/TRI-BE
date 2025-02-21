@@ -9,7 +9,7 @@ import com.trinity.ctc.domain.search.sorting.SortingStrategy;
 import com.trinity.ctc.domain.search.sorting.SortingStrategyFactory;
 import com.trinity.ctc.domain.seat.service.SeatAvailabilityService;
 import com.trinity.ctc.domain.user.entity.User;
-import com.trinity.ctc.kakao.repository.UserRepository;
+import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.domain.like.repository.LikeRepository;
 import com.trinity.ctc.domain.restaurant.dto.RestaurantPreviewResponse;
 import com.trinity.ctc.domain.restaurant.dto.RestaurantDetailResponse;
@@ -55,6 +55,7 @@ public class RestaurantService {
             .orElseThrow(
                 () -> new IllegalArgumentException("해당 식당을 찾을 수 없습니다. ID: " + restaurantId));
 
+        log.info("[SELECT] 식당 상세정보 획득 ID: {}", restaurantId);
         return RestaurantDetailResponse.fromEntity(restaurant);
     }
 
@@ -88,5 +89,4 @@ public class RestaurantService {
             })
             .collect(Collectors.toList());
     }
-
 }

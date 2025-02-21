@@ -23,9 +23,11 @@ public class RestaurantController {
 
     //식당 상세정보 반환
     @GetMapping("/{restaurantId}")
-    public ResponseEntity<RestaurantDetailResponse> getRestaurantDetail(@PathVariable Long restaurantId) {
+    public ResponseEntity<RestaurantDetailResponse> getRestaurantDetail(
+        @PathVariable Long restaurantId) {
         return ResponseEntity.ok(restaurantService.getRestaurantDetail(restaurantId));
     }
+
     //카테고리별 식당 목록 반환
     @PostMapping("/category/{categoryId}")
     public ResponseEntity<List<RestaurantPreviewResponse>> getRestaurantsByCategory(
