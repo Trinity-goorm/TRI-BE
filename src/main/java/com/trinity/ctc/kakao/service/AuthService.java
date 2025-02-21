@@ -5,7 +5,7 @@ import com.trinity.ctc.kakao.dto.KakaoLogoutResponse;
 import com.trinity.ctc.kakao.dto.KakaoTokenResponse;
 import com.trinity.ctc.kakao.dto.KakaoUserInfoResponse;
 import com.trinity.ctc.kakao.dto.UserLoginResponse;
-import com.trinity.ctc.kakao.repository.UserRepository;
+import com.trinity.ctc.domain.user.repository.UserRepository;
 import java.util.Collections;
 import java.util.Optional;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
