@@ -18,10 +18,12 @@ import com.trinity.ctc.domain.notification.type.NotificationType;
 import com.trinity.ctc.domain.notification.util.fomatter.NotificationMessageUtil;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
+import com.trinity.ctc.domain.reservation.service.ReservationService;
 import com.trinity.ctc.domain.seat.entity.SeatAvailability;
 import com.trinity.ctc.domain.seat.repository.SeatAvailabilityRepository;
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.domain.user.repository.UserRepository;
+import com.trinity.ctc.event.ReservationCompleteEvent;
 import com.trinity.ctc.util.exception.CustomException;
 import com.trinity.ctc.util.exception.error_code.*;
 import com.trinity.ctc.util.formatter.DateTimeUtil;
@@ -56,6 +58,7 @@ public class NotificationService {
     private final SeatNotificationRepository seatNotificationRepository;
 
     private final ApplicationEventPublisher eventPublisher;
+    private final ReservationService reservationService;
 
     /**
      * 예약 이벤트를 통해 예약 알림에 필요한 entity(user, reservation)를 받아오고, 예약 알림 entity을 DB에 저장하는 메서드
@@ -196,7 +199,6 @@ public class NotificationService {
         // 전송한 예약 알림을 table에서 삭제하는 메서드
         deleteSentReservationNotification(reservationNotificationIdList);
     }
-
 
     /**
      * 예약 1시간 전 알림을 보내는 메서드(운영시간 내에서 1시간 단위로 실행되도록 스케줄링)
@@ -517,4 +519,20 @@ public class NotificationService {
         return notificationHistoryList;
     }
 
+    /**
+     * 예약 알림 테스트 메서드(mock test 코드 작성 후 삭제 예정)
+     * @param userId
+     * @param reservationId
+     */
+    public void testReservationNotification(long userId, long reservationId) {
+        eventPublisher.publishEvent(new ReservationCompleteEvent(userId, reservationId));
+    }
+
+    /**
+     * 빈자리 알림 테스트 메서드(mock test 코드 작성 후 삭제 예정)
+     * @param reservationId
+     */
+    public void testSeatNotification(long reservationId) {
+        reservationService.cancelReservation(reservationId);
+    }
 }

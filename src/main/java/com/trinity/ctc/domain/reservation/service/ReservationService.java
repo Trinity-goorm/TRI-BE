@@ -154,11 +154,16 @@ public class ReservationService {
 
         // 좌석 수 반환
         SeatAvailability seatAvailability = seatAvailabilityRepository.findByReservationData(reservation.getRestaurant().getId(), reservation.getReservationDate(), reservation.getReservationTime().getTimeSlot(), reservation.getSeatType().getId());
+
+        log.info("id:" + seatAvailability.getId());
+
         log.info("[예약 취소 전] 가용좌석 수: {}", seatAvailability.getAvailableSeats());
         seatAvailability.cancelOneReservation();
         log.info("[예약 취소 후] 가용좌석 수: {}", seatAvailability.getAvailableSeats());
 
         eventPublisher.publishEvent(new ReservationCanceledEvent(reservationId, seatAvailability));
+
+        log.info("여기까지 왔나요?");
 
         return ReservationResultResponse.of(true, reservationId, reservation.getRestaurant().getName(), reservation.getReservationDate(), reservation.getReservationTime().getTimeSlot(), isCODPassed);
     }

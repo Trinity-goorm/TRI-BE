@@ -1,11 +1,11 @@
 USE ctc;
 
--- User 테이블 더미 데이터 삽입
-INSERT INTO ctc.user (empty_ticket_count, is_deleted, normal_ticket_count, sex, id, image_url, nickname, phone_number, status)
-VALUES
-    (3, FALSE, 50, 'MALE', 1, 'https://example.com/image1.jpg', 'UserOne', '010-1111-2222', 'AVAILABLE'),
-    (2, FALSE, 40, 'FEMALE', 2, 'https://example.com/image2.jpg', 'UserTwo', '010-3333-4444', 'AVAILABLE'),
-    (5, TRUE, 70, 'MALE', 3, 'https://example.com/image3.jpg', 'UserThree', '010-5555-6666', 'AVAILABLE');
+# -- User 테이블 더미 데이터 삽입
+# INSERT INTO ctc.user (empty_ticket_count, is_deleted, normal_ticket_count, sex, id, image_url, nickname, phone_number, status)
+# VALUES
+#     (3, FALSE, 50, 'MALE', 1, 'https://example.com/image1.jpg', 'UserOne', '010-1111-2222', 'AVAILABLE'),
+#     (2, FALSE, 40, 'FEMALE', 2, 'https://example.com/image2.jpg', 'UserTwo', '010-3333-4444', 'AVAILABLE'),
+#     (5, TRUE, 70, 'MALE', 3, 'https://example.com/image3.jpg', 'UserThree', '010-5555-6666', 'AVAILABLE');
 
 # -- UserPreference 테이블 더미 데이터 삽입
 # INSERT INTO ctc.user_preference (max_price, min_price, id, user_id)
@@ -51,7 +51,7 @@ INSERT INTO ctc.seat_availability
 (`available_seats`, `id`, `reservation_date`, `reservation_time_id`, `restaurant_id`, `seat_type_id`)
 VALUES
 -- 레스토랑 1
-(10, 1, '2025-02-26', 1, 1, 1), (8, 2, '2025-02-26', 1, 1, 2), (6, 3, '2025-02-26', 1, 1, 3),
+(0, 1, '2025-02-26', 1, 1, 1), (8, 2, '2025-02-26', 1, 1, 2), (6, 3, '2025-02-26', 1, 1, 3),
 (7, 4, '2025-02-26', 2, 1, 1), (9, 5, '2025-02-26', 2, 1, 2), (0, 6, '2025-02-26', 2, 1, 3),
 (8, 7, '2025-02-26', 3, 1, 1), (12, 8, '2025-02-26', 3, 1, 2), (15, 9, '2025-02-26', 3, 1, 3),
 (0, 10, '2025-02-26', 4, 1, 1), (0, 11, '2025-02-26', 4, 1, 2), (0, 12, '2025-02-26', 4, 1, 3),
@@ -195,18 +195,23 @@ VALUES
 INSERT INTO ctc.seat_notification
 (`id`, `seat_notification_message_id`, `user_id`)
 VALUES
-    (1, 1, 1),
-    (2, 2, 1),
-    (3, 3, 1),
-    (4, 4, 1),
-    (5, 5, 1),
-    (6, 6, 2),
-    (7, 7, 2),
-    (8, 8, 2),
-    (9, 9, 2),
-    (10, 10, 2),
-    (11, 1, 3),
-    (12, 2, 3),
-    (13, 3, 3),
-    (14, 4, 3),
-    (15, 5, 3);
+    (1, 1, 1);
+#     (2, 2, 1),
+#     (3, 3, 1),
+#     (4, 4, 1),
+#     (5, 5, 1),
+#     (6, 6, 2),
+#     (7, 7, 2),
+#     (8, 8, 2),
+#     (9, 9, 2),
+#     (10, 10, 2),
+#     (11, 1, 3),
+#     (12, 2, 3),
+#     (13, 3, 3),
+#     (14, 4, 3),
+#     (15, 5, 3);
+
+INSERT INTO ctc.reservation
+(`reservation_date`, `created_at`, `id`, reservation_time_id, restaurant_id, seat_type_id, user_id, status)
+VALUES
+    ('2025-02-24', NOW(), 1, 1, 1, 1, 1, 'COMPLETED')

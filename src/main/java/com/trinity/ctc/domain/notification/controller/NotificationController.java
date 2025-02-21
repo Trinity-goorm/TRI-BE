@@ -74,9 +74,26 @@ public class NotificationController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/test")
-    public ResponseEntity<Void> testNotification(@RequestParam long userId, @RequestParam long reservationId) {
-        notificationService.testNotification(userId, reservationId);
+    /**
+     * 예약 알림 테스트용 api(mock test 코드 작성 후 삭제 예정      )
+     * @param userId
+     * @param reservationId
+     * @return
+     */
+    @PostMapping("/reservations/test")
+    public ResponseEntity<Void> testReservationNotification(@RequestParam long userId, @RequestParam long reservationId) {
+        notificationService.testReservationNotification(userId, reservationId);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * 예약 알림 테스트용 api(mock test 코드 작성 후 삭제 예정)
+     * @param reservationId
+     * @return
+     */
+    @PostMapping("/seats/test")
+    public ResponseEntity<Void> testSeatNotification(@RequestParam long reservationId) {
+        notificationService.testSeatNotification(reservationId);
         return ResponseEntity.noContent().build();
     }
 }
