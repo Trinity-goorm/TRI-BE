@@ -14,9 +14,13 @@ spring:
         show_sql: true
         format_sql: true
         generate_statistics: true  # Hibernate 통계 활성화
+        order_updates: true # 동일한 엔티티 INSERT 문 정렬 최적화
+        order_inserts: true
         jdbc:
-          fetch_size: 50 # 데이터 패치 크기
-          batch_size: 20 # 배치 크기
+          fetch_size: 1000 # 데이터 패치 크기
+          batch_size: 1000 # 배치 크기
+    open-in-view: false  # OSIV 끄기 (가능하면 끄는 것이 성능적으로 유리)
+
 ---
 logging:
   level:
