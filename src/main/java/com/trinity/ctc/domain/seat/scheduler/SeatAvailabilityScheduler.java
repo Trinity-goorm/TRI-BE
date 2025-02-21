@@ -1,3 +1,4 @@
+
 package com.trinity.ctc.domain.seat.scheduler;
 
 import com.trinity.ctc.domain.seat.service.SeatAvailabilityBatchService;

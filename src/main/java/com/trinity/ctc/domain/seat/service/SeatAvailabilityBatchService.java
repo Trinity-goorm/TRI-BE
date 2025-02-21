@@ -40,7 +40,7 @@ public class SeatAvailabilityBatchService {
     public void batchInsertSeatAvailabilityProd() {
         long startTime = System.nanoTime();
 
-        List<SeatAvailability> seatAvailabilities = prepareSeatAvailabilityData(DateRangeMode.CURRENT_MONTH);
+        List<SeatAvailability> seatAvailabilities = prepareSeatAvailabilityData(DateRangeMode.NEXT_MONTH);
 
         int totalSize = seatAvailabilities.size();
         log.info("🚀 INSERT 할 SeatAvailability 데이터 개수: {}", totalSize);
