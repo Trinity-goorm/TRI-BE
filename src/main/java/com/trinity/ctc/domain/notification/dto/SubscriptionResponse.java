@@ -23,11 +23,11 @@ public class SubscriptionResponse {
     @Schema(description = "식당 이름", example = "이가네양꼬치")
     private String restaurantName;
 
-    @ArraySchema(schema = @Schema(description = "식당 카테고리 리스트", example = "중식, 일식"))
-    private List<String> restaurantCategory;
+    @Schema(description = "식당 카테고리", example = "중식, 일식")
+    private String restaurantCategory;
 
-    @ArraySchema(schema = @Schema(description = "식당 사진 URL 리스트", example = "img1.kakaocdn.net/..., img2.kakaocdn.net/..."))
-    private List<String> restaurantImageUrl;
+    @Schema(description = "식당 사진 URL", example = "img1.kakaocdn.net/..., img2.kakaocdn.net/...")
+    private String restaurantImageUrl;
 
     @Schema(description = "빈자리 예약 날짜", example = "2025-02-26")
     private LocalDate date;
@@ -48,8 +48,8 @@ public class SubscriptionResponse {
         return new SubscriptionResponse(seatNotificationId,
                 seatAvailability.getRestaurant().getName(),
                 seatAvailability.getRestaurant().getRestaurantCategoryList().stream()
-                        .map(restaurantCategory -> restaurantCategory.getCategory().getName()).collect(Collectors.toList()),
-                seatAvailability.getRestaurant().getImageUrls().stream().map(RestaurantImage::getUrl).collect(Collectors.toList()),
+                        .map(restaurantCategory -> restaurantCategory.getCategory().getName()).collect(Collectors.joining(", ")),
+                seatAvailability.getRestaurant().getImageUrls().stream().map(RestaurantImage::getUrl).collect(Collectors.joining(", ")),
                 seatAvailability.getReservationDate(),
                 seatAvailability.getReservationTime().getTimeSlot(),
                 seatAvailability.getSeatType().getMinCapacity(),

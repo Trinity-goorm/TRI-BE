@@ -73,4 +73,10 @@ public class NotificationController {
         notificationService.cancelSubscribeSeatNotification(seatNotificationId);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/test")
+    public ResponseEntity<Void> testNotification(@RequestParam long userId, @RequestParam long reservationId) {
+        notificationService.testNotification(userId, reservationId);
+        return ResponseEntity.noContent().build();
+    }
 }

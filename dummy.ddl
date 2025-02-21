@@ -13,21 +13,21 @@ VALUES
     (2, FALSE, 20, 'FEMALE', 2, 'https://example.com/image2.jpg', 'UserTwo', '010-3333-4444', 'AVAILABLE'),
     (5, TRUE, 7, 'MALE', 3, 'https://example.com/image3.jpg', 'UserThree', '010-5555-6666', 'AVAILABLE');
 
--- UserPreference 테이블 더미 데이터 삽입
-INSERT INTO ctc.user_preference (max_price, min_price, id, user_id)
-VALUES
-    (50000, 10000, 1, 1),
-    (70000, 20000, 2, 2),
-    (60000, 15000, 3, 3);
-
--- UserPreferenceCategory 테이블 더미 데이터 삽입
-INSERT INTO ctc.user_preference_category (category_id, user_preference_id)
-VALUES
-    (1, 1),
-    (2, 1),
-    (3, 2),
-    (1, 3),
-    (2, 3);
+# -- UserPreference 테이블 더미 데이터 삽입
+# INSERT INTO ctc.user_preference (max_price, min_price, id, user_id)
+# VALUES
+#     (50000, 10000, 1, 1),
+#     (70000, 20000, 2, 2),
+#     (60000, 15000, 3, 3);
+#
+# # -- UserPreferenceCategory 테이블 더미 데이터 삽입user.phone_number
+# INSERT INTO ctc.user_preference_category (category_id, user_preference_id)
+# VALUES
+#     (1, 1),
+#     (2, 1),
+#     (3, 2),
+#     (1, 3),
+#     (2, 3);
 
 
 -- INSERT INTO `ctc`.`restaurant`
@@ -105,28 +105,16 @@ VALUES
 INSERT INTO ctc.reservation_time
 (created_at, id, time_slot)
 VALUES
-    (NOW(), 1, '09:00'),
-    (NOW(), 2, '09:30'),
-    (NOW(), 3, '10:00'),
-    (NOW(), 4, '10:30'),
-    (NOW(), 5, '11:00'),
-    (NOW(), 6, '11:30'),
-    (NOW(), 7, '12:00'),
-    (NOW(), 8, '12:30'),
-    (NOW(), 9, '13:00'),
-    (NOW(), 10, '13:30'),
-    (NOW(), 11, '14:00'),
-    (NOW(), 12, '14:30'),
-    (NOW(), 13, '15:00'),
-    (NOW(), 14, '15:30'),
-    (NOW(), 15, '16:00'),
-    (NOW(), 16, '16:30'),
-    (NOW(), 17, '17:00'),
-    (NOW(), 18, '17:30'),
-    (NOW(), 19, '18:00'),
-    (NOW(), 20, '18:30'),
-    (NOW(), 21, '19:00'),
-    (NOW(), 22, '19:30');
+    (NOW(), 1, '15:52'),
+    (NOW(), 2, '11:00'),
+    (NOW(), 3, '12:00'),
+    (NOW(), 4, '13:00'),
+    (NOW(), 5, '14:00'),
+    (NOW(), 6, '15:00'),
+    (NOW(), 7, '16:00'),
+    (NOW(), 8, '17:00'),
+    (NOW(), 9, '18:00'),
+    (NOW(), 10, '19:00');
 
 -- Seat Type 테이블
 INSERT INTO ctc.seat_type
@@ -141,7 +129,7 @@ INSERT INTO ctc.seat_availability
 (`available_seats`, `id`, `reservation_date`, `reservation_time_id`, `restaurant_id`, `seat_type_id`)
 VALUES
 -- 레스토랑 1
-(10, 1, '2025-02-15', 1, 1, 1), (8, 2, '2025-02-15', 1, 1, 2), (6, 3, '2025-02-15', 1, 1, 3),
+(10, 1, '2025-02-21', 1, 1, 1), (8, 2, '2025-02-15', 1, 1, 2), (6, 3, '2025-02-15', 1, 1, 3),
 (7, 4, '2025-02-15', 2, 1, 1), (9, 5, '2025-02-15', 2, 1, 2), (0, 6, '2025-02-15', 2, 1, 3),
 (8, 7, '2025-02-15', 3, 1, 1), (12, 8, '2025-02-15', 3, 1, 2), (15, 9, '2025-02-15', 3, 1, 3),
 (0, 10, '2025-02-15', 4, 1, 1), (0, 11, '2025-02-15', 4, 1, 2), (0, 12, '2025-02-15', 4, 1, 3),
@@ -267,3 +255,8 @@ VALUES
 (8, 232, '2025-02-15', 6, 10, 1), (9, 233, '2025-02-15', 6, 10, 2), (11, 234, '2025-02-15', 6, 10, 3),
 (6, 235, '2025-02-15', 7, 10, 1), (7, 236, '2025-02-15', 7, 10, 2), (9, 237, '2025-02-15', 7, 10, 3),
 (12, 238, '2025-02-15', 8, 10, 1), (15, 239, '2025-02-15', 8, 10, 2), (14, 240, '2025-02-15', 8, 10, 3);
+
+INSERT INTO ctc.reservation
+(`reservation_date`, `created_at`, `id`, reservation_time_id, restaurant_id, seat_type_id, user_id, status)
+VALUES
+    ('2025-02-21', NOW(), 1, 1, 1, 1, 1, 'COMPLETED')

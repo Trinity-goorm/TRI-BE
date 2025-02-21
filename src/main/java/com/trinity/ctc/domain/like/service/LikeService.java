@@ -3,7 +3,7 @@ package com.trinity.ctc.domain.like.service;
 import com.trinity.ctc.domain.like.entity.Likes;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
 import com.trinity.ctc.domain.user.entity.User;
-import com.trinity.ctc.kakao.repository.UserRepository;
+import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.domain.like.repository.LikeRepository;
 import com.trinity.ctc.domain.restaurant.dto.RestaurantDetailResponse;
 import com.trinity.ctc.domain.restaurant.repository.RestaurantRepository;

@@ -37,6 +37,9 @@ public class SwaggerConfig {
     @Value("/api/notifications/**")
     private String[] notificationPaths;
 
+    @Value("/api/users/**")
+    private String[] userPaths;
+
     @Bean
     public OpenAPI customOpenAPI() {
         List<Server> servers = new ArrayList<>();
@@ -102,6 +105,17 @@ public class SwaggerConfig {
         return GroupedOpenApi.builder()
                 .group("Notification API")
                 .pathsToMatch(notificationPaths)
+                .build();
+    }
+
+    /**
+     * User API 그룹
+     */
+    @Bean
+    public GroupedOpenApi userOpenApi() {
+        return GroupedOpenApi.builder()
+                .group("User API")
+                .pathsToMatch(userPaths)
                 .build();
     }
 }
