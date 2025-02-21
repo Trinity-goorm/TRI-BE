@@ -55,6 +55,7 @@ public class RestaurantService {
             .orElseThrow(
                 () -> new IllegalArgumentException("해당 식당을 찾을 수 없습니다. ID: " + restaurantId));
 
+        log.info("[SELECT] 식당 상세정보 획득 ID: {}", restaurantId);
         return RestaurantDetailResponse.fromEntity(restaurant);
     }
 
@@ -88,11 +89,4 @@ public class RestaurantService {
             })
             .collect(Collectors.toList());
     }
-
-    public List<RestaurantPreviewResponse> getRecommendation(Long userId) {
-
-
-        return null;
-    }
-
 }
