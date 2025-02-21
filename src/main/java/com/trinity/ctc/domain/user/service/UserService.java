@@ -10,6 +10,8 @@ import com.trinity.ctc.domain.user.entity.compositeKey.UserPreferenceCategoryKey
 import com.trinity.ctc.domain.user.repository.UserPreferenceCategoryRepository;
 import com.trinity.ctc.domain.user.repository.UserPreferenceRepository;
 import com.trinity.ctc.domain.user.repository.UserRepository;
+import com.trinity.ctc.domain.user.status.UserStatus;
+import com.trinity.ctc.domain.user.validator.UserValidator;
 import com.trinity.ctc.util.exception.CustomException;
 import com.trinity.ctc.util.exception.error_code.UserErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -28,9 +30,11 @@ public class UserService {
     private final CategoryRepository categoryRepository;
     private final UserPreferenceRepository userPreferenceRepository;
     private final UserPreferenceCategoryRepository userPreferenceCategoryRepository;
+    private final UserValidator userValidator;
 
     /**
      * 온보딩 요청 DTO의 정보로 user entity를 build 후 저장하는 메서드
+     *
      * @param onboardingRequest
      */
     @Transactional
@@ -38,9 +42,11 @@ public class UserService {
         User user = userRepository.findById(onboardingRequest.getUserId())
                 .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
+        userValidator.validateUserStatus(user);
+
         List<Category> categoryList = categoryRepository.findAllById(onboardingRequest.getUserPreferenceCategoryIdList());
 
-        if(categoryList.size() < 3) throw new CustomException(UserErrorCode.NOT_ENOUGH_CATEGORY_SELECT);
+        if (categoryList.size() < 3) throw new CustomException(UserErrorCode.NOT_ENOUGH_CATEGORY_SELECT);
 
         UserPreference userPreference = UserPreference.builder()
                 .minPrice(onboardingRequest.getMinPrice())
@@ -69,3 +75,4 @@ public class UserService {
         userRepository.save(user);
     }
 }
+

@@ -36,6 +36,6 @@ public class UserController {
     )
     public ResponseEntity<Void> saveOnboardingInformation(@RequestBody OnboardingRequest onboardingRequest) {
         userService.saveOnboardingInformation(onboardingRequest);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }
