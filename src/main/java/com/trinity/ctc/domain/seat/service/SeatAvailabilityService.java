@@ -1,6 +1,7 @@
 package com.trinity.ctc.domain.seat.service;
 
 import com.trinity.ctc.domain.reservation.dto.ReservationAvailabilityResponse;
+import com.trinity.ctc.domain.seat.dto.GroupedDailyAvailabilityResponse;
 import com.trinity.ctc.domain.seat.dto.GroupedSeatResponse;
 import com.trinity.ctc.domain.seat.dto.GroupedTimeSlotResponse;
 import com.trinity.ctc.domain.seat.entity.SeatAvailability;
@@ -8,9 +9,7 @@ import com.trinity.ctc.domain.seat.repository.SeatAvailabilityRepository;
 import com.trinity.ctc.util.formatter.DateTimeUtil;
 import com.trinity.ctc.util.helper.GroupingHelper;
 import com.trinity.ctc.util.validator.DateTimeValidator;
-import com.trinity.ctc.domain.seat.dto.GroupedDailyAvailabilityResponse;
 import com.trinity.ctc.util.validator.SeatAvailabilityValidator;
-import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,6 +20,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.trinity.ctc.util.validator.DateTimeValidator.isToday;
 
@@ -28,6 +28,7 @@ import static com.trinity.ctc.util.validator.DateTimeValidator.isToday;
 @RequiredArgsConstructor
 @Slf4j
 public class SeatAvailabilityService {
+
     private final SeatAvailabilityRepository seatAvailabilityRepository;
 
     /**
@@ -39,7 +40,7 @@ public class SeatAvailabilityService {
     @Transactional(readOnly = true)
     public GroupedDailyAvailabilityResponse getAvailableSeatsDay(Long restaurantId, LocalDate selectedDate) {
 
-        DateTimeValidator.validate(selectedDate);
+        DateTimeValidator.isPast(selectedDate);
         List<SeatAvailability> availableSeatList = fetchAvailableSeats(restaurantId, selectedDate);
 
         boolean isToday = isToday(selectedDate);

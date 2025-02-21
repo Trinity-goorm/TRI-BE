@@ -2,6 +2,7 @@ package com.trinity.ctc.util.validator;
 
 import com.trinity.ctc.domain.seat.entity.SeatAvailability;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -18,7 +19,10 @@ public class SeatAvailabilityValidator {
     }
 
     public static boolean checkAvailability(SeatAvailability seatAvailability) {
-        return seatAvailability.getAvailableSeats() > 0;
+        LocalDate reservationDate = seatAvailability.getReservationDate();
+        DateTimeValidator.isPast(reservationDate);
+        boolean isToday = DateTimeValidator.isToday(reservationDate);
+        return isToday ? checkAvailabilityForToday(seatAvailability) : checkAvailabilityForFuture(seatAvailability);
     }
 
     private static boolean checkAvailabilityForToday(SeatAvailability seatAvailability) {

@@ -22,7 +22,7 @@ public class DateTimeValidator {
      * 과거인지 확인
      * @param localDate
      */
-    public static void validate(LocalDate localDate) {
+    public static void isPast(LocalDate localDate) {
         LocalDate today = LocalDate.now();
         if (localDate.isBefore(today)) {
             throw new CustomException(DateTimeErrorCode.GIVEN_DATETIME_IS_PAST);
