@@ -14,6 +14,9 @@ import lombok.Getter;
 @Schema(description = "좌석 상세 정보")
 public class GroupedSeatResponse {
 
+    @Schema(description = "예약가능정보 ID", example = "1")
+    private final long seatAvailabilityId;
+
     @Schema(description = "좌석 타입 ID", example = "1")
     private final long seatTypeId;
 
@@ -28,6 +31,7 @@ public class GroupedSeatResponse {
 
     public static GroupedSeatResponse of(SeatAvailability seatAvailability) {
         return new GroupedSeatResponse(
+                seatAvailability.getId(),
                 seatAvailability.getSeatType().getId(),
                 seatAvailability.getSeatType().getMinCapacity(),
                 seatAvailability.getSeatType().getMaxCapacity(),
