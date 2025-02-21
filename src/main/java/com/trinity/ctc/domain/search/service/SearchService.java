@@ -71,4 +71,18 @@ public class SearchService {
         }
     }
 
+    @Transactional
+    public void deleteSearchHistory(Long userId, Long searchHistoryId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다. ID: " + userId));
+
+        SearchHistory searchHistory = searchRepository.findById(searchHistoryId)
+            .orElseThrow(
+                () -> new IllegalArgumentException("검색 기록을 찾을 수 없습니다. ID: " + searchHistoryId));
+
+        if (searchHistory.getUser().equals(user)) {
+            searchHistory.softDelete(); // 🔹 isDeleted = true로 변경
+            searchRepository.save(searchHistory);
+        }
+    }
 }

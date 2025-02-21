@@ -7,6 +7,7 @@ import com.trinity.ctc.domain.search.service.SearchService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,5 +34,12 @@ public class SearchController {
     public ResponseEntity<List<SearchHistoryResponse>> getSearchHistory(@PathVariable Long userId) {
         return ResponseEntity.ok(searchService.getSearchHistory(userId));
     }
+
+    @DeleteMapping("/history/{userId}/{searchHistoryId}")
+    public ResponseEntity<String> deleteSearchHistory(@PathVariable Long userId, @PathVariable Long searchHistoryId) {
+        searchService.deleteSearchHistory(userId, searchHistoryId);
+        return ResponseEntity.ok("검색 기록이 삭제되었습니다.");
+    }
+
 }
 

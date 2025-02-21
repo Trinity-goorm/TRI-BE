@@ -15,7 +15,7 @@ import org.springframework.stereotype.Repository;
 public interface SearchRepository extends JpaRepository<SearchHistory, Long> {
     @Query("SELECT new com.trinity.ctc.domain.search.dto.SearchHistoryResponse(s.id, s.keyword) "
         + "FROM SearchHistory s "
-        + "WHERE s.user.id = :userId "
+        + "WHERE s.user.id = :userId AND s.isDeleted = false "
         + "ORDER BY s.createdAt DESC")
     List<SearchHistoryResponse> findTopByUserIdOrderByCreatedAtDesc(@Param("userId") Long userId, Pageable pageable);
 
