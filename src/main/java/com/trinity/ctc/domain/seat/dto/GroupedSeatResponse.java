@@ -15,7 +15,7 @@ import lombok.Getter;
 public class GroupedSeatResponse {
 
     @Schema(description = "예약가능정보 ID", example = "1")
-    private final long seatAvailabilityId;
+    private final long seatId;
 
     @Schema(description = "좌석 타입 ID", example = "1")
     private final long seatTypeId;
