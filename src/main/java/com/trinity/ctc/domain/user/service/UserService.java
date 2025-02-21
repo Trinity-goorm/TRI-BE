@@ -3,6 +3,7 @@ package com.trinity.ctc.domain.user.service;
 import com.trinity.ctc.domain.category.entity.Category;
 import com.trinity.ctc.domain.category.repository.CategoryRepository;
 import com.trinity.ctc.domain.user.dto.OnboardingRequest;
+import com.trinity.ctc.domain.user.dto.UserDetailResponse;
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.domain.user.entity.UserPreference;
 import com.trinity.ctc.domain.user.entity.UserPreferenceCategory;
@@ -67,5 +68,15 @@ public class UserService {
         user.updateOnboardingInformation(onboardingRequest, userPreference);
 
         userRepository.save(user);
+    }
+
+    /**
+     * 사용자 프로필 정보 반환
+     * @param userId
+     * @return 사용자 프로필 정보
+     */
+    public UserDetailResponse getUserDetail(long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
+        return UserDetailResponse.of(user.getId(), user.getNickname(), user.getNormalTicketCount(), user.getEmptyTicketCount());
     }
 }
