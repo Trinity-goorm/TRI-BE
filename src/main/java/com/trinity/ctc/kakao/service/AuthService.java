@@ -11,6 +11,7 @@ import java.util.Optional;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AuthService {
@@ -23,6 +24,7 @@ public class AuthService {
         this.userRepository = userRepository;
     }
 
+    @Transactional
     public UserLoginResponse authenticateWithKakao(String authorizationCode) {
 
         // 1. 토큰 발급 요청

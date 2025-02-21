@@ -28,10 +28,13 @@ public class UserPreferenceCategory {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @Builder
-    public UserPreferenceCategory(UserPreference userPreference, Category category) {
-        this.userPreference = userPreference;
-        this.category = category;
+    public static UserPreferenceCategory of(UserPreference userPreference, Category category) {
+
+        UserPreferenceCategory userPreferenceCategory = new UserPreferenceCategory();
+        userPreferenceCategory.id = new UserPreferenceCategoryKey(userPreference.getId(), category.getId());
+        userPreferenceCategory.userPreference = userPreference;
+        userPreferenceCategory.category = category;
+        return userPreferenceCategory;
     }
 }
 

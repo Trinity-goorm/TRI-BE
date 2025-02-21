@@ -7,6 +7,7 @@ import com.trinity.ctc.domain.notification.entity.SeatNotificationMessage;
 import com.trinity.ctc.domain.payment.entity.PaymentHistory;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.search.entity.SearchHistory;
+import com.trinity.ctc.domain.user.dto.OnboardingRequest;
 import com.trinity.ctc.domain.user.status.Sex;
 import com.trinity.ctc.domain.user.status.UserStatus;
 import com.trinity.ctc.util.validator.TicketValidator;
@@ -91,5 +92,12 @@ public class User {
 
     public void useEmptyTicket() {
         this.emptyTicketCount--;
+    }
+
+    public void updateOnboardingInformation(OnboardingRequest onboardingRequest, UserPreference userPreference) {
+        this.sex = onboardingRequest.getSex();
+        this.birthday = onboardingRequest.getBirthday();
+        this.phoneNumber = onboardingRequest.getPhoneNumber();
+        this.userPreference = userPreference;
     }
 }

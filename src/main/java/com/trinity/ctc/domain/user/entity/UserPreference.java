@@ -30,9 +30,10 @@ public class UserPreference {
     private List<UserPreferenceCategory> userPreferenceCategoryList = new ArrayList<>();
 
     @Builder
-    public UserPreference(int minPrice, int maxPrice, List<UserPreferenceCategory> userPreferenceCategoryList) {
+    public UserPreference(int minPrice, int maxPrice, List<UserPreferenceCategory> userPreferenceCategoryList, User user) {
         this.minPrice = minPrice;
         this.maxPrice = maxPrice;
         this.userPreferenceCategoryList = userPreferenceCategoryList;
+        this.user = user;
     }
 }
