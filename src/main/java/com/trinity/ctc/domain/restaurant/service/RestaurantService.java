@@ -89,4 +89,10 @@ public class RestaurantService {
             .collect(Collectors.toList());
     }
 
+    public List<RestaurantPreviewResponse> getRecommendation(Long userId) {
+
+
+        return null;
+    }
+
 }
