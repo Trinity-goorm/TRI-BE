@@ -14,6 +14,7 @@ import com.trinity.ctc.domain.user.repository.UserPreferenceCategoryRepository;
 import com.trinity.ctc.domain.user.repository.UserPreferenceRepository;
 import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.domain.user.validator.UserValidator;
+import com.trinity.ctc.util.common.SortOrder;
 import com.trinity.ctc.util.exception.CustomException;
 import com.trinity.ctc.util.exception.error_code.UserErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -98,8 +99,10 @@ public class UserService {
      * @return 예약정보 리스트 및 개수
      */
     @Transactional(readOnly = true)
-    public UserReservationListResponse getUserReservations(long userId, int page, int size) {
-        PageRequest pageRequest = PageRequest.of(page - 1, size);
+    public UserReservationListResponse getUserReservations(long userId, int page, int size, String sortBy) {
+        SortOrder sortOrder = SortOrder.fromString(sortBy);
+        PageRequest pageRequest = PageRequest.of(page - 1, size, sortOrder.getSort());
+
         Slice<Reservation> reservations = reservationRepository.findAllByUserId(userId, pageRequest);
         return UserReservationListResponse.from(reservations);
     }

@@ -5,6 +5,8 @@ import com.trinity.ctc.domain.user.dto.UserDetailResponse;
 import com.trinity.ctc.domain.user.dto.UserReservationListResponse;
 import com.trinity.ctc.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -63,8 +65,16 @@ public class UserController {
     )
     public ResponseEntity<UserReservationListResponse> getUserReservations(@PathVariable long userId,
                                                                            @RequestParam(defaultValue = "1") int page,
-                                                                           @RequestParam(defaultValue = "10") int size) {
-        UserReservationListResponse userReservationListResponse = userService.getUserReservations(userId, page, size);
+                                                                           @RequestParam(defaultValue = "10") int size,
+                                                                           @Parameter(
+                                                                                   description = "정렬 기준 (가능한 값: RESERVE_DATE_ASC, RESERVE_DATE_DESC)",
+                                                                                   example = "RESERVE_DATE_DESC",
+                                                                                   schema = @Schema(allowableValues = {
+                                                                                           "RESERVE_DATE_ASC", "RESERVE_DATE_DESC"
+                                                                                   })
+                                                                           )
+                                                                           @RequestParam(defaultValue = "RESERVE_DATE_DESC") String sortBy) {
+        UserReservationListResponse userReservationListResponse = userService.getUserReservations(userId, page, size, sortBy);
         return ResponseEntity.ok(userReservationListResponse);
     }
 }
