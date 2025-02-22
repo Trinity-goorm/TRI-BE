@@ -2,6 +2,7 @@ package com.trinity.ctc.domain.user.controller;
 
 import com.trinity.ctc.domain.user.dto.OnboardingRequest;
 import com.trinity.ctc.domain.user.dto.UserDetailResponse;
+import com.trinity.ctc.domain.user.dto.UserReservationListResponse;
 import com.trinity.ctc.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -49,5 +50,19 @@ public class UserController {
     public ResponseEntity<UserDetailResponse> getUserDetail(@RequestParam long userId) {
         UserDetailResponse result = userService.getUserDetail(userId);
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/reservations/{userId}")
+    @Operation(
+            summary = "사용자 예약리스트 반환",
+            description = "사용자 예약리스트를 반환하는 API"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "성공"
+    )
+    public ResponseEntity<UserReservationListResponse> getUserReservations(@PathVariable long userId) {
+        UserReservationListResponse userReservationListResponse = userService.getUserReservations(userId);
+        return ResponseEntity.ok(userReservationListResponse);
     }
 }

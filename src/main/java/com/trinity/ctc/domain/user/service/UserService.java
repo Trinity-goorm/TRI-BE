@@ -2,8 +2,11 @@ package com.trinity.ctc.domain.user.service;
 
 import com.trinity.ctc.domain.category.entity.Category;
 import com.trinity.ctc.domain.category.repository.CategoryRepository;
+import com.trinity.ctc.domain.reservation.entity.Reservation;
+import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
 import com.trinity.ctc.domain.user.dto.OnboardingRequest;
 import com.trinity.ctc.domain.user.dto.UserDetailResponse;
+import com.trinity.ctc.domain.user.dto.UserReservationListResponse;
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.domain.user.entity.UserPreference;
 import com.trinity.ctc.domain.user.entity.UserPreferenceCategory;
@@ -30,6 +33,7 @@ public class UserService {
     private final UserPreferenceRepository userPreferenceRepository;
     private final UserPreferenceCategoryRepository userPreferenceCategoryRepository;
     private final UserValidator userValidator;
+    private final ReservationRepository reservationRepository;
 
     /**
      * 온보딩 요청 DTO의 정보로 user entity를 build 후 저장하는 메서드
@@ -79,9 +83,23 @@ public class UserService {
      * @param userId
      * @return 사용자 프로필 정보
      */
+    @Transactional(readOnly = true)
     public UserDetailResponse getUserDetail(long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
         return UserDetailResponse.of(user.getId(), user.getNickname(), user.getNormalTicketCount(), user.getEmptyTicketCount());
+    }
+
+
+    /**
+     * 사용자 예약리스트 반환
+     * @param userId
+     * @return 예약정보 리스트 및 개수
+     */
+    @Transactional(readOnly = true)
+    public UserReservationListResponse getUserReservations(long userId) {
+        List<Reservation> reservations = reservationRepository.findAllByUserId(userId);
+        log.info("reservations: {}", reservations.size());
+        return UserReservationListResponse.from(reservations);
     }
 }
 
