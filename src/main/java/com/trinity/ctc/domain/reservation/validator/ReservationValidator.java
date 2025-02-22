@@ -19,6 +19,12 @@ public class ReservationValidator {
 
     private final ReservationRepository reservationRepository;
 
+    public static void validateReservationUserMatched(long reservationUserId, long requestUserid) {
+        if (reservationUserId != requestUserid) {
+            throw new CustomException(ReservationErrorCode.RESERVATION_USER_MISMATCH);
+        }
+    }
+
     public static void isPreoccupied(ReservationStatus reservationStatus) {
         if (reservationStatus != ReservationStatus.IN_PROGRESS) {
             throw new CustomException(ReservationErrorCode.NOT_PREOCCUPIED);

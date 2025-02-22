@@ -90,6 +90,9 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new CustomException(ReservationErrorCode.NOT_FOUND));
 
+        // 예약정보의 사용자 검증
+        ReservationValidator.validateReservationUserMatched(reservation.getUser().getId(), userId);
+
         // 예약정보 선점여부 검증
         ReservationValidator.isPreoccupied(reservation.getStatus());
 
