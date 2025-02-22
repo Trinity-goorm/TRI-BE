@@ -3,7 +3,6 @@ package com.trinity.ctc.domain.reservation.validator;
 import com.trinity.ctc.domain.reservation.dto.ReservationRequest;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
-import com.trinity.ctc.domain.reservation.service.ReservationService;
 import com.trinity.ctc.domain.reservation.status.ReservationStatus;
 import com.trinity.ctc.util.exception.CustomException;
 import com.trinity.ctc.util.exception.error_code.ReservationErrorCode;
@@ -20,6 +19,12 @@ public class ReservationValidator {
 
     private final ReservationRepository reservationRepository;
 
+    public static void validateReservationUserMatched(long reservationUserId, long requestUserid) {
+        if (reservationUserId != requestUserid) {
+            throw new CustomException(ReservationErrorCode.RESERVATION_USER_MISMATCH);
+        }
+    }
+
     public static void isPreoccupied(ReservationStatus reservationStatus) {
         if (reservationStatus != ReservationStatus.IN_PROGRESS) {
             throw new CustomException(ReservationErrorCode.NOT_PREOCCUPIED);
@@ -33,7 +38,7 @@ public class ReservationValidator {
     }
 
     public static boolean checkCOD(LocalDate reservationDate) {
-        return DateTimeValidator.isTwoDaysAgoOrBefore(reservationDate);
+        return DateTimeValidator.isMoreThanOneDayAway(reservationDate);
     }
 
     public void validateUserReservation(ReservationRequest request) {

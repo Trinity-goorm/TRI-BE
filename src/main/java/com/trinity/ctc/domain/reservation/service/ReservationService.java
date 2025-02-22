@@ -66,11 +66,6 @@ public class ReservationService {
         seatAvailability.preoccupyOneSeat();
         log.info("[좌석 선점 완료] 남은 좌석 수: {}", seatAvailability.getAvailableSeats());
 
-        // 티켓 차감
-        User user = userRepository.findById(reservationRequest.getUserId())
-                .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
-        user.payNormalTickets();
-
         // 예약정보 생성 -> 저장
         Reservation reservation = createReservation(reservationRequest);
         reservationRepository.save(reservation);
@@ -90,8 +85,16 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new CustomException(ReservationErrorCode.NOT_FOUND));
 
+        // 예약정보의 사용자 검증
+        ReservationValidator.validateReservationUserMatched(reservation.getUser().getId(), userId);
+
         // 예약정보 선점여부 검증
         ReservationValidator.isPreoccupied(reservation.getStatus());
+
+        // 티켓 차감
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
+        user.payNormalTickets();
 
         // 예약정보 완료상태로 변경
         reservation.completeReservation();
