@@ -36,4 +36,8 @@ public class RestaurantCategory {
         this.restaurant = restaurant;
         return this;
     }
+
+    public String getCategoryName() {
+        return category.getName();
+    }
 }

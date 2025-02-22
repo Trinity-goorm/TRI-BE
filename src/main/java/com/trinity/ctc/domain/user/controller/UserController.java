@@ -2,8 +2,11 @@ package com.trinity.ctc.domain.user.controller;
 
 import com.trinity.ctc.domain.user.dto.OnboardingRequest;
 import com.trinity.ctc.domain.user.dto.UserDetailResponse;
+import com.trinity.ctc.domain.user.dto.UserReservationListResponse;
 import com.trinity.ctc.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -49,5 +52,29 @@ public class UserController {
     public ResponseEntity<UserDetailResponse> getUserDetail(@RequestParam long userId) {
         UserDetailResponse result = userService.getUserDetail(userId);
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/reservations/{userId}")
+    @Operation(
+            summary = "사용자 예약리스트 반환",
+            description = "사용자 예약리스트를 반환하는 API"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "성공"
+    )
+    public ResponseEntity<UserReservationListResponse> getUserReservations(@PathVariable long userId,
+                                                                           @RequestParam(defaultValue = "1") int page,
+                                                                           @RequestParam(defaultValue = "10") int size,
+                                                                           @Parameter(
+                                                                                   description = "정렬 기준 (가능한 값: RESERVE_DATE_ASC, RESERVE_DATE_DESC)",
+                                                                                   example = "RESERVE_DATE_DESC",
+                                                                                   schema = @Schema(allowableValues = {
+                                                                                           "RESERVE_DATE_ASC", "RESERVE_DATE_DESC"
+                                                                                   })
+                                                                           )
+                                                                           @RequestParam(defaultValue = "RESERVE_DATE_DESC") String sortBy) {
+        UserReservationListResponse userReservationListResponse = userService.getUserReservations(userId, page, size, sortBy);
+        return ResponseEntity.ok(userReservationListResponse);
     }
 }

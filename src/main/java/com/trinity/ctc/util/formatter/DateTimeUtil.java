@@ -40,6 +40,11 @@ public class DateTimeUtil {
         return dateTime.withSecond(0).withNano(0); // 초와 나노초 제거
     }
 
+    // LocalTime -> HH:mm -> 예: 15:00
+    public static LocalTime truncateTimeToMinute(LocalTime time) {
+        return time.withSecond(0).withNano(0); // 초와 나노초 제거
+    }
+
     // LocalTime과 오늘 날짜를 결합하여 LocalDateTime 반환
     public static LocalDateTime combineWithToday(LocalTime timeSlot) {
         // 현재 날짜와 timeSlot을 결합

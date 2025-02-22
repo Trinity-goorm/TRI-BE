@@ -94,4 +94,20 @@ public class Restaurant {
         }
         return this;
     }
+
+    public List<String> getCategories() {
+        List<String> categories = new ArrayList<>();
+        for (RestaurantCategory restaurantCategory : restaurantCategoryList) {
+            categories.add(restaurantCategory.getCategoryName());
+        }
+        return categories;
+    }
+
+    public List<String> getRestaurantImageUrls() {
+        List<String> images = new ArrayList<>();
+        for (RestaurantImage restaurantImage  : this.imageUrls) {
+               images.add(restaurantImage.getUrl());
+        }
+        return images;
+    }
 }
