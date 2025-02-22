@@ -56,7 +56,7 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<NotificationHistory> notificationList = new ArrayList<>();
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserPreference userPreference;
 
     @OneToMany(mappedBy = "user")

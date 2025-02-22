@@ -26,7 +26,7 @@ public class UserPreference {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "userPreference")
+    @OneToMany(mappedBy = "userPreference", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserPreferenceCategory> userPreferenceCategoryList = new ArrayList<>();
 
     @Builder
