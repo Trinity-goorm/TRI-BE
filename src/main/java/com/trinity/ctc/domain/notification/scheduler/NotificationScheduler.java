@@ -25,4 +25,10 @@ public class NotificationScheduler {
     public void sendHourBeforeNotification() {
         notificationService.sendHourBeforeNotification();
     }
+
+    @Scheduled(cron = "0 0 9-19/1 * * ?")
+    public void deleteSeatNotificationMessages() {
+        notificationService.deleteSeatNotificationMessages();
+    }
+
 }

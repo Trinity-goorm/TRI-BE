@@ -12,6 +12,8 @@ import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.domain.user.entity.UserPreference;
 import com.trinity.ctc.domain.user.repository.UserPreferenceRepository;
 import com.trinity.ctc.domain.user.repository.UserRepository;
+import com.trinity.ctc.util.exception.CustomException;
+import com.trinity.ctc.util.exception.error_code.UserErrorCode;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +41,8 @@ public class RestaurantRecommendationService {
 
         log.info("user 가져오기: {}", userId);
 
-        UserPreference userPreference = userPreferenceRepository.findByUserId(userId);
+                                                                // userPreference의 ID는 userID -> 따라서, findById의 parameter는 userID가 됨
+        UserPreference userPreference = userPreferenceRepository.findById(userId).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
         log.info("userPreference 가져오기: {}", userPreference);
         List<String> preferredCategories = userPreference.getUserPreferenceCategoryList().stream()

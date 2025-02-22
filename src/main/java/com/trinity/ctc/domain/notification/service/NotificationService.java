@@ -533,4 +533,19 @@ public class NotificationService {
     public void testSeatNotification(long reservationId) {
         reservationService.cancelReservation(reservationId);
     }
+
+    /**
+     * 날짜/시간이 지난 자리에 대한 빈자리 알림 메세지/빈자리 알림 신청에 대한 데이터 삭제 메서드
+     */
+    @Transactional
+    public void deleteSeatNotificationMessages() {
+        // 현재 날짜/시간 포멧팅
+        LocalDate currentDate = LocalDate.now();
+        LocalTime currentTime = DateTimeUtil.truncateTimeToMinute(LocalTime.now());
+
+        // 현재 날짜/시간 기준으로 이전의 자리에 해당하는 빈자리 알림 메세지를 select
+        List<SeatNotificationMessage> messages = seatNotificationMessageRepository.findAllByCurrentDateTime(currentDate, currentTime);
+        // 삭제(Cascade 설정으로 알림 신청 데이터도 삭제됨)
+        seatNotificationMessageRepository.deleteAll(messages);
+    }
 }

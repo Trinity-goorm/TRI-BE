@@ -1,5 +1,7 @@
 package com.trinity.ctc.domain.reservation.entity;
 
+import com.trinity.ctc.domain.notification.entity.ReservationNotification;
+import com.trinity.ctc.domain.notification.entity.SeatNotification;
 import com.trinity.ctc.domain.reservation.status.ReservationStatus;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
 import com.trinity.ctc.domain.seat.entity.SeatType;
@@ -14,6 +16,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Entity
@@ -50,6 +54,9 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seat_type_id")
     private SeatType seatType;
+
+    @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReservationNotification> reservationNotificationList = new ArrayList<>();
 
     @Builder
     public Reservation(LocalDate reservationDate, ReservationStatus status, Restaurant restaurant, User user, ReservationTime reservationTime ,SeatType seatType) {

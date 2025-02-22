@@ -15,18 +15,17 @@ import java.util.List;
 public class UserPreference {
 
     @Id
-    @Column
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private long id; // user_id로 식별(식별 관계)
 
     private int minPrice;
     private int maxPrice;
 
     @OneToOne(fetch = FetchType.LAZY)
+    @MapsId
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "userPreference")
+    @OneToMany(mappedBy = "userPreference", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserPreferenceCategory> userPreferenceCategoryList = new ArrayList<>();
 
     @Builder

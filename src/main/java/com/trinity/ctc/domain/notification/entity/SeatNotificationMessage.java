@@ -27,7 +27,7 @@ public class SeatNotificationMessage {
     @JoinColumn(name = "seat_availability_id")
     private SeatAvailability seatAvailability;
 
-    @OneToMany(mappedBy = "seatNotificationMessage")
+    @OneToMany(mappedBy = "seatNotificationMessage", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SeatNotification> seatNotificationList = new ArrayList<>();
 
     @Builder

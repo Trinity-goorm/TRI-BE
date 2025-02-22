@@ -1,5 +1,6 @@
 package com.trinity.ctc.domain.seat.entity;
 
+import com.trinity.ctc.domain.notification.entity.SeatNotificationMessage;
 import com.trinity.ctc.domain.reservation.entity.ReservationTime;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
 import com.trinity.ctc.util.validator.CapacityValidator;
@@ -36,6 +37,9 @@ public class SeatAvailability {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seat_type_id")
     private SeatType seatType;
+
+    @OneToOne(mappedBy = "seatAvailability", cascade = CascadeType.ALL, orphanRemoval = true)
+    private SeatNotificationMessage seatNotificationMessage;
 
     /* 내부 로직 */
     public void preoccupyOneSeat() {
