@@ -41,6 +41,7 @@ public class RestaurantRecommendationService {
 
         log.info("user 가져오기: {}", userId);
 
+                                                                // userPreference의 ID는 userID -> 따라서, findById의 parameter는 userID가 됨
         UserPreference userPreference = userPreferenceRepository.findById(userId).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
         log.info("userPreference 가져오기: {}", userPreference);
