@@ -48,7 +48,7 @@ public class User {
     private String imageUrl;
     private Boolean isDeleted;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Fcm> fcmList = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
