@@ -34,8 +34,8 @@ public class DateTimeValidator {
      * @param localDate
      * @return 이틀 전이면 true, 아니면 false
      */
-    public static boolean isTwoDaysAgoOrBefore(LocalDate localDate) {
-        LocalDate twoDaysAgo = LocalDate.now().minusDays(2);
-        return localDate.isBefore(twoDaysAgo) || localDate.isEqual(twoDaysAgo);
+    public static boolean isMoreThanOneDayAway(LocalDate localDate) {
+        LocalDate oneDayAfter = LocalDate.now().plusDays(1);
+        return localDate.isAfter(oneDayAfter) | localDate.isEqual(oneDayAfter);
     }
 }
