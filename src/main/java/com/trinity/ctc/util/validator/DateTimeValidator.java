@@ -4,6 +4,8 @@ import com.trinity.ctc.util.exception.CustomException;
 import com.trinity.ctc.util.exception.error_code.DateTimeErrorCode;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 public class DateTimeValidator {
     private DateTimeValidator() {}
@@ -37,5 +39,11 @@ public class DateTimeValidator {
     public static boolean isMoreThanOneDayAway(LocalDate localDate) {
         LocalDate oneDayAfter = LocalDate.now().plusDays(1);
         return localDate.isAfter(oneDayAfter) | localDate.isEqual(oneDayAfter);
+    }
+
+    public static boolean isExpired(LocalDate localDate, LocalTime localTime) {
+        LocalDateTime localDateTime = LocalDateTime.of(localDate, localTime);
+        LocalDateTime now = LocalDateTime.now();
+        return localDateTime.isBefore(now);
     }
 }
