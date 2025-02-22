@@ -95,5 +95,6 @@ public class User {
         this.birthday = onboardingRequest.getBirthday();
         this.phoneNumber = onboardingRequest.getPhoneNumber();
         this.userPreference = userPreference;
+        this.status = UserStatus.AVAILABLE;
     }
 }
