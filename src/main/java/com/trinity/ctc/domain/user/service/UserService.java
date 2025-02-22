@@ -83,5 +83,12 @@ public class UserService {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
         return UserDetailResponse.of(user.getId(), user.getNickname(), user.getNormalTicketCount(), user.getEmptyTicketCount());
     }
+
+    /**
+     * 모든 유저의 빈자리 티켓 개수를 10개로 초기화
+     */
+    public void resetEmptyTicket() {
+        userPreferenceRepository.resetAllEmptyTickets();
+    }
 }
 
