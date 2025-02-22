@@ -111,7 +111,7 @@ public class UserService {
      * 모든 유저의 빈자리 티켓 개수를 10개로 초기화
      */
     public void resetEmptyTicket() {
-        userPreferenceRepository.resetAllEmptyTickets();
+        userRepository.resetAllEmptyTickets();
     }
 }
 
