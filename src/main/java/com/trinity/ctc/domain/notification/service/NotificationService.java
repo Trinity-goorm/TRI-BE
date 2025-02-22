@@ -170,10 +170,9 @@ public class NotificationService {
     }
 
     /**
-     * 매일 8시에 당일 예약 알림을 보내는 메서드(매일 8시에 실행되도록 스케줄링)
+     * 매일 8시에 당일 예약 알림을 보내는 메서드
      */
-    @Scheduled(cron = "0 0 8 * * ?") // 매일 8시에 실행
-    public void sendDailyReservationNotification() {
+    public void sendDailyNotification() {
         LocalDate today = LocalDate.now();
 
         // 알림 타입과 오늘 날짜로 당일 예약 알림 정보 가져오기
@@ -187,7 +186,7 @@ public class NotificationService {
         // 알림 타입 세팅
         NotificationType type = NotificationType.DAILY_NOTIFICATION;
 
-        // 전송할 알림 리스트를 전부 도는 알림 발송 로직(현재 동기 처리 중) 
+        // 전송할 알림 리스트를 전부 도는 알림 발송 로직(현재 동기 처리 중)
         for (ReservationNotification notification : reservationNotificationList) {
             // 단 건의 알림 전송 로직에 대해 처리하는 메서드
             NotificationHistory notificationHistory = handleEachNotification(notification, type);
@@ -201,10 +200,9 @@ public class NotificationService {
     }
 
     /**
-     * 예약 1시간 전 알림을 보내는 메서드(운영시간 내에서 1시간 단위로 실행되도록 스케줄링)
+     * 예약 1시간 전 알림을 보내는 메서드
      */
-    @Scheduled(cron = "0 0 11-23/1 * * ?") // 11 ~ 23시 동안 1시간 단위로 실행
-    public void sendHourBeforeReservationNotification() {
+    public void sendHourBeforeNotification() {
         LocalDateTime now = DateTimeUtil.truncateToMinute(LocalDateTime.now());
 
         // 알림 타입과 현재 시간으로 보낼 예약 1시간 전 알림 정보 가져오기
@@ -218,7 +216,7 @@ public class NotificationService {
         // 알림 타입 세팅
         NotificationType type = NotificationType.BEFORE_ONE_HOUR_NOTIFICATION;
 
-        // 전송할 알림 리스트를 전부 도는 알림 발송 로직(현재 동기 처리 중) 
+        // 전송할 알림 리스트를 전부 도는 알림 발송 로직(현재 동기 처리 중)
         for (ReservationNotification notification : reservationNotificationList) {
             NotificationHistory notificationHistory = handleEachNotification(notification, type);
             notificationHistoryList.add(notificationHistory);
