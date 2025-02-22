@@ -2,6 +2,8 @@ package com.trinity.ctc.domain.reservation.repository;
 
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.reservation.status.ReservationStatus;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -61,6 +63,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             "JOIN FETCH r.reservationTime rt " +
             "JOIN FETCH r.seatType st " +
             "WHERE r.user.id = :userId")
-    List<Reservation> findAllByUserId(@Param("userId") Long userId);
+    Slice<Reservation> findAllByUserId(@Param("userId") Long userId, Pageable pageable);
 
 }

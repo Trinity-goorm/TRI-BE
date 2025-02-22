@@ -61,8 +61,10 @@ public class UserController {
             responseCode = "200",
             description = "성공"
     )
-    public ResponseEntity<UserReservationListResponse> getUserReservations(@PathVariable long userId) {
-        UserReservationListResponse userReservationListResponse = userService.getUserReservations(userId);
+    public ResponseEntity<UserReservationListResponse> getUserReservations(@PathVariable long userId,
+                                                                           @RequestParam(defaultValue = "1") int page,
+                                                                           @RequestParam(defaultValue = "10") int size) {
+        UserReservationListResponse userReservationListResponse = userService.getUserReservations(userId, page, size);
         return ResponseEntity.ok(userReservationListResponse);
     }
 }

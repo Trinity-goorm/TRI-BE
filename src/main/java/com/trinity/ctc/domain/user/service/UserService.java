@@ -18,6 +18,8 @@ import com.trinity.ctc.util.exception.CustomException;
 import com.trinity.ctc.util.exception.error_code.UserErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -96,9 +98,9 @@ public class UserService {
      * @return 예약정보 리스트 및 개수
      */
     @Transactional(readOnly = true)
-    public UserReservationListResponse getUserReservations(long userId) {
-        List<Reservation> reservations = reservationRepository.findAllByUserId(userId);
-        log.info("reservations: {}", reservations.size());
+    public UserReservationListResponse getUserReservations(long userId, int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page - 1, size);
+        Slice<Reservation> reservations = reservationRepository.findAllByUserId(userId, pageRequest);
         return UserReservationListResponse.from(reservations);
     }
 }
