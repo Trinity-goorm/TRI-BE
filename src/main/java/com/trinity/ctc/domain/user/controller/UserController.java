@@ -35,6 +35,10 @@ public class UserController {
             responseCode = "400",
             description = "사용자가 선호 카테고리를 3개 미만으로 선택 시, 400 반환"
     )
+    @ApiResponse(
+            responseCode = "403",
+            description = "사용자가 임시 회원이 아닐 경우, 403 반환"
+    )
     public ResponseEntity<Void> saveOnboardingInformation(@RequestBody OnboardingRequest onboardingRequest) {
         userService.saveOnboardingInformation(onboardingRequest);
         return ResponseEntity.noContent().build();
