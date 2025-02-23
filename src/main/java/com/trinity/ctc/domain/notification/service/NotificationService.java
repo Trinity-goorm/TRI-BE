@@ -1,7 +1,9 @@
 package com.trinity.ctc.domain.notification.service;
 
 import com.google.firebase.messaging.*;
+import com.trinity.ctc.domain.fcm.entity.Fcm;
 import com.trinity.ctc.domain.fcm.repository.FcmRepository;
+import com.trinity.ctc.domain.notification.dto.FcmMessageDto;
 import com.trinity.ctc.domain.notification.dto.FcmSendingResultDto;
 import com.trinity.ctc.domain.notification.dto.SubscriptionListResponse;
 import com.trinity.ctc.domain.notification.dto.SubscriptionResponse;
@@ -23,16 +25,17 @@ import com.trinity.ctc.domain.seat.entity.SeatAvailability;
 import com.trinity.ctc.domain.seat.repository.SeatAvailabilityRepository;
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.domain.user.repository.UserRepository;
-import com.trinity.ctc.event.ReservationCompleteEvent;
 import com.trinity.ctc.util.exception.CustomException;
-import com.trinity.ctc.util.exception.error_code.*;
+import com.trinity.ctc.util.exception.error_code.FcmErrorCode;
+import com.trinity.ctc.util.exception.error_code.NotificationErrorCode;
+import com.trinity.ctc.util.exception.error_code.SeatErrorCode;
+import com.trinity.ctc.util.exception.error_code.UserErrorCode;
 import com.trinity.ctc.util.formatter.DateTimeUtil;
 import com.trinity.ctc.util.validator.TicketValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,20 +65,11 @@ public class NotificationService {
 
     /**
      * 예약 이벤트를 통해 예약 알림에 필요한 entity(user, reservation)를 받아오고, 예약 알림 entity을 DB에 저장하는 메서드
-     *
-     * @param userId        사용자 ID
-     * @param reservationId 예약 ID
+     * @param user              사용자
+     * @param reservation       예약 정보
      */
     @Transactional
-    public void registerReservationNotification(Long userId, Long reservationId) {
-        // 유저 정보 가져오기
-        User user = userRepository.findById(userId).orElseThrow(()
-                -> new CustomException(UserErrorCode.NOT_FOUND));
-
-        // 예약 정보 가져오기
-        Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(()
-                -> new CustomException(ReservationErrorCode.NOT_FOUND));
-
+    public void registerReservationNotification(User user, Reservation reservation) {
         // 당일 예약 알림 메세지 포멧팅
         ReservationNotification dailyNotification = formattingDailyNotification(user, reservation);
 
@@ -102,16 +96,16 @@ public class NotificationService {
         String restaurantName = reservation.getRestaurant().getName();
         LocalDate reservedDate = reservation.getReservationDate();
         LocalTime reservedTime = reservation.getReservationTime().getTimeSlot();
-        Long reservationId = reservation.getId();
         LocalDateTime scheduledTime = combineWithDate(reservedDate, LocalTime.of(8, 0));
 
         // 알림 메세지 data 별 포멧팅
         String title = NotificationMessageUtil.formatDailyNotificationTitle(userName, restaurantName);
         String body = NotificationMessageUtil.formatDailyNotificationBody(restaurantName, reservedDate, reservedTime);
-        String url = NotificationMessageUtil.formatReservationNotificationUrl(reservationId);
+        String url = NotificationMessageUtil.formatReservationNotificationUrl();
 
         // 알림 메세지 빌드
-        ReservationNotification reservationNotification = ReservationNotification.builder()
+
+        return ReservationNotification.builder()
                 .type(NotificationType.DAILY_NOTIFICATION)
                 .title(title)
                 .body(body)
@@ -120,8 +114,6 @@ public class NotificationService {
                 .scheduledTime(scheduledTime)
                 .reservation(reservation)
                 .build();
-
-        return reservationNotification;
     }
 
     /**
@@ -144,10 +136,11 @@ public class NotificationService {
         // 알림 메세지 data 별 포멧팅    
         String title = NotificationMessageUtil.formatHourBeforeNotificationTitle(userName, restaurantName);
         String body = NotificationMessageUtil.formatHourBeforeNotificationBody(restaurantName, reservedDate, reservedTime);
-        String url = NotificationMessageUtil.formatReservationNotificationUrl(reservationId);
+        String url = NotificationMessageUtil.formatReservationNotificationUrl();
 
         // 알림 메세지 빌드
-        ReservationNotification reservationNotification = ReservationNotification.builder()
+
+        return ReservationNotification.builder()
                 .type(NotificationType.BEFORE_ONE_HOUR_NOTIFICATION)
                 .title(title)
                 .body(body)
@@ -156,8 +149,6 @@ public class NotificationService {
                 .scheduledTime(scheduledTime)
                 .reservation(reservation)
                 .build();
-
-        return reservationNotification;
     }
 
     /**
@@ -254,14 +245,13 @@ public class NotificationService {
         String token = fcmRepository.findByUser(notification.getUser().getId());
 
         // FCM 메시지 빌드
-        Message message = Message.builder()
+
+        return Message.builder()
                 .putData("title", notification.getTitle())
                 .putData("body", notification.getBody())
                 .putData("url", notification.getUrl())
                 .setToken(token)
                 .build();
-
-        return message;
     }
 
     /**
@@ -303,7 +293,7 @@ public class NotificationService {
         messageHistory.put("url", notification.getUrl());
 
         // 알림 history 빌드
-        NotificationHistory notificationHistory = NotificationHistory.builder()
+        return NotificationHistory.builder()
                 .type(type)
                 .message(messageHistory)
                 .sentAt(result.getSentAt())
@@ -311,7 +301,6 @@ public class NotificationService {
                 .errorCode(result.getErrorCode())
                 .user(notification.getUser())
                 .build();
-        return notificationHistory;
     }
 
     /**
@@ -407,9 +396,7 @@ public class NotificationService {
             log.info("response: " + subscriptionResponse.getSeatNotificationId());
         }
 
-        SubscriptionListResponse subscriptionListResponse = new SubscriptionListResponse(subscriptionResponseList.size(), subscriptionResponseList);
-
-        return subscriptionListResponse;
+        return new SubscriptionListResponse(subscriptionResponseList.size(), subscriptionResponseList);
     }
 
     // 빈자리 알림 발송 시작점
@@ -438,10 +425,7 @@ public class NotificationService {
         MulticastMessage multicastMessage = buildSeatNotifications(seatNotificationMessage, seatNotificationList);
 
         // FCM 메세지 전송 및 전송 결과 반환
-        List<FcmSendingResultDto> resultList = sendMulticastNotification(multicastMessage);
-
-
-        return resultList;
+        return sendMulticastNotification(multicastMessage);
     }
 
     private MulticastMessage buildSeatNotifications(SeatNotificationMessage seatNotificationMessage, List<SeatNotification> seatNotificationList) {
@@ -451,15 +435,13 @@ public class NotificationService {
             tokenList.add(token);
         }
 
-        // FCM 메시지 빌드
-        MulticastMessage message = MulticastMessage.builder()
+        // FCM 메시지 빌드 후 반환
+        return MulticastMessage.builder()
                 .putData("title", seatNotificationMessage.getTitle())
                 .putData("body", seatNotificationMessage.getBody())
                 .putData("url", seatNotificationMessage.getUrl())
                 .addAllTokens(tokenList)
                 .build();
-
-        return message;
     }
 
     private List<FcmSendingResultDto> sendMulticastNotification(MulticastMessage message) {
@@ -470,11 +452,10 @@ public class NotificationService {
             // FCM 서버에 메세지 전송
             List<SendResponse> sendResponseList = FirebaseMessaging.getInstance().sendEachForMulticast(message).getResponses();
             // 전송 결과(전송 시간, 전송 상태)
-            for(int i = 0; i < sendResponseList.size(); i++) {
-                SendResponse sendResponse = sendResponseList.get(i);
+            for (SendResponse sendResponse : sendResponseList) {
                 LocalDateTime time = LocalDateTime.now();
 
-                if(sendResponse.isSuccessful()){
+                if (sendResponse.isSuccessful()) {
                     FcmSendingResultDto fcmSendingResultDto = new FcmSendingResultDto(time, SentResult.SUCCESS);
                 } else {
                     FcmSendingResultDto fcmSendingResultDto = new FcmSendingResultDto(time, SentResult.FAILED, sendResponse.getException().getMessagingErrorCode());
@@ -518,15 +499,6 @@ public class NotificationService {
     }
 
     /**
-     * 예약 알림 테스트 메서드(mock test 코드 작성 후 삭제 예정)
-     * @param userId
-     * @param reservationId
-     */
-    public void testReservationNotification(long userId, long reservationId) {
-        eventPublisher.publishEvent(new ReservationCompleteEvent(userId, reservationId));
-    }
-
-    /**
      * 빈자리 알림 테스트 메서드(mock test 코드 작성 후 삭제 예정)
      * @param reservationId
      */
@@ -547,5 +519,148 @@ public class NotificationService {
         List<SeatNotificationMessage> messages = seatNotificationMessageRepository.findAllByCurrentDateTime(currentDate, currentTime);
         // 삭제(Cascade 설정으로 알림 신청 데이터도 삭제됨)
         seatNotificationMessageRepository.deleteAll(messages);
+    }
+
+
+    /**
+     * 예약 완료 알림 전송 메서드
+     * @param user
+     * @param reservation
+     */
+    public void sendReservationSuccessNotification(User user, Reservation reservation) {
+        FcmMessageDto messageData = formattingReservationCompleteNotification(reservation);
+        List<Message> messageList = buildMessageList(user, messageData);
+
+        // history 데이터 list 세팅
+        List<NotificationHistory> notificationHistoryList = new ArrayList<>();
+
+        // 알림 타입 세팅
+        NotificationType type = NotificationType.RESERVATION_COMPLETE;
+
+        // 전송할 알림 리스트를 전부 도는 알림 발송 로직(현재 동기 처리 중)
+        for (Message message : messageList) {
+            // 단 건의 알림 전송 로직에 대해 처리하는 메서드
+            NotificationHistory notificationHistory = sendCompleteNotification(message, type, user, messageData);
+            notificationHistoryList.add(notificationHistory);
+        }
+        // 전송된 알림 히스토리를 전부 history 테이블에 저장하는 메서드
+        saveNotificationHistory(notificationHistoryList);
+    }
+
+    private FcmMessageDto formattingReservationCompleteNotification(Reservation reservation) {
+        // 예약 완료 알림 메세지에 필요한 정보 변수 선언
+        String restaurantName = reservation.getRestaurant().getName();
+        String restaurantPhoneNumber = reservation.getRestaurant().getPhoneNumber();
+        LocalDate reservedDate = reservation.getReservationDate();
+        LocalTime reservedTime = reservation.getReservationTime().getTimeSlot();
+        int minCapacity = reservation.getSeatType().getMinCapacity();
+        int maxCapacity = reservation.getSeatType().getMaxCapacity();
+
+        // 알림 메세지 data 별 포멧팅
+        String title = NotificationMessageUtil.formatReservationCompleteNotificationTitle(restaurantName);
+        String body = NotificationMessageUtil.formatReservationCompleteNotificationBody(reservedDate, reservedTime, minCapacity,
+                                                                                        maxCapacity, restaurantPhoneNumber);
+        String url = NotificationMessageUtil.formatReservationNotificationUrl();
+
+        return new FcmMessageDto(title, body, url);
+    }
+
+    private List<Message> buildMessageList(User user, FcmMessageDto fcmMessageDto) {
+        List<Fcm> tokenList = user.getFcmList();
+        List<Message> messageList = new ArrayList<>();
+        Message message;
+
+        for(Fcm token : tokenList) {
+            message = Message.builder()
+                    .putData("title", fcmMessageDto.getTitle())
+                    .putData("body", fcmMessageDto.getBody())
+                    .putData("url", fcmMessageDto.getUrl())
+                    .setToken(token.getToken())
+                    .build();
+
+            messageList.add(message);
+        }
+
+        return messageList;
+    }
+
+
+    private NotificationHistory sendCompleteNotification(Message message, NotificationType type, User user, FcmMessageDto fcmMessageDto) {
+        // FCM 메세지 전송 및 전송 결과 반환
+        FcmSendingResultDto result = sendEachNotification(message);
+        return buildNotificationHistory(fcmMessageDto, result, type, user);
+    }
+
+    private NotificationHistory buildNotificationHistory(FcmMessageDto fcmMessageDto, FcmSendingResultDto result, NotificationType type, User user) {
+        // 보낸 FCM 메세지를 JSON으로 저장하기 위해 Map 사용
+        Map<String, String> messageHistory = new HashMap<>();
+        messageHistory.put("title", fcmMessageDto.getTitle());
+        messageHistory.put("body", fcmMessageDto.getBody());
+        messageHistory.put("url", fcmMessageDto.getUrl());
+
+        // 알림 history 빌드
+        return NotificationHistory.builder()
+                .type(type)
+                .message(messageHistory)
+                .sentAt(result.getSentAt())
+                .sentResult(result.getSentResult())
+                .errorCode(result.getErrorCode())
+                .user(user)
+                .build();
+    }
+
+    /**
+     * 예약 취소 알림 전송 메서드
+     * @param user
+     * @param reservation
+     * @param isCODPassed
+     */
+    public void sendReservationCanceledNotification(User user, Reservation reservation, boolean isCODPassed) {
+        FcmMessageDto messageData = formattingReservationCanceledNotification(reservation, user, isCODPassed);
+        List<Message> messageList = buildMessageList(user, messageData);
+
+        // history 데이터 list 세팅
+        List<NotificationHistory> notificationHistoryList = new ArrayList<>();
+
+        // 알림 타입 세팅
+        NotificationType type = NotificationType.RESERVATION_CANCELED;
+
+        // 전송할 알림 리스트를 전부 도는 알림 발송 로직(현재 동기 처리 중)
+        for (Message message : messageList) {
+            // 단 건의 알림 전송 로직에 대해 처리하는 메서드
+            NotificationHistory notificationHistory = sendCompleteNotification(message, type, user, messageData);
+            notificationHistoryList.add(notificationHistory);
+        }
+        // 전송된 알림 히스토리를 전부 history 테이블에 저장하는 메서드
+        saveNotificationHistory(notificationHistoryList);
+    }
+
+    private FcmMessageDto formattingReservationCanceledNotification(Reservation reservation, User user, boolean isCODPassed) {
+        // 예약 완료 알림 메세지에 필요한 정보 변수 선언
+
+        String restaurantName = reservation.getRestaurant().getName();
+        String restaurantPhoneNumber = reservation.getRestaurant().getPhoneNumber();
+        LocalDate reservedDate = reservation.getReservationDate();
+        LocalTime reservedTime = reservation.getReservationTime().getTimeSlot();
+        int minCapacity = reservation.getSeatType().getMinCapacity();
+        int maxCapacity = reservation.getSeatType().getMaxCapacity();
+
+        String title;
+        String body;
+
+        // 알림 메세지 data 별 포멧팅
+        if(isCODPassed) {
+            title = NotificationMessageUtil.formatReservationFullCanceledNotificationTitle(restaurantName);
+            body = NotificationMessageUtil.formatReservationFullCanceledNotificationBody(reservedDate, reservedTime, minCapacity,
+                    maxCapacity, restaurantPhoneNumber, user.getNormalTicketCount());
+        } else {
+            title = NotificationMessageUtil.formatReservationNullCanceledNotificationTitle(restaurantName);
+            body = NotificationMessageUtil.formatReservationNullCanceledNotificationBody(reservedDate, reservedTime, minCapacity,
+                    maxCapacity, restaurantPhoneNumber, user.getNormalTicketCount());
+        }
+
+        String url = NotificationMessageUtil.formatReservationNotificationUrl();
+
+        return new FcmMessageDto(title, body, url);
     }
 }
