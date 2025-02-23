@@ -75,7 +75,7 @@ public class NotificationController {
     }
 
     /**
-     * 예약 알림 테스트용 api(mock test 코드 작성 후 삭제 예정      )
+     * 예약 알림 테스트용 api(mock test 코드 작성 후 삭제 예정)
      * @param userId
      * @param reservationId
      * @return
