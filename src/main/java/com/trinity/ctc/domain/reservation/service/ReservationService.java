@@ -100,7 +100,7 @@ public class ReservationService {
         reservation.completeReservation();
 
         // 예약 완료 이벤트 발행
-        eventPublisher.publishEvent(new ReservationCompleteEvent(userId, reservationId));
+        eventPublisher.publishEvent(new ReservationCompleteEvent(reservation));
 
         // 결과 반환
         return ReservationResultResponse.of(true, reservationId, reservation.getRestaurant().getName(), reservation.getReservationDate(), reservation.getReservationTime().getTimeSlot());
@@ -164,9 +164,7 @@ public class ReservationService {
         seatAvailability.cancelOneReservation();
         log.info("[예약 취소 후] 가용좌석 수: {}", seatAvailability.getAvailableSeats());
 
-        eventPublisher.publishEvent(new ReservationCanceledEvent(reservationId, seatAvailability));
-
-        log.info("여기까지 왔나요?");
+        eventPublisher.publishEvent(new ReservationCanceledEvent(reservation, seatAvailability, isCODPassed));
 
         return ReservationResultResponse.of(true, reservationId, reservation.getRestaurant().getName(), reservation.getReservationDate(), reservation.getReservationTime().getTimeSlot(), isCODPassed);
     }
