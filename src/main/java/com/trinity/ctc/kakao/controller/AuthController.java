@@ -5,6 +5,11 @@ import com.trinity.ctc.domain.fcm.service.FcmService;
 import com.trinity.ctc.kakao.dto.KakaoLogoutResponse;
 import com.trinity.ctc.kakao.dto.UserLoginResponse;
 import com.trinity.ctc.kakao.service.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/users/kakao")
+@Tag(name = "Auth", description = "인증 관련 API")
 public class AuthController {
 
     private final AuthService authService;
@@ -27,7 +33,19 @@ public class AuthController {
 
 
     @PostMapping("/login")
-    public ResponseEntity<?> kakaoLogin(@RequestParam String code, @RequestBody FcmTokenRequest fcmTokenRequest) {
+    @Operation(
+        summary = "카카오 로그인",
+        description = "카카오 로그인을 수행합니다."
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "카카오 로그인 성공",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = UserLoginResponse.class)
+            )
+    )
+    public ResponseEntity<UserLoginResponse> kakaoLogin(@RequestParam String code, @RequestBody FcmTokenRequest fcmTokenRequest) {
         UserLoginResponse response = authService.authenticateWithKakao(code);
 
         fcmService.registerFcmToken(fcmTokenRequest, response.getId());
@@ -36,14 +54,24 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Map<String, String>> kakaoLogout(@RequestHeader("Authorization") String authorizationHeader, @RequestBody FcmTokenRequest fcmTokenRequest) {
+    @Operation(
+        summary = "카카오 로그아웃",
+        description = "카카오 로그아웃을 수행합니다."
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "카카오 로그아웃 성공",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = KakaoLogoutResponse.class)
+            )
+    )
+    public ResponseEntity<KakaoLogoutResponse> kakaoLogout(@RequestHeader("Authorization") String authorizationHeader, @RequestBody FcmTokenRequest fcmTokenRequest) {
         String accessToken = authorizationHeader.replace("Bearer ", "").trim();
         KakaoLogoutResponse logoutResponse = authService.logout(accessToken);
 
         fcmService.deleteFcmToken(fcmTokenRequest);
 
-        return ResponseEntity.ok(Map.of(
-                "status", "success",
-                "id", logoutResponse.getId()));
+        return ResponseEntity.ok(logoutResponse);
     }
 }
