@@ -9,6 +9,8 @@ import com.trinity.ctc.domain.restaurant.entity.Restaurant;
 import com.trinity.ctc.domain.restaurant.entity.RestaurantCategory;
 import com.trinity.ctc.domain.restaurant.entity.RestaurantImage;
 import com.trinity.ctc.domain.restaurant.repository.RestaurantRepository;
+import com.trinity.ctc.util.exception.CustomException;
+import com.trinity.ctc.util.exception.error_code.JsonParseErrorCode;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -51,7 +53,7 @@ public class RestaurantFileLoader {
                     restaurants.add(restaurantRepository.save(restaurant));
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new CustomException(JsonParseErrorCode.FILE_READ_ERROR);
             }
         }
         return restaurants;
