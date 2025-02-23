@@ -31,14 +31,20 @@ public class SwaggerConfig {
     @Value("${swagger.group.fcm.paths}")
     private String[] fcmPaths;
 
-    @Value("/api/reservations/**")
+    @Value("${swagger.group.reservation.paths}")
     private String[] reservationPaths;
 
-    @Value("/api/notifications/**")
+    @Value("${swagger.group.notification.paths}")
     private String[] notificationPaths;
 
-    @Value("/api/users/**")
+    @Value("${swagger.group.user.paths}")
     private String[] userPaths;
+
+    @Value("${swagger.group.restaurant.paths}")
+    private String[] restaurantPaths;
+
+    @Value("${swagger.group.search.paths}")
+    private String[] searchPaths;
 
     @Bean
     public OpenAPI customOpenAPI() {
@@ -116,6 +122,25 @@ public class SwaggerConfig {
         return GroupedOpenApi.builder()
                 .group("User API")
                 .pathsToMatch(userPaths)
+                .build();
+    }
+
+    /**
+     * Restaurant API 그룹
+     */
+    @Bean
+    public GroupedOpenApi restaurantOpenApi() {
+        return GroupedOpenApi.builder()
+                .group("Restaurant API")
+                .pathsToMatch(restaurantPaths)
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi searchOpenApi() {
+        return GroupedOpenApi.builder()
+                .group("Search API")
+                .pathsToMatch(searchPaths)
                 .build();
     }
 }
