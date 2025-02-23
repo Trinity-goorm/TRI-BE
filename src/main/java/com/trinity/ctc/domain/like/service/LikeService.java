@@ -7,6 +7,8 @@ import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.domain.like.repository.LikeRepository;
 import com.trinity.ctc.domain.restaurant.dto.RestaurantDetailResponse;
 import com.trinity.ctc.domain.restaurant.repository.RestaurantRepository;
+import com.trinity.ctc.util.exception.CustomException;
+import com.trinity.ctc.util.exception.error_code.LikeErrorCode;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,12 +27,12 @@ public class LikeService {
     @Transactional
     public void likeRestaurant(Long userId, Long restaurantId) {
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다. ID: " + userId));
+            .orElseThrow(() -> new CustomException(LikeErrorCode.USER_NOT_FOUND));
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
-            .orElseThrow(() -> new IllegalArgumentException("해당 식당을 찾을 수 없습니다. ID: " + restaurantId));
+            .orElseThrow(() -> new CustomException(LikeErrorCode.RESTAURANT_NOT_FOUND));
 
         if (likeRepository.existsByUserAndRestaurant(user, restaurant)) {
-            throw new IllegalStateException("이미 찜한 식당입니다.");
+            throw new CustomException(LikeErrorCode.ALREADY_LIKED);
         }
 
         Likes likes = Likes.builder()
@@ -45,12 +47,12 @@ public class LikeService {
     @Transactional
     public void unlikeRestaurant(Long userId, Long restaurantId) {
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다. ID: " + userId));
+            .orElseThrow(() -> new CustomException(LikeErrorCode.USER_NOT_FOUND));
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
-            .orElseThrow(() -> new IllegalArgumentException("해당 식당을 찾을 수 없습니다. ID: " + restaurantId));
+            .orElseThrow(() -> new CustomException(LikeErrorCode.RESTAURANT_NOT_FOUND));
 
         if (!likeRepository.existsByUserAndRestaurant(user, restaurant)) {
-            throw new IllegalStateException("찜하지 않은 식당입니다.");
+            throw new CustomException(LikeErrorCode.NOT_LIKED);
         }
 
         likeRepository.deleteByUserAndRestaurant(user, restaurant);
@@ -59,7 +61,7 @@ public class LikeService {
     @Transactional
     public List<RestaurantDetailResponse> getLikeList(Long userId) {
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다. ID: " + userId));
+            .orElseThrow(() -> new CustomException(LikeErrorCode.USER_NOT_FOUND));
 
         List<Likes> likes = likeRepository.findByUser(user);
 

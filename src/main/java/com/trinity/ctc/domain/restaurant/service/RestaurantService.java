@@ -14,6 +14,9 @@ import com.trinity.ctc.domain.like.repository.LikeRepository;
 import com.trinity.ctc.domain.restaurant.dto.RestaurantPreviewResponse;
 import com.trinity.ctc.domain.restaurant.dto.RestaurantDetailResponse;
 import com.trinity.ctc.domain.restaurant.repository.RestaurantRepository;
+import com.trinity.ctc.util.exception.CustomException;
+import com.trinity.ctc.util.exception.error_code.RestaurantErrorCode;
+import com.trinity.ctc.util.exception.error_code.UserErrorCode;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -53,7 +56,7 @@ public class RestaurantService {
     public RestaurantDetailResponse getRestaurantDetail(Long restaurantId) {
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
             .orElseThrow(
-                () -> new IllegalArgumentException("해당 식당을 찾을 수 없습니다. ID: " + restaurantId));
+                () -> new CustomException(RestaurantErrorCode.NOT_FOUND));
 
         log.info("[SELECT] 식당 상세정보 획득 ID: {}", restaurantId);
         return RestaurantDetailResponse.fromEntity(restaurant);
@@ -62,10 +65,10 @@ public class RestaurantService {
     @Transactional(readOnly = true)
     public List<RestaurantPreviewResponse> getRestaurantsByCategory(RestaurantPreviewRequest request, Long categoryId) {
         User user = userRepository.findById(request.getUserId())
-            .orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다. ID: " + request.getUserId()));
+            .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
         SortingStrategy sortingStrategy = SortingStrategyFactory.getStrategy(request.getSortType());
-        Sort sort = sortingStrategy.getSort(); //getSort() 메서드가 없음
+        Sort sort = sortingStrategy.getSort();
 
         Pageable pageable = PageRequest.of(request.getPage()-1, 30, sort);
 

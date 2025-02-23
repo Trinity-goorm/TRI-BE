@@ -30,13 +30,8 @@ public class AuthService {
     @Transactional
     public UserLoginResponse authenticateWithKakao(String authorizationCode) {
 
-        // 1. 토큰 발급 요청
         KakaoTokenResponse tokenResponse = kakaoApiService.getAccessToken(authorizationCode);
-
-        // 2. 사용자 정보 요청
         KakaoUserInfoResponse userInfo = kakaoApiService.getUserInfo(tokenResponse.getAccessToken());
-
-        // 3. 사용자 정보 처리 (회원 가입 또는 로그인 처리)
         UserLoginResponse response = handleUserInfo(userInfo, tokenResponse);
 
         return response;

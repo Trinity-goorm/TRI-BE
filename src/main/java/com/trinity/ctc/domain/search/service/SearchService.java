@@ -12,6 +12,9 @@ import com.trinity.ctc.domain.search.sorting.SortingStrategy;
 import com.trinity.ctc.domain.search.sorting.SortingStrategyFactory;
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.domain.user.repository.UserRepository;
+import com.trinity.ctc.util.exception.CustomException;
+import com.trinity.ctc.util.exception.error_code.SearchErrorCode;
+import com.trinity.ctc.util.exception.error_code.UserErrorCode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -40,7 +43,7 @@ public class SearchService {
 
         Page<Restaurant> restaurants = restaurantRepository.searchRestaurants(keyword, pageable);
         User user = userRepository.findById(request.getUserId())
-            .orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다. ID: " + request.getUserId()));
+            .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
         saveSearchHistory(request.getUserId(), keyword);
         return restaurantService.convertToRestaurantDtoList(restaurants,user);
@@ -53,7 +56,7 @@ public class SearchService {
     @Transactional
     public void saveSearchHistory(Long userId, String keyword) {
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다. ID: " + userId));
+            .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
         Optional<SearchHistory> existingHistory = searchRepository.findByKeywordAndUser(keyword, user);
 
@@ -74,11 +77,11 @@ public class SearchService {
     @Transactional
     public void deleteSearchHistory(Long userId, Long searchHistoryId) {
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다. ID: " + userId));
+            .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
         SearchHistory searchHistory = searchRepository.findById(searchHistoryId)
             .orElseThrow(
-                () -> new IllegalArgumentException("검색 기록을 찾을 수 없습니다. ID: " + searchHistoryId));
+                () -> new CustomException(SearchErrorCode.NOT_FOUND_SEARCH_RESULT));
 
         if (searchHistory.getUser().equals(user)) {
             searchHistory.softDelete(); // 🔹 isDeleted = true로 변경
