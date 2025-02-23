@@ -40,6 +40,8 @@ public class NotificationHistory {
     @Enumerated(EnumType.STRING)
     private MessagingErrorCode errorCode;
 
+    private String fcmToken;
+
     private Boolean isDeleted = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -48,12 +50,13 @@ public class NotificationHistory {
 
     @Builder
     public NotificationHistory(NotificationType type, Map<String, String> message, LocalDateTime sentAt, SentResult sentResult,
-                               @Nullable MessagingErrorCode errorCode, User user) {
+                               @Nullable MessagingErrorCode errorCode, String fcmToken, User user) {
         this.type = type;
         this.message = message;
         this.sentAt = sentAt;
         this.sentResult = sentResult;
         this.errorCode = errorCode;
+        this.fcmToken = fcmToken;
         this.user = user;
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 
 @Repository
 public interface FcmRepository extends JpaRepository<Fcm, Long> {
@@ -27,5 +28,5 @@ public interface FcmRepository extends JpaRepository<Fcm, Long> {
                      @Param("expiresAt") LocalDateTime expiresAt);
 
     @Query("SELECT f.token FROM Fcm f WHERE f.user.id = :userId")
-    String findByUser(@Param("userId") Long userId);
+    List<String> findByUser(@Param("userId") Long userId);
 }

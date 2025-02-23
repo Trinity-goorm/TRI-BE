@@ -10,8 +10,6 @@ import com.trinity.ctc.domain.user.dto.UserReservationListResponse;
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.domain.user.entity.UserPreference;
 import com.trinity.ctc.domain.user.entity.UserPreferenceCategory;
-import com.trinity.ctc.domain.user.repository.UserPreferenceCategoryRepository;
-import com.trinity.ctc.domain.user.repository.UserPreferenceRepository;
 import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.domain.user.validator.UserValidator;
 import com.trinity.ctc.util.common.SortOrder;
@@ -33,27 +31,28 @@ import java.util.List;
 public class UserService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
-    private final UserPreferenceRepository userPreferenceRepository;
-    private final UserPreferenceCategoryRepository userPreferenceCategoryRepository;
     private final UserValidator userValidator;
     private final ReservationRepository reservationRepository;
 
     /**
      * 온보딩 요청 DTO의 정보로 user entity를 build 후 저장하는 메서드
-     *
      * @param onboardingRequest
      */
     @Transactional
     public void saveOnboardingInformation(OnboardingRequest onboardingRequest) {
+        // update 할 사용자 entity select
         User user = userRepository.findById(onboardingRequest.getUserId())
                 .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
+        // 사용자가 온보딩 중인 사용자인지(status = TEMPORARILY_UNAVAILABLE) 검증, 아닐 경우 403 반환
         userValidator.validateUserStatus(user);
+        // 사용자가 선호 카테고리를 3개 이상 선택했는지 검증
+        userValidator.validateCategorySelection(onboardingRequest.getUserPreferenceCategoryIdList().size());
 
+        // 사용자가 선택한 선호 카테고리를 카테고리 table에서 select
         List<Category> categoryList = categoryRepository.findAllById(onboardingRequest.getUserPreferenceCategoryIdList());
 
-        if (categoryList.size() < 3) throw new CustomException(UserErrorCode.NOT_ENOUGH_CATEGORY_SELECT);
-
+        // userPreference entity build & save
         UserPreference userPreference = UserPreference.builder()
                 .minPrice(onboardingRequest.getMinPrice())
                 .maxPrice(onboardingRequest.getMaxPrice())
@@ -61,24 +60,14 @@ public class UserService {
                 .user(user)
                 .build();
 
-        userPreferenceRepository.save(userPreference);
-
-        log.info("userPreference: {}", userPreference.getId());
-
+        // userPreference와 사용자가 선택한 category를 mapping하여 userPreferenceCategoryList build하고 add
         List<UserPreferenceCategory> userPreferenceCategoryList = categoryList.stream()
                 .map(category -> UserPreferenceCategory.of(userPreference, category))
                 .toList();
-
         userPreference.getUserPreferenceCategoryList().addAll(userPreferenceCategoryList);
-        userPreferenceCategoryRepository.saveAll(userPreferenceCategoryList);
 
-        log.info("userPreferenceCategoryList: {}", userPreferenceCategoryList.get(0).getId());
-        log.info("userPreference: {}", userPreference.getUserPreferenceCategoryList().get(0).getId());
-        log.info("user: {}", user);
-
+        // user entity 내 update 메서드로 user와 영속화된 entity 모두 DB에 반영
         user.updateOnboardingInformation(onboardingRequest, userPreference);
-
-        userRepository.save(user);
     }
 
     /**
