@@ -13,6 +13,7 @@ import com.trinity.ctc.domain.user.entity.UserPreference;
 import com.trinity.ctc.domain.user.repository.UserPreferenceRepository;
 import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.util.exception.CustomException;
+import com.trinity.ctc.util.exception.error_code.RestaurantErrorCode;
 import com.trinity.ctc.util.exception.error_code.UserErrorCode;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +38,7 @@ public class RestaurantRecommendationService {
     @Transactional
     public List<RestaurantPreviewResponse> getRecommendedRestaurants(Long userId) {
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다. ID: " + userId));
+            .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
         log.info("user 가져오기: {}", userId);
 
@@ -60,7 +61,7 @@ public class RestaurantRecommendationService {
         return aiResponse.getRecommendations().stream()
             .map(recommendation -> {
                 Restaurant restaurant = restaurantRepository.findById(recommendation.getRestaurantId())
-                    .orElseThrow(() -> new IllegalArgumentException("해당 식당을 찾을 수 없습니다. ID: " + recommendation.getRestaurantId()));
+                    .orElseThrow(() -> new CustomException(RestaurantErrorCode.NOT_FOUND));
 
                 boolean isWishlisted = likeRepository.existsByUserAndRestaurant(user, restaurant);
 

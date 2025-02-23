@@ -11,10 +11,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Entity
 @RequiredArgsConstructor
+@Getter
 public class SearchHistory {
 
     @Id
@@ -25,6 +27,8 @@ public class SearchHistory {
     private String keyword;
 
     private LocalDateTime createdAt;
+
+    private boolean isDeleted = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -39,5 +43,9 @@ public class SearchHistory {
 
     public void updateCreatedAt() {
         this.createdAt = LocalDateTime.now();
+    }
+
+    public void softDelete() {
+        this.isDeleted = true;
     }
 }

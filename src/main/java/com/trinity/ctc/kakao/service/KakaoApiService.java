@@ -61,11 +61,9 @@ public class KakaoApiService {
     }
 
     public KakaoLogoutResponse deleteToken(String accessToken) {
-        // 1. 요청 헤더에 액세스 토큰 설정
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + accessToken);
 
-        // 2. 카카오 로그아웃 API 요청 전송
         HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
         KakaoLogoutResponse logoutResponse = restTemplate.postForObject(
