@@ -19,22 +19,24 @@ public class ReservationEventListener {
     @Async
     @EventListener
     public void handleReservationSuccessEvent(ReservationCompleteEvent reservationEvent) {
-        notificationService.registerReservationNotification(reservationEvent.getUserId(), reservationEvent.getReservationId());
+        notificationService.registerReservationNotification(reservationEvent.getReservation().getUser(), reservationEvent.getReservation());
+        notificationService.sendReservationSuccessNotification(reservationEvent.getReservation().getUser(), reservationEvent.getReservation());
     }
 
     @Async
     @EventListener
     public void handleReservationCanceledEvent(ReservationCanceledEvent reservationEvent) {
-//        빈자리 알림 발송 -> 빈자리 여부 검증을...?
+//        빈자리 알림 발송 -> 빈자리 여부 검증 방식...?
         if(reservationEvent.getSeatAvailability().getAvailableSeats() == 1) notificationService.sendSeatNotification(reservationEvent.getSeatAvailability().getId());
-        notificationService.deleteReservationNotification(reservationEvent.getReservationId());
+        notificationService.deleteReservationNotification(reservationEvent.getReservation().getId());
+        notificationService.sendReservationCanceledNotification(reservationEvent.getReservation().getUser(), reservationEvent.getReservation(), reservationEvent.isCODPassed());
     }
 
     @Async
     @EventListener
     public void handlePreOccupancyCanceledEvent(PreOccupancyCanceledEvent preOccupancyCanceledEvent) {
 //        빈자리 알림 발송
-//        if(reservationEvent.getSeatAvailability().getAvailableSeats() == 1) notificationService.sendSeatNotification(reservationEvent.getSeatAvailability().getId());
+        if(preOccupancyCanceledEvent.getSeatAvailability().getAvailableSeats() == 1) notificationService.sendSeatNotification(preOccupancyCanceledEvent.getSeatAvailability().getId());
     }
 }
 
