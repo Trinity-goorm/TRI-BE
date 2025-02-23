@@ -26,8 +26,8 @@ public class NotificationMessageUtil {
                                     restaurantName, date, time);
     }
 
-    public static String formatReservationNotificationUrl(long reservationId) {
-        return MessageFormat.format("http://localhost:5173/reservation/{0}", reservationId);
+    public static String formatReservationNotificationUrl() {
+        return "http://localhost:5173/mydining";
     }
 
     public static String formatSeatNotificationTitle(String restaurantName) {
@@ -40,6 +40,33 @@ public class NotificationMessageUtil {
     }
 
     public static String formatSeatNotificationUrl(long restaurantId) {
-        return MessageFormat.format("http://localhost:5173/reservation/{0}", restaurantId);
+        return MessageFormat.format(" http://localhost:5173/detail/{0}", restaurantId);
+    }
+
+    public static String formatReservationCompleteNotificationTitle(String restaurantName) {
+        return MessageFormat.format("예약해주셔서 감사합니다.\r\n{0}에서 예약 내역을 알려드립니다.", restaurantName);
+    }
+
+    public static String formatReservationCompleteNotificationBody(LocalDate date, LocalTime time, int min, int max, String phoneNumber) {
+        return MessageFormat.format("날짜: {0}\r\n시간: {1}\r\n인원: {2}~{3}명\r\n전화번호: {4}",
+                date, time, min, max, phoneNumber);
+    }
+
+    public static String formatReservationFullCanceledNotificationTitle(String restaurantName) {
+        return MessageFormat.format("{0} 예약 취소 되었음을 알려드립니다.\r\n환불 정책에 따라 예약 티켓의 100%가 환불 처리되었습니다.", restaurantName);
+    }
+
+    public static String formatReservationFullCanceledNotificationBody(LocalDate date, LocalTime time, int min, int max, String phoneNumber, int normalTickerCount) {
+        return MessageFormat.format("날짜: {0}\r\n시간: {1}\r\n인원: {2}~{3}명\r\n전화번호: {4}\r\n환불 티켓: 10개\r\n소유 티켓: {5}",
+                date, time, min, max, phoneNumber, normalTickerCount);
+    }
+
+    public static String formatReservationNullCanceledNotificationTitle(String restaurantName) {
+        return MessageFormat.format("{0} 예약 취소 되었음을 알려드립니다.\r\n환불 정책에 따라 예약 티켓은 환불되지 않습니다.", restaurantName);
+    }
+
+    public static String formatReservationNullCanceledNotificationBody(LocalDate date, LocalTime time, int min, int max, String phoneNumber, int normalTickerCount) {
+        return MessageFormat.format("날짜: {0}\r\n시간: {1}\r\n인원: {2}~{3}명\r\n전화번호: {4}\r\n소유 티켓: {5}",
+                date, time, min, max, phoneNumber, normalTickerCount);
     }
 }
