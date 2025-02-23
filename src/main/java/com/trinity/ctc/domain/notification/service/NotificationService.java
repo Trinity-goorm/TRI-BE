@@ -361,7 +361,7 @@ public class NotificationService {
                 .build();
 
         // 빈자리 알림 신청 시, 빈자리 알림 티켓 -1
-//        user.useEmptyTicket();
+        user.useEmptyTicket();
 
         // 빈자리 알림 신청 내역 저장
         seatNotificationRepository.save(seatNotification);
