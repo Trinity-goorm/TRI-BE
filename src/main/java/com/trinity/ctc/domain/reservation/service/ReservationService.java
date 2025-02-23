@@ -11,9 +11,9 @@ import com.trinity.ctc.domain.reservation.status.ReservationStatus;
 import com.trinity.ctc.domain.reservation.validator.ReservationValidator;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
 import com.trinity.ctc.domain.restaurant.repository.RestaurantRepository;
-import com.trinity.ctc.domain.seat.entity.SeatAvailability;
+import com.trinity.ctc.domain.seat.entity.Seat;
 import com.trinity.ctc.domain.seat.entity.SeatType;
-import com.trinity.ctc.domain.seat.repository.SeatAvailabilityRepository;
+import com.trinity.ctc.domain.seat.repository.SeatRepository;
 import com.trinity.ctc.domain.seat.repository.SeatTypeRepository;
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.event.ReservationCanceledEvent;
@@ -32,7 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
-    private final SeatAvailabilityRepository seatAvailabilityRepository;
+    private final SeatRepository seatRepository;
     private final UserRepository userRepository;
     private final RestaurantRepository restaurantRepository;
     private final SeatTypeRepository seatTypeRepository;
@@ -59,12 +59,12 @@ public class ReservationService {
         reservationValidator.validateUserReservation(reservationRequest);
 
         // 검증 (좌석 남은 자리 확인)
-        SeatAvailability seatAvailability = validateSeatAvailability(reservationRequest);
+        Seat seat = validateSeatAvailability(reservationRequest);
 
         // 좌석 한개 선점
-        log.info("[좌석 선점] 기존 좌석 수: {}", seatAvailability.getAvailableSeats());
-        seatAvailability.preoccupyOneSeat();
-        log.info("[좌석 선점 완료] 남은 좌석 수: {}", seatAvailability.getAvailableSeats());
+        log.info("[좌석 선점] 기존 좌석 수: {}", seat.getAvailableSeats());
+        seat.preoccupyOneSeat();
+        log.info("[좌석 선점 완료] 남은 좌석 수: {}", seat.getAvailableSeats());
 
         // 예약정보 생성 -> 저장
         Reservation reservation = createReservation(reservationRequest);
@@ -121,10 +121,10 @@ public class ReservationService {
         reservation.cancelReservation();
 
         // 가용좌석 증가 (더티체킹)
-        SeatAvailability seatAvailability = seatAvailabilityRepository.findByReservationData(reservation.getRestaurant().getId(), reservation.getReservationDate(), reservation.getReservationTime().getTimeSlot(), reservation.getSeatType().getId());
-        log.info("[예약 취소 전] 가용좌석 수: {}", seatAvailability.getAvailableSeats());
-        seatAvailability.cancelOneReservation();
-        log.info("[예약 취소 후] 가용좌석 수: {}", seatAvailability.getAvailableSeats());
+        Seat seat = seatRepository.findByReservationData(reservation.getRestaurant().getId(), reservation.getReservationDate(), reservation.getReservationTime().getTimeSlot(), reservation.getSeatType().getId());
+        log.info("[예약 취소 전] 가용좌석 수: {}", seat.getAvailableSeats());
+        seat.cancelOneReservation();
+        log.info("[예약 취소 후] 가용좌석 수: {}", seat.getAvailableSeats());
 
         // 결과 반환
         return ReservationResultResponse.of(true, reservationId, reservation.getRestaurant().getName(), reservation.getReservationDate(), reservation.getReservationTime().getTimeSlot());
@@ -156,15 +156,15 @@ public class ReservationService {
         log.info("[티켓 반환 후] 반환여부: {}, 일반티켓 수: {}", isCODPassed, user.getNormalTicketCount());
 
         // 좌석 수 반환
-        SeatAvailability seatAvailability = seatAvailabilityRepository.findByReservationData(reservation.getRestaurant().getId(), reservation.getReservationDate(), reservation.getReservationTime().getTimeSlot(), reservation.getSeatType().getId());
+        Seat seat = seatRepository.findByReservationData(reservation.getRestaurant().getId(), reservation.getReservationDate(), reservation.getReservationTime().getTimeSlot(), reservation.getSeatType().getId());
 
-        log.info("id:" + seatAvailability.getId());
+        log.info("id:" + seat.getId());
 
-        log.info("[예약 취소 전] 가용좌석 수: {}", seatAvailability.getAvailableSeats());
-        seatAvailability.cancelOneReservation();
-        log.info("[예약 취소 후] 가용좌석 수: {}", seatAvailability.getAvailableSeats());
+        log.info("[예약 취소 전] 가용좌석 수: {}", seat.getAvailableSeats());
+        seat.cancelOneReservation();
+        log.info("[예약 취소 후] 가용좌석 수: {}", seat.getAvailableSeats());
 
-        eventPublisher.publishEvent(new ReservationCanceledEvent(reservation, seatAvailability, isCODPassed));
+        eventPublisher.publishEvent(new ReservationCanceledEvent(reservation, seat, isCODPassed));
 
         return ReservationResultResponse.of(true, reservationId, reservation.getRestaurant().getName(), reservation.getReservationDate(), reservation.getReservationTime().getTimeSlot(), isCODPassed);
     }
@@ -175,23 +175,23 @@ public class ReservationService {
      * @param reservationRequest
      * @return 선점대상 좌석정보
      */
-    private SeatAvailability validateSeatAvailability(ReservationRequest reservationRequest) {
-        SeatAvailability seatAvailability = seatAvailabilityRepository.findByReservationData(
+    private Seat validateSeatAvailability(ReservationRequest reservationRequest) {
+        Seat seat = seatRepository.findByReservationData(
                 reservationRequest.getRestaurantId(),
                 reservationRequest.getSelectedDate(),
                 reservationRequest.getReservationTime(),
                 reservationRequest.getSeatTypeId()
         );
 
-        if (!SeatAvailabilityValidator.checkAvailability(seatAvailability)) {
+        if (!SeatAvailabilityValidator.checkAvailability(seat)) {
             log.warn("[예약 실패] 좌석 부족 - 레스토랑 ID: {}, 날짜: {}, 시간: {}, 좌석 타입 ID: {}",
                     reservationRequest.getRestaurantId(), reservationRequest.getSelectedDate(),
                     reservationRequest.getReservationTime(), reservationRequest.getSeatTypeId());
             throw new CustomException(SeatErrorCode.NO_AVAILABLE_SEAT);
         }
 
-        log.info("[좌석 확인 완료] 남은 좌석 수: {}", seatAvailability.getAvailableSeats());
-        return seatAvailability;
+        log.info("[좌석 확인 완료] 남은 좌석 수: {}", seat.getAvailableSeats());
+        return seat;
     }
 
     /**

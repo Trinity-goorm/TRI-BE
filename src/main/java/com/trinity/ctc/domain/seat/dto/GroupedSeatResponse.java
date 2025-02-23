@@ -1,6 +1,6 @@
 package com.trinity.ctc.domain.seat.dto;
 
-import com.trinity.ctc.domain.seat.entity.SeatAvailability;
+import com.trinity.ctc.domain.seat.entity.Seat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -29,13 +29,13 @@ public class GroupedSeatResponse {
     @Schema(description = "예약 가능한 좌석 수", example = "4")
     private final int availableSeats;
 
-    public static GroupedSeatResponse of(SeatAvailability seatAvailability) {
+    public static GroupedSeatResponse of(Seat seat) {
         return new GroupedSeatResponse(
-                seatAvailability.getId(),
-                seatAvailability.getSeatType().getId(),
-                seatAvailability.getSeatType().getMinCapacity(),
-                seatAvailability.getSeatType().getMaxCapacity(),
-                seatAvailability.getAvailableSeats()
+                seat.getId(),
+                seat.getSeatType().getId(),
+                seat.getSeatType().getMinCapacity(),
+                seat.getSeatType().getMaxCapacity(),
+                seat.getAvailableSeats()
         );
     }
 }

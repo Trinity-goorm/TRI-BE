@@ -1,6 +1,6 @@
 package com.trinity.ctc.util.validator;
 
-import com.trinity.ctc.domain.seat.entity.SeatAvailability;
+import com.trinity.ctc.domain.seat.entity.Seat;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -9,29 +9,29 @@ import java.util.List;
 public class SeatAvailabilityValidator {
     private SeatAvailabilityValidator() {}
 
-    public static boolean validate(SeatAvailability seatAvailability, boolean isToday) {
-        return isToday ? checkAvailabilityForToday(seatAvailability) : checkAvailabilityForFuture(seatAvailability);
+    public static boolean validate(Seat seat, boolean isToday) {
+        return isToday ? checkAvailabilityForToday(seat) : checkAvailabilityForFuture(seat);
     }
 
-    public static boolean isAnySeatAvailable(List<SeatAvailability> seatAvailabilities, boolean isToday) {
-        return seatAvailabilities.stream()
+    public static boolean isAnySeatAvailable(List<Seat> seats, boolean isToday) {
+        return seats.stream()
                 .anyMatch(sa -> SeatAvailabilityValidator.validate(sa, isToday));
     }
 
-    public static boolean checkAvailability(SeatAvailability seatAvailability) {
-        LocalDate reservationDate = seatAvailability.getReservationDate();
+    public static boolean checkAvailability(Seat seat) {
+        LocalDate reservationDate = seat.getReservationDate();
         DateTimeValidator.isPast(reservationDate);
         boolean isToday = DateTimeValidator.isToday(reservationDate);
-        return isToday ? checkAvailabilityForToday(seatAvailability) : checkAvailabilityForFuture(seatAvailability);
+        return isToday ? checkAvailabilityForToday(seat) : checkAvailabilityForFuture(seat);
     }
 
-    private static boolean checkAvailabilityForToday(SeatAvailability seatAvailability) {
+    private static boolean checkAvailabilityForToday(Seat seat) {
         LocalTime oneHourLater = LocalTime.now().plusHours(1);
-        return seatAvailability.getAvailableSeats() > 0 &&
-                seatAvailability.getReservationTime().getTimeSlot().isAfter(oneHourLater);
+        return seat.getAvailableSeats() > 0 &&
+                seat.getReservationTime().getTimeSlot().isAfter(oneHourLater);
     }
 
-    private static boolean checkAvailabilityForFuture(SeatAvailability seatAvailability) {
-        return seatAvailability.getAvailableSeats() > 0;
+    private static boolean checkAvailabilityForFuture(Seat seat) {
+        return seat.getAvailableSeats() > 0;
     }
 }

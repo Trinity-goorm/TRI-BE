@@ -1,7 +1,7 @@
 package com.trinity.ctc.domain.seat.controller;
 
 import com.trinity.ctc.domain.seat.dto.GroupedDailyAvailabilityResponse;
-import com.trinity.ctc.domain.seat.service.SeatAvailabilityService;
+import com.trinity.ctc.domain.seat.service.SeatService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -18,13 +18,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 
+@RestController
 @RequestMapping("/api/seats")
 @RequiredArgsConstructor
 @Tag(name = "Seat", description = "좌석 관련 API")
 @Slf4j
-public class SeatAvailabilityController {
+public class SeatController {
 
-    private final SeatAvailabilityService seatAvailabilityService;
+    private final SeatService seatService;
 
     @GetMapping("/availability/day")
     @Operation(
@@ -42,7 +43,7 @@ public class SeatAvailabilityController {
     public ResponseEntity<GroupedDailyAvailabilityResponse> getAvailabilityForDay(@RequestParam Long restaurantId,
                                                                                   @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate selectedDate) {
         log.info("[GetAvailabilityForDay] 대상 식당: {}, 대상 날짜: {}", restaurantId, selectedDate);
-        GroupedDailyAvailabilityResponse availableSeats = seatAvailabilityService.getAvailableSeatsDay(restaurantId, selectedDate);
+        GroupedDailyAvailabilityResponse availableSeats = seatService.getAvailableSeatsDay(restaurantId, selectedDate);
         return ResponseEntity.ok(availableSeats);
     }
 }

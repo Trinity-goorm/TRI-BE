@@ -4,7 +4,7 @@ import com.trinity.ctc.domain.reservation.entity.ReservationTime;
 import com.trinity.ctc.domain.reservation.service.ReservationTimeService;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
 import com.trinity.ctc.domain.restaurant.service.RestaurantService;
-import com.trinity.ctc.domain.seat.entity.SeatAvailability;
+import com.trinity.ctc.domain.seat.entity.Seat;
 import com.trinity.ctc.domain.seat.entity.SeatType;
 import com.trinity.ctc.domain.seat.mode.DateRangeMode;
 import jakarta.persistence.EntityManager;
@@ -22,7 +22,7 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class SeatAvailabilityBatchService {
+public class SeatBatchService {
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -37,16 +37,16 @@ public class SeatAvailabilityBatchService {
     private int availableSeatCount;
 
     @Transactional
-    public void batchInsertSeatAvailabilityProd() {
+    public void batchInsertSeatProd() {
         long startTime = System.nanoTime();
 
-        List<SeatAvailability> seatAvailabilities = prepareSeatAvailabilityData(DateRangeMode.NEXT_MONTH);
+        List<Seat> seats = prepareSeatData(DateRangeMode.NEXT_MONTH);
 
-        int totalSize = seatAvailabilities.size();
-        log.info("🚀 INSERT 할 SeatAvailability 데이터 개수: {}", totalSize);
+        int totalSize = seats.size();
+        log.info("🚀 INSERT 할 Seat 데이터 개수: {}", totalSize);
 
         for (int i = 0; i < totalSize; i++) {
-            entityManager.persist(seatAvailabilities.get(i));
+            entityManager.persist(seats.get(i));
 
             if ((i + 1) % batchSize == 0) {
                 entityManager.flush();
@@ -62,16 +62,16 @@ public class SeatAvailabilityBatchService {
     }
 
     @Transactional
-    public void batchInsertSeatAvailabilityDummy() {
+    public void batchInsertSeatDummy() {
         long startTime = System.nanoTime();
 
-        List<SeatAvailability> seatAvailabilities = prepareSeatAvailabilityData(DateRangeMode.TWO_MONTHS);
+        List<Seat> seats = prepareSeatData(DateRangeMode.TWO_MONTHS);
 
-        int totalSize = seatAvailabilities.size();
-        log.info("🚀 INSERT 할 SeatAvailability 데이터 개수: {}", totalSize);
+        int totalSize = seats.size();
+        log.info("🚀 INSERT 할 Seat 데이터 개수: {}", totalSize);
 
         for (int i = 0; i < totalSize; i++) {
-            entityManager.persist(seatAvailabilities.get(i));
+            entityManager.persist(seats.get(i));
 
             if ((i + 1) % batchSize == 0) {
                 entityManager.flush();
@@ -86,7 +86,7 @@ public class SeatAvailabilityBatchService {
         log.info("✅ 배치 INSERT 완료! 실행 시간: {}ms", (endTime - startTime) / 1_000_000);
     }
 
-    private List<SeatAvailability> prepareSeatAvailabilityData(DateRangeMode mode) {
+    private List<Seat> prepareSeatData(DateRangeMode mode) {
         List<Restaurant> restaurants = restaurantService.getAllRestaurants();
         List<ReservationTime> reservationTimes = reservationTimeService.getAllReservationTimes();
         List<SeatType> seatTypes = seatTypeService.getAllSeatTypes();
@@ -102,18 +102,18 @@ public class SeatAvailabilityBatchService {
             endDate = startDate.plusMonths(2); // 다음 달 말일까지
         }
 
-        List<SeatAvailability> seatAvailabilities = new ArrayList<>();
+        List<Seat> seats = new ArrayList<>();
 
         for (LocalDate reservationDate = startDate; reservationDate.isBefore(endDate); reservationDate = reservationDate.plusDays(1)) {
             for (Restaurant restaurant : restaurants) {
                 for (ReservationTime reservationTime : reservationTimes) {
                     for (SeatType seatType : seatTypes) {
-                        seatAvailabilities.add(SeatAvailability.create(restaurant, reservationDate, reservationTime, seatType, availableSeatCount));
+                        seats.add(Seat.create(restaurant, reservationDate, reservationTime, seatType, availableSeatCount));
                     }
                 }
             }
         }
 
-        return seatAvailabilities;
+        return seats;
     }
 }

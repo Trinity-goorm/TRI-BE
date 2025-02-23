@@ -17,12 +17,12 @@ import java.util.Optional;
 @Repository
 public interface SeatNotificationMessageRepository extends JpaRepository<SeatNotificationMessage, Long> {
 
-    @Query("SELECT s FROM SeatNotificationMessage s WHERE s.seatAvailability.id = :seatAvailabilityId")
-    Optional<SeatNotificationMessage> findBySeatId(@Param("seatAvailabilityId") long seatAvailabilityId);
+    @Query("SELECT s FROM SeatNotificationMessage s WHERE s.seat.id = :seatId")
+    Optional<SeatNotificationMessage> findBySeatId(@Param("seatId") long seatId);
 
 
-    @Query("SELECT s FROM SeatNotificationMessage s WHERE s.seatAvailability IN (" +
-            "    SELECT a FROM SeatAvailability a WHERE a.reservationDate < :currentDate OR " +
+    @Query("SELECT s FROM SeatNotificationMessage s WHERE s.seat IN (" +
+            "    SELECT a FROM Seat a WHERE a.reservationDate < :currentDate OR " +
             "         (a.reservationDate = :currentDate AND a.reservationTime.timeSlot < :currentTime))")
     List<SeatNotificationMessage> findAllByCurrentDateTime(@Param("currentDate") LocalDate currentDate,
                                                                   @Param("currentTime") LocalTime currentTime);

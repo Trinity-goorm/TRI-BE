@@ -4,8 +4,8 @@ import com.trinity.ctc.domain.reservation.dto.ReservationAvailabilityResponse;
 import com.trinity.ctc.domain.seat.dto.GroupedDailyAvailabilityResponse;
 import com.trinity.ctc.domain.seat.dto.GroupedSeatResponse;
 import com.trinity.ctc.domain.seat.dto.GroupedTimeSlotResponse;
-import com.trinity.ctc.domain.seat.entity.SeatAvailability;
-import com.trinity.ctc.domain.seat.repository.SeatAvailabilityRepository;
+import com.trinity.ctc.domain.seat.entity.Seat;
+import com.trinity.ctc.domain.seat.repository.SeatRepository;
 import com.trinity.ctc.util.formatter.DateTimeUtil;
 import com.trinity.ctc.util.helper.GroupingHelper;
 import com.trinity.ctc.util.validator.DateTimeValidator;
@@ -27,9 +27,9 @@ import static com.trinity.ctc.util.validator.DateTimeValidator.isToday;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class SeatAvailabilityService {
+public class SeatService {
 
-    private final SeatAvailabilityRepository seatAvailabilityRepository;
+    private final SeatRepository seatRepository;
 
     /**
      * 오늘 예약가능 시간 및 좌석 별 남은 좌석 수 반환 (현재시간 한시간 뒤부터)
@@ -41,11 +41,11 @@ public class SeatAvailabilityService {
     public GroupedDailyAvailabilityResponse getAvailableSeatsDay(Long restaurantId, LocalDate selectedDate) {
 
         DateTimeValidator.isPast(selectedDate);
-        List<SeatAvailability> availableSeatList = fetchAvailableSeats(restaurantId, selectedDate);
+        List<Seat> availableSeatList = fetchAvailableSeats(restaurantId, selectedDate);
 
         boolean isToday = isToday(selectedDate);
 
-        Map<LocalTime, List<SeatAvailability>> groupedByTimeslot = GroupingHelper.groupByTimeSlot(availableSeatList);
+        Map<LocalTime, List<Seat>> groupedByTimeslot = GroupingHelper.groupByTimeSlot(availableSeatList);
         List<GroupedTimeSlotResponse> groupedTimeSlotResponses = createGroupedTimeSlotResponses(groupedByTimeslot, isToday);
 
         return GroupedDailyAvailabilityResponse.fromMultipleTimeSlots(selectedDate, groupedTimeSlotResponses);
@@ -63,7 +63,7 @@ public class SeatAvailabilityService {
         return IntStream.range(0, 14)
             .mapToObj(i -> {
                 LocalDate targetDate = today.plusDays(i);
-                List<SeatAvailability> availableSeatList= fetchAvailableSeats(restaurantId, targetDate);
+                List<Seat> availableSeatList= fetchAvailableSeats(restaurantId, targetDate);
                 // 예약 가능 여부 판단
                 boolean isAvailable = SeatAvailabilityValidator.isAnySeatAvailable(availableSeatList, isToday(targetDate));
                 return new ReservationAvailabilityResponse(targetDate, isAvailable);
@@ -78,9 +78,9 @@ public class SeatAvailabilityService {
      * @param selectedDate
      * @return 특정 식당, 날짜의 예약가능데이터
      */
-    private List<SeatAvailability> fetchAvailableSeats(Long restaurantId, LocalDate selectedDate) {
-        List<SeatAvailability> availableSeatList = seatAvailabilityRepository.findAvailableSeatsForDate(restaurantId, selectedDate);
-        log.info("[SeatAvailabilityService] 생성 Response 수 : {}", availableSeatList.size());
+    private List<Seat> fetchAvailableSeats(Long restaurantId, LocalDate selectedDate) {
+        List<Seat> availableSeatList = seatRepository.findAvailableSeatsForDate(restaurantId, selectedDate);
+        log.info("[SeatService] 생성 Response 수 : {}", availableSeatList.size());
         return availableSeatList;
     }
 
@@ -90,7 +90,7 @@ public class SeatAvailabilityService {
      * @param isToday
      * @return
      */
-    private List<GroupedTimeSlotResponse> createGroupedTimeSlotResponses(Map<LocalTime, List<SeatAvailability>> groupedByTimeslot, boolean isToday) {
+    private List<GroupedTimeSlotResponse> createGroupedTimeSlotResponses(Map<LocalTime, List<Seat>> groupedByTimeslot, boolean isToday) {
         return groupedByTimeslot.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
                 .map(entry -> createGroupedTimeSlotResponse(entry.getKey(), entry.getValue(), isToday))
@@ -100,16 +100,16 @@ public class SeatAvailabilityService {
     /**
      * 그룹화된 타임슬롯 응답 생성
      * @param timeslot
-     * @param seatAvailabilities
+     * @param seats
      * @param isToday
      * @return 타임슬롯으로 그룹화 된 응답
      */
-    private GroupedTimeSlotResponse createGroupedTimeSlotResponse(LocalTime timeslot, List<SeatAvailability> seatAvailabilities, boolean isToday) {
+    private GroupedTimeSlotResponse createGroupedTimeSlotResponse(LocalTime timeslot, List<Seat> seats, boolean isToday) {
         // 예약 가능 여부 판단
-        boolean isAvailable = SeatAvailabilityValidator.isAnySeatAvailable(seatAvailabilities, isToday);
+        boolean isAvailable = SeatAvailabilityValidator.isAnySeatAvailable(seats, isToday);
 
         // 좌석 응답 생성
-        List<GroupedSeatResponse> groupedSeatResponses = seatAvailabilities.stream()
+        List<GroupedSeatResponse> groupedSeatResponses = seats.stream()
                 .map(GroupedSeatResponse::of)
                 .toList();
 

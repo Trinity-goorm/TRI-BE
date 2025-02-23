@@ -1,6 +1,6 @@
 package com.trinity.ctc.event;
 
-import com.trinity.ctc.domain.seat.entity.SeatAvailability;
+import com.trinity.ctc.domain.seat.entity.Seat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -8,5 +8,5 @@ import lombok.Getter;
 @AllArgsConstructor
 public class PreOccupancyCanceledEvent {
     private final Long reservationId;
-    private final SeatAvailability seatAvailability;
+    private final Seat seat;
 }

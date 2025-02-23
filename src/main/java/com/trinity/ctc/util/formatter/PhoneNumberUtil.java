@@ -1,6 +1,6 @@
 package com.trinity.ctc.util.formatter;
 
-public class PhonNumberUtil {
+public class PhoneNumberUtil {
     public static String formatPhoneNumber(String phone) {
         // 9자리) ex. 031705777 -> 031-705-777
         if (phone.matches("^(02|0[3-9]\\d)\\d{7}$")) {

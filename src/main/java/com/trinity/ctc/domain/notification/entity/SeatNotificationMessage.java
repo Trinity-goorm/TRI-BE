@@ -1,6 +1,6 @@
 package com.trinity.ctc.domain.notification.entity;
 
-import com.trinity.ctc.domain.seat.entity.SeatAvailability;
+import com.trinity.ctc.domain.seat.entity.Seat;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -25,16 +25,16 @@ public class SeatNotificationMessage {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seat_availability_id")
-    private SeatAvailability seatAvailability;
+    private Seat seat;
 
     @OneToMany(mappedBy = "seatNotificationMessage", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SeatNotification> seatNotificationList = new ArrayList<>();
 
     @Builder
-    public SeatNotificationMessage (String title, String body, String url, SeatAvailability seatAvailability) {
+    public SeatNotificationMessage (String title, String body, String url, Seat seat) {
         this.title = title;
         this.body = body;
         this.url = url;
-        this.seatAvailability = seatAvailability;
+        this.seat = seat;
     }
 }
