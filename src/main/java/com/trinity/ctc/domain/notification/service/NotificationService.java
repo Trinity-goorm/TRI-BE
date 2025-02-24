@@ -28,7 +28,6 @@ import com.trinity.ctc.util.exception.error_code.NotificationErrorCode;
 import com.trinity.ctc.util.exception.error_code.SeatErrorCode;
 import com.trinity.ctc.util.exception.error_code.UserErrorCode;
 import com.trinity.ctc.util.formatter.DateTimeUtil;
-import com.trinity.ctc.util.formatter.PhoneNumberUtil;
 import com.trinity.ctc.util.validator.TicketValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -621,7 +620,7 @@ public class NotificationService {
     private FcmMessageDto formattingReservationCompleteNotification(Reservation reservation) {
         // 예약 완료 알림 메세지에 필요한 정보 변수 선언
         String restaurantName = reservation.getRestaurant().getName();
-        String restaurantPhoneNumber = PhoneNumberUtil.formatPhoneNumber(reservation.getRestaurant().getPhoneNumber());
+        String restaurantPhoneNumber = reservation.getRestaurant().getPhoneNumber();
         LocalDate reservedDate = reservation.getReservationDate();
         LocalTime reservedTime = reservation.getReservationTime().getTimeSlot();
         int minCapacity = reservation.getSeatType().getMinCapacity();
@@ -716,7 +715,7 @@ public class NotificationService {
         // 예약 완료 알림 메세지에 필요한 정보 변수 선언
 
         String restaurantName = reservation.getRestaurant().getName();
-        String restaurantPhoneNumber = PhoneNumberUtil.formatPhoneNumber(reservation.getRestaurant().getPhoneNumber());
+        String restaurantPhoneNumber = reservation.getRestaurant().getPhoneNumber();
         LocalDate reservedDate = reservation.getReservationDate();
         LocalTime reservedTime = reservation.getReservationTime().getTimeSlot();
         int minCapacity = reservation.getSeatType().getMinCapacity();
