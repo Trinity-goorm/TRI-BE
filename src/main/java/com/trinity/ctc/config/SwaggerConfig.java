@@ -125,6 +125,17 @@ public class SwaggerConfig {
                 .build();
     }
 
+    /**
+     * Reservation API 그룹
+     */
+    @Bean
+    public GroupedOpenApi reservationOpenApi() {
+        return GroupedOpenApi.builder()
+                .group("Reservation API")
+                .pathsToMatch(reservationPaths)
+                .build();
+    }
+
     @Bean
     public GroupedOpenApi searchOpenApi() {
         return GroupedOpenApi.builder()
