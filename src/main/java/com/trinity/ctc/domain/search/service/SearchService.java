@@ -63,6 +63,7 @@ public class SearchService {
         if(existingHistory.isPresent()) {
             SearchHistory searchHistory = existingHistory.get();
             searchHistory.updateCreatedAt();
+            searchHistory.restore();
             searchRepository.save(searchHistory);
         } else {
             SearchHistory newSearchHistory = SearchHistory.builder()
