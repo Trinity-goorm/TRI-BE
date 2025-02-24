@@ -20,7 +20,7 @@ public class SeatType {
     private int maxCapacity;
 
     @OneToMany(mappedBy = "seatType")
-    private List<SeatAvailability> seatAvailabilityList = new ArrayList<>();
+    private List<Seat> seatList = new ArrayList<>();
 
     @OneToMany(mappedBy = "seatType")
     private List<Reservation> reservationList = new ArrayList<>();

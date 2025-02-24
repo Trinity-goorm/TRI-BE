@@ -93,17 +93,6 @@ public class SwaggerConfig {
     }
 
     /**
-     * Seat API 그룹
-     */
-    @Bean
-    public GroupedOpenApi reservationOpenApi() {
-        return GroupedOpenApi.builder()
-                .group("Reservation API")
-                .pathsToMatch(reservationPaths)
-                .build();
-    }
-
-    /**
      * Notification API 그룹
      */
     @Bean

@@ -2,7 +2,7 @@ package com.trinity.ctc.domain.restaurant.entity;
 
 import com.trinity.ctc.domain.like.entity.Likes;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
-import com.trinity.ctc.domain.seat.entity.SeatAvailability;
+import com.trinity.ctc.domain.seat.entity.Seat;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -49,7 +49,7 @@ public class Restaurant {
     private List<Reservation> reservationList = new ArrayList<>();
 
     @OneToMany(mappedBy = "restaurant")
-    private List<SeatAvailability> seatAvailabilityList = new ArrayList<>();
+    private List<Seat> seatList = new ArrayList<>();
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RestaurantCategory> restaurantCategoryList = new ArrayList<>();

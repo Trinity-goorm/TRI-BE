@@ -18,8 +18,8 @@ import com.trinity.ctc.domain.notification.util.fomatter.NotificationMessageUtil
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
 import com.trinity.ctc.domain.reservation.service.ReservationService;
-import com.trinity.ctc.domain.seat.entity.SeatAvailability;
-import com.trinity.ctc.domain.seat.repository.SeatAvailabilityRepository;
+import com.trinity.ctc.domain.seat.entity.Seat;
+import com.trinity.ctc.domain.seat.repository.SeatRepository;
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.util.exception.CustomException;
@@ -28,7 +28,7 @@ import com.trinity.ctc.util.exception.error_code.NotificationErrorCode;
 import com.trinity.ctc.util.exception.error_code.SeatErrorCode;
 import com.trinity.ctc.util.exception.error_code.UserErrorCode;
 import com.trinity.ctc.util.formatter.DateTimeUtil;
-import com.trinity.ctc.util.formatter.PhonNumberUtil;
+import com.trinity.ctc.util.formatter.PhoneNumberUtil;
 import com.trinity.ctc.util.validator.TicketValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +53,7 @@ public class NotificationService {
     private final ReservationRepository reservationRepository;
     private final NotificationHistoryRepository notificationHistoryRepository;
     private final ReservationNotificationRepository reservationNotificationRepository;
-    private final SeatAvailabilityRepository seatAvailabilityRepository;
+    private final SeatRepository seatRepository;
     private final SeatNotificationMessageRepository seatNotificationMessageRepository;
     private final SeatNotificationRepository seatNotificationRepository;
     private final ReservationService reservationService;
@@ -354,11 +354,16 @@ public class NotificationService {
                     throw new CustomException(NotificationErrorCode.ALREADY_SUBSCRIBED);
                 });
 
+        // 빈자리 알림 신청 내역 build
         SeatNotification seatNotification = SeatNotification.builder()
                 .user(user)
                 .seatNotificationMessage(seatNotificationMessage)
                 .build();
 
+        // 빈자리 알림 신청 시, 빈자리 알림 티켓 -1
+        user.useEmptyTicket();
+
+        // 빈자리 알림 신청 내역 저장
         seatNotificationRepository.save(seatNotification);
     }
 
@@ -368,7 +373,7 @@ public class NotificationService {
      * @return
      */
     private SeatNotificationMessage registerSeatNotificationMessage(long seatId) {
-        SeatAvailability seat = seatAvailabilityRepository.findById(seatId).orElseThrow(() -> new CustomException(SeatErrorCode.NOT_FOUND));
+        Seat seat = seatRepository.findById(seatId).orElseThrow(() -> new CustomException(SeatErrorCode.NOT_FOUND));
 
         // 빈자리 알림 메세지에 필요한 정보 변수 선언
         LocalDate date = seat.getReservationDate();
@@ -388,7 +393,7 @@ public class NotificationService {
                 .title(title)
                 .body(body)
                 .url(url)
-                .seatAvailability(seat)
+                .seat(seat)
                 .build();
 
         return seatNotificationMessageRepository.save(message);
@@ -418,12 +423,12 @@ public class NotificationService {
         for (SeatNotification notification : seatNotificationList) {
             int subscriberCount = seatNotificationRepository.countBySeatNotificationMessage(notification.getSeatNotificationMessage());
 
-            log.info("SeatNotification ID: {}, 관련 SeatAvailability ID: {}, 구독자 수: {}",
+            log.info("SeatNotification ID: {}, 관련 Seat ID: {}, 구독자 수: {}",
                     notification.getId(),
-                    notification.getSeatNotificationMessage().getSeatAvailability().getId(),
+                    notification.getSeatNotificationMessage().getSeat().getId(),
                     subscriberCount);
 
-            SubscriptionResponse subscriptionResponse = SubscriptionResponse.of(notification.getId(), notification.getSeatNotificationMessage().getSeatAvailability(), subscriberCount);
+            SubscriptionResponse subscriptionResponse = SubscriptionResponse.of(notification.getId(), notification.getSeatNotificationMessage().getSeat(), subscriberCount);
             subscriptionResponseList.add(subscriptionResponse);
             log.info("response: " + subscriptionResponse.getSeatNotificationId());
         }
@@ -615,7 +620,7 @@ public class NotificationService {
     private FcmMessageDto formattingReservationCompleteNotification(Reservation reservation) {
         // 예약 완료 알림 메세지에 필요한 정보 변수 선언
         String restaurantName = reservation.getRestaurant().getName();
-        String restaurantPhoneNumber = PhonNumberUtil.formatPhoneNumber(reservation.getRestaurant().getPhoneNumber());
+        String restaurantPhoneNumber = PhoneNumberUtil.formatPhoneNumber(reservation.getRestaurant().getPhoneNumber());
         LocalDate reservedDate = reservation.getReservationDate();
         LocalTime reservedTime = reservation.getReservationTime().getTimeSlot();
         int minCapacity = reservation.getSeatType().getMinCapacity();
@@ -709,7 +714,7 @@ public class NotificationService {
         // 예약 완료 알림 메세지에 필요한 정보 변수 선언
 
         String restaurantName = reservation.getRestaurant().getName();
-        String restaurantPhoneNumber = PhonNumberUtil.formatPhoneNumber(reservation.getRestaurant().getPhoneNumber());
+        String restaurantPhoneNumber = PhoneNumberUtil.formatPhoneNumber(reservation.getRestaurant().getPhoneNumber());
         LocalDate reservedDate = reservation.getReservationDate();
         LocalTime reservedTime = reservation.getReservationTime().getTimeSlot();
         int minCapacity = reservation.getSeatType().getMinCapacity();

@@ -1,7 +1,7 @@
 package com.trinity.ctc.event;
 
 import com.trinity.ctc.domain.reservation.entity.Reservation;
-import com.trinity.ctc.domain.seat.entity.SeatAvailability;
+import com.trinity.ctc.domain.seat.entity.Seat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -9,6 +9,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public class ReservationCanceledEvent {
     private final Reservation reservation;
-    private final SeatAvailability seatAvailability;
+    private final Seat seat;
     private final boolean isCODPassed;
 }

@@ -1,6 +1,6 @@
 package com.trinity.ctc.domain.reservation.entity;
 
-import com.trinity.ctc.domain.seat.entity.SeatAvailability;
+import com.trinity.ctc.domain.seat.entity.Seat;
 import jakarta.persistence.*;
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;
@@ -30,6 +30,6 @@ public class ReservationTime {
     private List<Reservation> reservations = new ArrayList<>();
 
     @OneToMany(mappedBy = "reservationTime")
-    private List<SeatAvailability> seatAvailabilityList = new ArrayList<>();
+    private List<Seat> seatList = new ArrayList<>();
 
 }

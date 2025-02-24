@@ -11,7 +11,7 @@ import java.time.LocalDate;
 
 @Getter
 @Entity
-public class SeatAvailability {
+public class Seat {
 
     @Id
     @Column
@@ -38,7 +38,7 @@ public class SeatAvailability {
     @JoinColumn(name = "seat_type_id")
     private SeatType seatType;
 
-    @OneToOne(mappedBy = "seatAvailability", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "seat", cascade = CascadeType.ALL, orphanRemoval = true)
     private SeatNotificationMessage seatNotificationMessage;
 
     /* 내부 로직 */
@@ -53,8 +53,8 @@ public class SeatAvailability {
     }
 
     /* 객체 생성 로직 */
-    public static SeatAvailability create(Restaurant restaurant, LocalDate ReservationDate, ReservationTime reservationTime, SeatType seatType, int availableSeats) {
-        SeatAvailability availability = new SeatAvailability();
+    public static Seat create(Restaurant restaurant, LocalDate ReservationDate, ReservationTime reservationTime, SeatType seatType, int availableSeats) {
+        Seat availability = new Seat();
         availability.restaurant = restaurant;
         availability.reservationDate = ReservationDate;
         availability.reservationTime = reservationTime;

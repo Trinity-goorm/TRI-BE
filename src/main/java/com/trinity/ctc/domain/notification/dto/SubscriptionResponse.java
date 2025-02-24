@@ -1,15 +1,13 @@
 package com.trinity.ctc.domain.notification.dto;
 
 import com.trinity.ctc.domain.restaurant.entity.RestaurantImage;
-import com.trinity.ctc.domain.seat.entity.SeatAvailability;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
+import com.trinity.ctc.domain.seat.entity.Seat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Getter
@@ -44,16 +42,16 @@ public class SubscriptionResponse {
     @Schema(description = "빈자리 알림 신청자 수", example = "13")
     private int subscriberCount;
 
-    public static SubscriptionResponse of (long seatNotificationId, SeatAvailability seatAvailability, int subscriberCount) {
+    public static SubscriptionResponse of (long seatNotificationId, Seat seat, int subscriberCount) {
         return new SubscriptionResponse(seatNotificationId,
-                seatAvailability.getRestaurant().getName(),
-                seatAvailability.getRestaurant().getRestaurantCategoryList().stream()
+                seat.getRestaurant().getName(),
+                seat.getRestaurant().getRestaurantCategoryList().stream()
                         .map(restaurantCategory -> restaurantCategory.getCategory().getName()).collect(Collectors.joining(", ")),
-                seatAvailability.getRestaurant().getImageUrls().stream().map(RestaurantImage::getUrl).collect(Collectors.joining(", ")),
-                seatAvailability.getReservationDate(),
-                seatAvailability.getReservationTime().getTimeSlot(),
-                seatAvailability.getSeatType().getMinCapacity(),
-                seatAvailability.getSeatType().getMaxCapacity(),
+                seat.getRestaurant().getImageUrls().stream().map(RestaurantImage::getUrl).collect(Collectors.joining(", ")),
+                seat.getReservationDate(),
+                seat.getReservationTime().getTimeSlot(),
+                seat.getSeatType().getMinCapacity(),
+                seat.getSeatType().getMaxCapacity(),
                 subscriberCount
         );
     }

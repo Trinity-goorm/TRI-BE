@@ -7,7 +7,7 @@ import com.trinity.ctc.domain.restaurant.dto.RestaurantPreviewRequest;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
 import com.trinity.ctc.domain.search.sorting.SortingStrategy;
 import com.trinity.ctc.domain.search.sorting.SortingStrategyFactory;
-import com.trinity.ctc.domain.seat.service.SeatAvailabilityService;
+import com.trinity.ctc.domain.seat.service.SeatService;
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.domain.like.repository.LikeRepository;
@@ -38,7 +38,7 @@ public class RestaurantService {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
     private final LikeRepository likeRepository;
-    private final SeatAvailabilityService seatAvailabilityService;
+    private final SeatService seatService;
 
     @Transactional(readOnly = true)
     public List<Restaurant> getAllRestaurants() {
@@ -84,7 +84,7 @@ public class RestaurantService {
                 boolean isWishlisted = likeRepository.existsByUserAndRestaurant(user, restaurant);
 
                 // 14일간 날짜별 예약 가능 여부 조회
-                List<ReservationAvailabilityResponse> reservation = seatAvailabilityService
+                List<ReservationAvailabilityResponse> reservation = seatService
                     .getAvailabilityForNext14Days(restaurant.getId());
 
                 log.info("reservation 사이즈: {}", reservation.size());
