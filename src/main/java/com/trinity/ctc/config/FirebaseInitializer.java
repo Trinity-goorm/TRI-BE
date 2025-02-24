@@ -8,23 +8,23 @@ import com.trinity.ctc.util.exception.error_code.FcmErrorCode;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @Component
 public class FirebaseInitializer {
 
-    @Value("${firebase.key-path}")
-    private String fcmKeyPath;
+    @Value("${firebase.credentials}")
+    private String firebaseCredentials;
 
     @PostConstruct
     public void initialize() {
-        try (InputStream serviceAccount = new ClassPathResource(fcmKeyPath).getInputStream()) {
-
+        try (InputStream serviceAccount = new ByteArrayInputStream(firebaseCredentials.getBytes(StandardCharsets.UTF_8))) {
             if (FirebaseApp.getApps().isEmpty()) {
                 FirebaseOptions options = FirebaseOptions.builder()
                         .setCredentials(GoogleCredentials.fromStream(serviceAccount))
@@ -35,7 +35,6 @@ public class FirebaseInitializer {
             } else {
                 log.info("Firebase already initialized.");
             }
-
         } catch (IOException e) {
             throw new CustomException(FcmErrorCode.FIREBASE_INITIALIZATION_FAILED);
         }

@@ -47,7 +47,7 @@ springdoc:
 ---
 firebase:
   project-id: catchping-fcmserver
-  key-path: catchping-fcmserver-firebase-adminsdk.json
+  credentials: ${FIREBASE_CREDENTIALS}
 
 
 
