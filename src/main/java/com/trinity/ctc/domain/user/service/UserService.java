@@ -78,7 +78,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public UserDetailResponse getUserDetail(long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
-        return UserDetailResponse.of(user.getId(), user.getNickname(), user.getNormalTicketCount(), user.getEmptyTicketCount());
+        return UserDetailResponse.of(user.getId(), user.getNickname(),user.getPhoneNumber() , user.getNormalTicketCount(), user.getEmptyTicketCount());
     }
 
 

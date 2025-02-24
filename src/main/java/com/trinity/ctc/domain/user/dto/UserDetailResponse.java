@@ -16,13 +16,16 @@ public class UserDetailResponse {
     @Schema(description = "사용자 이름", example = "김똑똑")
     private final String username;
 
+    @Schema(description = "사용자 번호", example = "010-0000-0000")
+    private final String phoneNumber;
+
     @Schema(description = "보유한 일반 티켓 수", example = "100")
     private final int normalTicketCount;
 
     @Schema(description = "보유한 빈자리알람 티켓 수", example = "10")
     private final int emptyTicketCount;
 
-    public static UserDetailResponse of(long userId, String username, int normalTicketCount, int emptyTicketCount) {
-        return new UserDetailResponse(userId, username, normalTicketCount, emptyTicketCount);
+    public static UserDetailResponse of(long userId, String username, String phoneNumber, int normalTicketCount, int emptyTicketCount) {
+        return new UserDetailResponse(userId, username,phoneNumber, normalTicketCount, emptyTicketCount);
     }
 }
