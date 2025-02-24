@@ -87,6 +87,9 @@ jobs:
             # Spring
             SPRING_PROFILES_ACTIVE=prod
             
+            # Firebase
+            FIREBASE_CREDENTIALS="${{ secrets.FIREBASE_CREDENTIALS }}"
+            
             # Kakao
             KAKAO_API_KEY=\"${{ secrets.KAKAO_API_KEY }}\"
             KAKAO_REDIRECT_URI=\"${{ secrets.KAKAO_REDIRECT_URI }}\"
