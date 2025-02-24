@@ -48,4 +48,8 @@ public class SearchHistory {
     public void softDelete() {
         this.isDeleted = true;
     }
+
+    public void restore() {
+        this.isDeleted = false;
+    }
 }
