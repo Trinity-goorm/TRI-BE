@@ -23,4 +23,10 @@ public class CapacityValidator {
             throw new CustomException(SeatErrorCode.NO_AVAILABLE_SEAT);
         }
     }
+
+    public static void validateNegativeSeats(int availableSeats) {
+        if (availableSeats < 0) {
+            throw new CustomException(SeatErrorCode.CAPACITY_IS_NEGATIVE);
+        }
+    }
 }
