@@ -629,7 +629,7 @@ public class NotificationService {
         // 알림 메세지 data 별 포멧팅
         String title = NotificationMessageUtil.formatReservationCompleteNotificationTitle(restaurantName);
         String body = NotificationMessageUtil.formatReservationCompleteNotificationBody(reservedDate, reservedTime, minCapacity,
-                maxCapacity, restaurantPhoneNumber);
+                maxCapacity);
         String url = NotificationMessageUtil.formatReservationNotificationUrl();
 
         return new FcmMessageDto(title, body, url);
@@ -727,12 +727,10 @@ public class NotificationService {
         // 알림 메세지 data 별 포멧팅
         if (isCODPassed) {
             title = NotificationMessageUtil.formatReservationFullCanceledNotificationTitle(restaurantName);
-            body = NotificationMessageUtil.formatReservationFullCanceledNotificationBody(reservedDate, reservedTime, minCapacity,
-                    maxCapacity, restaurantPhoneNumber, user.getNormalTicketCount());
+            body = NotificationMessageUtil.formatReservationFullCanceledNotificationBody(reservedDate, reservedTime, user.getNormalTicketCount());
         } else {
             title = NotificationMessageUtil.formatReservationNullCanceledNotificationTitle(restaurantName);
-            body = NotificationMessageUtil.formatReservationNullCanceledNotificationBody(reservedDate, reservedTime, minCapacity,
-                    maxCapacity, restaurantPhoneNumber, user.getNormalTicketCount());
+            body = NotificationMessageUtil.formatReservationNullCanceledNotificationBody(reservedDate, reservedTime, user.getNormalTicketCount());
         }
 
         String url = NotificationMessageUtil.formatReservationNotificationUrl();
