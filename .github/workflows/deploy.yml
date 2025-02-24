@@ -1,4 +1,4 @@
-name: Build and Deploy to ECR - BE EC2 & RDS Connect
+name: Build and Deploy to ECR - BE EC2 & RDS
 
 on:
   push:
