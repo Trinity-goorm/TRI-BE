@@ -1,8 +1,6 @@
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ${{ steps.login-ecr.outputs.registry }}/trinity-repo:${{ github.sha }}
     container_name: catch-ping-app
     ports:
       - "8080:8080"
