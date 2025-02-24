@@ -74,7 +74,7 @@ jobs:
             aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
             
             # 작업 디렉토리로 이동
-            cd /home/ec2-user/trinity-be
+            cd /home/ec2-user
             
             # .env 파일 생성
             echo "
