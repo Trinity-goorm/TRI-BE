@@ -40,8 +40,8 @@ public class UserLoginResponse {
             true,
             null,
             null,
-            0,
-            0,
+            100,
+            10,
             tokenResponse.getAccessToken(),
             tokenResponse.getRefreshToken()
         );
