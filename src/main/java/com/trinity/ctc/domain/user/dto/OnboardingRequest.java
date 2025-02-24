@@ -13,6 +13,9 @@ public class OnboardingRequest {
     @Schema(description = "유저 ID", example = "1")
     private long userId;
 
+    @Schema(description = "닉네임", example = "USER1")
+    private String nickname;
+
     @Schema(description = "성별", example = "MALE/FEMALE")
     private Sex sex;
 
