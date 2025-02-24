@@ -8,3 +8,9 @@ services:
       SPRING_PROFILES_ACTIVE: prod
     env_file:
       - .env
+    networks:
+      - ctc-network
+        
+networks:
+  ctc-network:
+    driver: bridge
