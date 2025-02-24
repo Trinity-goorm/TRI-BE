@@ -48,7 +48,7 @@ public class Seat {
     }
 
     public void cancelOneReservation() {
-        CapacityValidator.validateAvailableSeats(this.availableSeats);
+        CapacityValidator.validateNegativeSeats(this.availableSeats);
         availableSeats++;
     }
 
