@@ -88,7 +88,7 @@ jobs:
             SPRING_PROFILES_ACTIVE=prod
             
             # Firebase
-            FIREBASE_CREDENTIALS=$(echo '${{ secrets.FIREBASE_CREDENTIALS }}' | jq -c '.' | sed 's/"/\\"/g')
+            FIREBASE_CREDENTIALS=${{ secrets.FIREBASE_CREDENTIALS }}
             
             # Kakao
             KAKAO_API_KEY=${{ secrets.KAKAO_API_KEY }}
