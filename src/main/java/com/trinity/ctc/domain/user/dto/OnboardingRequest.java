@@ -16,7 +16,7 @@ public class OnboardingRequest {
     @Schema(description = "닉네임", example = "USER1")
     private String nickname;
 
-    @Schema(description = "성별", example = "MALE/FEMALE")
+    @Schema(description = "성별", example = "MALE")
     private Sex sex;
 
     @Schema(description = "생년월일", example = "1995-08-25")
