@@ -78,21 +78,20 @@ jobs:
             
             # .env 파일 생성
             echo "
-
             # Database
-            PROD_DATASOURCE_URL=jdbc:mysql://${{ secrets.RDS_ENDPOINT }}:3306/${{ secrets.RDS_DATABASE }}
+            PROD_DATASOURCE_URL=jdbc:mysql://${{ secrets.RDS_ENDPOINT }}:3306/${{ secrets.RDS_DATABASE }} 
             PROD_DATASOURCE_USERNAME=${{ secrets.RDS_USERNAME }}
-            PROD_DATASOURCE_PASSWORD=${{ secrets.RDS_PASSWORD }}
+            PROD_DATASOURCE_PASSWORD=${{ secrets.RDS_PASSWORD }} 
             
-            # Spring
+            # Spring  
             SPRING_PROFILES_ACTIVE=prod
             
             # Firebase
-            FIREBASE_CREDENTIALS='${{ secrets.FIREBASE_CREDENTIALS }}'
+            FIREBASE_CREDENTIALS='$(echo "${{ secrets.FIREBASE_CREDENTIALS }}" | sed -e 's/"/\\\"/g' -e 's/\\n/\\\\n/g')'
             
-            # Kakao
-            KAKAO_API_KEY=\"${{ secrets.KAKAO_API_KEY }}\"
-            KAKAO_REDIRECT_URI=\"${{ secrets.KAKAO_REDIRECT_URI }}\"
+            # Kakao  
+            KAKAO_API_KEY=\\\"${{ secrets.KAKAO_API_KEY }}\\\"
+            KAKAO_REDIRECT_URI=\\\"${{ secrets.KAKAO_REDIRECT_URI }}\\\"  
             " > .env
             
             # docker-compose.yml 업데이트
