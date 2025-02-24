@@ -49,5 +49,8 @@ firebase:
   project-id: catchping-fcmserver
   credentials: ${FIREBASE_CREDENTIALS}
 
+ai:
+  api:
+    url: "http://10.0.172.33:5000/recommend"
 
 

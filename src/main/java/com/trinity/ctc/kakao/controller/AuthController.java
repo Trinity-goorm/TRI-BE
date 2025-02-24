@@ -41,9 +41,9 @@ public class AuthController {
     )
     public ResponseEntity<UserLoginResponse> kakaoLogin(@RequestParam String code, @RequestBody FcmTokenRequest fcmTokenRequest) {
         UserLoginResponse response = authService.authenticateWithKakao(code);
+        log.info("UserLoginResponse: {}", response);
 
         fcmService.registerFcmToken(fcmTokenRequest, response.getId());
-
         return ResponseEntity.ok(response);
     }
 
