@@ -13,8 +13,8 @@ spring:
         show_sql: false
         format_sql: false
         jdbc:
-          fetch_size: 100 # 데이터 패치 크기
-          batch_size: 50 # 배치 크기
+          fetch_size: 1000 # 데이터 패치 크기
+          batch_size: 1000 # 배치 크기
 ---
 logging:
   level:
