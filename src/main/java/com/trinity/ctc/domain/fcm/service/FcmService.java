@@ -7,7 +7,6 @@ import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.util.exception.CustomException;
 import com.trinity.ctc.util.exception.error_code.UserErrorCode;
-import com.trinity.ctc.util.formatter.DateTimeUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -34,8 +33,9 @@ public class FcmService {
                 .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
         // 토큰 등록 시간과 만료 시간 설정
-        LocalDateTime registeredAt = DateTimeUtil.truncateToMinute(DateTimeUtil.convertMillisToLocalDateTime(fcmTokenRequest.getTimestamp()));
+        LocalDateTime registeredAt = fcmTokenRequest.getTimeStamp();
         LocalDateTime expiresAt = registeredAt.plusDays(30);
+
 
         // FCM 토큰 entity 빌드
         Fcm fcm = Fcm.builder()
@@ -65,7 +65,7 @@ public class FcmService {
         String fcmToken = fcmTokenRequest.getFcmToken();
 
         // 토큰 업데이트 시간과 만료 시간 설정
-        LocalDateTime updatedAt = DateTimeUtil.truncateToMinute(DateTimeUtil.convertMillisToLocalDateTime(fcmTokenRequest.getTimestamp()));
+        LocalDateTime updatedAt = fcmTokenRequest.getTimeStamp();
         LocalDateTime expiresAt = updatedAt.plusDays(30);
 
         // 토큰값이 같은 record 업데이트

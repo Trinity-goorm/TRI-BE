@@ -7,10 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -30,6 +27,15 @@ public class FcmController {
     )
     public ResponseEntity<Void> renewFcmToken(@RequestBody FcmTokenRequest fcmTokenRequest) {
         fcmService.renewFcmToken(fcmTokenRequest);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/test")
+    public ResponseEntity<Void> test(@RequestParam String code, @RequestBody FcmTokenRequest fcmTokenRequest) {
+
+        log.info("gone?");
+        fcmService.registerFcmToken(fcmTokenRequest,1L);
+
         return ResponseEntity.noContent().build();
     }
 }
