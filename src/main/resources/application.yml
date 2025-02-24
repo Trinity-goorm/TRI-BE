@@ -3,15 +3,6 @@ spring:
     active: local
 ---
 spring:
-  datasource:
-    url: ${COMMON_DATASOURCE_URL}
-    username: ${COMMON_DATASOURCE_USERNAME}
-    password: ${COMMON_DATASOURCE_PASSWORD}
-
-    hikari:
-      connection-test-query: SELECT 1  # ?????? ?? ???
----
-spring:
   jpa:
     properties:
       hibernate:
