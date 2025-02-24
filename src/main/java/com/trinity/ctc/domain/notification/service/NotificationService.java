@@ -595,6 +595,7 @@ public class NotificationService {
      * @param user
      * @param reservation
      */
+    @Transactional
     public void sendReservationSuccessNotification(User user, Reservation reservation) {
         FcmMessageDto messageData = formattingReservationCompleteNotification(reservation);
 
@@ -686,6 +687,7 @@ public class NotificationService {
      * @param reservation
      * @param isCODPassed
      */
+    @Transactional
     public void sendReservationCanceledNotification(User user, Reservation reservation, boolean isCODPassed) {
         FcmMessageDto messageData = formattingReservationCanceledNotification(reservation, user, isCODPassed);
         GroupFcmInformationDto groupFcmInformationDto = buildMessageList(user, messageData);
