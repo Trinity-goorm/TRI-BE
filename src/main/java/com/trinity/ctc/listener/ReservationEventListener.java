@@ -19,24 +19,24 @@ public class ReservationEventListener {
     @Async
     @EventListener
     public void handleReservationSuccessEvent(ReservationCompleteEvent reservationEvent) {
-        notificationService.registerReservationNotification(reservationEvent.getReservation().getUser(), reservationEvent.getReservation());
-        notificationService.sendReservationSuccessNotification(reservationEvent.getReservation().getUser(), reservationEvent.getReservation());
+        notificationService.registerReservationNotification(reservationEvent.getUserId(), reservationEvent.getReservationId());
+        notificationService.sendReservationSuccessNotification(reservationEvent.getUserId(), reservationEvent.getReservationId());
     }
 
     @Async
     @EventListener
     public void handleReservationCanceledEvent(ReservationCanceledEvent reservationEvent) {
-        if(reservationEvent.getSeat().getAvailableSeats() == 1) notificationService.sendSeatNotification(reservationEvent.getSeat().getId());
-        notificationService.sendReservationCanceledNotification(reservationEvent.getReservation().getUser(),
-                                                                reservationEvent.getReservation(), reservationEvent.isCODPassed());
-        notificationService.deleteReservationNotification(reservationEvent.getReservation().getId());
+        if(reservationEvent.getAvailableSeats() == 1) notificationService.sendSeatNotification(reservationEvent.getSeatId());
+        notificationService.sendReservationCanceledNotification(reservationEvent.getUserId(),
+                                                                reservationEvent.getReservationId(), reservationEvent.isCODPassed());
+        notificationService.deleteReservationNotification(reservationEvent.getReservationId());
     }
 
     @Async
     @EventListener
     public void handlePreOccupancyCanceledEvent(PreOccupancyCanceledEvent preOccupancyCanceledEvent) {
 //        빈자리 알림 발송
-        if(preOccupancyCanceledEvent.getSeat().getAvailableSeats() == 1) notificationService.sendSeatNotification(preOccupancyCanceledEvent.getSeat().getId());
+        if(preOccupancyCanceledEvent.getAvailableSeats() == 1) notificationService.sendSeatNotification(preOccupancyCanceledEvent.getSeatId());
     }
 }
 
