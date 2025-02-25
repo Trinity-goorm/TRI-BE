@@ -552,6 +552,8 @@ public class NotificationService {
                     .sentAt(resultList.get(i).getSentAt())
                     .sentResult(resultList.get(i).getSentResult())
                     .errorCode(resultList.get(i).getErrorCode())
+//                    .fcmToken(messageDtoList.get(i).getFcmToken())
+                    // FCM 토큰 저장 필요!!!
                     .user(seatNotificationList.get(i).getUser())
                     .build();
 

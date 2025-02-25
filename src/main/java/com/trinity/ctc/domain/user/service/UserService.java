@@ -46,7 +46,7 @@ public class UserService {
 
         // 사용자가 온보딩 중인 사용자인지(status = TEMPORARILY_UNAVAILABLE) 검증, 아닐 경우 403 반환
         userValidator.validateUserStatus(user);
-        // 사용자가 선호 카테고리를 3개 이상 선택했는지 검증
+        // 사용자가 선호 카테고리를 3개 선택했는지 검증
         userValidator.validateCategorySelection(onboardingRequest.getUserPreferenceCategoryIdList().size());
 
         // 사용자가 선택한 선호 카테고리를 카테고리 table에서 select
