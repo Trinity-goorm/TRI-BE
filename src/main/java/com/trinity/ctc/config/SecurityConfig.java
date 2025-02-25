@@ -1,5 +1,6 @@
 package com.trinity.ctc.config;
 
+import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -9,8 +10,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -22,7 +21,6 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())  // POST 테스트 시 CSRF 비활성화
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // CORS 설정
             .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("users/kakao/login", "users/kakao/logout").permitAll()
                     .requestMatchers("/api/**").permitAll()
                     .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/v3/api-docs/**").permitAll()
                     .anyRequest().authenticated()  // 그 외 경로는 인증 필요

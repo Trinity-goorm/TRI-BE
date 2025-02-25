@@ -16,6 +16,7 @@ kakao:
     user-info-url: "https://kapi.kakao.com/v2/user/me"
     grant-type: "authorization_code"
     logout-url: "https://kapi.kakao.com/v1/user/logout"
+    access-token-validation-url: "https://kapi.kakao.com/v1/user/access_token_info"
 ---
 swagger:
   server-url:
@@ -49,5 +50,8 @@ firebase:
   project-id: catchping-fcmserver
   credentials: ${FIREBASE_CREDENTIALS}
 
+ai:
+  api:
+    url: "http://10.0.172.33:5000/recommend"
 
 

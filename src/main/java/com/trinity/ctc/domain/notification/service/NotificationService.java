@@ -25,7 +25,6 @@ import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.util.exception.CustomException;
 import com.trinity.ctc.util.exception.error_code.*;
 import com.trinity.ctc.util.formatter.DateTimeUtil;
-import com.trinity.ctc.util.formatter.PhoneNumberUtil;
 import com.trinity.ctc.util.validator.TicketValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -123,7 +122,6 @@ public class NotificationService {
         String restaurantName = reservation.getRestaurant().getName();
         LocalDate reservedDate = reservation.getReservationDate();
         LocalTime reservedTime = reservation.getReservationTime().getTimeSlot();
-        Long reservationId = reservation.getId();
         LocalDateTime scheduledTime = DateTimeUtil.combineWithDate(reservedDate, reservedTime).minusHours(1);
 
         // 알림 메세지 data 별 포멧팅    
@@ -620,7 +618,6 @@ public class NotificationService {
     private FcmMessageDto formattingReservationCompleteNotification(Reservation reservation) {
         // 예약 완료 알림 메세지에 필요한 정보 변수 선언
         String restaurantName = reservation.getRestaurant().getName();
-        String restaurantPhoneNumber = PhoneNumberUtil.formatPhoneNumber(reservation.getRestaurant().getPhoneNumber());
         LocalDate reservedDate = reservation.getReservationDate();
         LocalTime reservedTime = reservation.getReservationTime().getTimeSlot();
         int minCapacity = reservation.getSeatType().getMinCapacity();
@@ -629,7 +626,7 @@ public class NotificationService {
         // 알림 메세지 data 별 포멧팅
         String title = NotificationMessageUtil.formatReservationCompleteNotificationTitle(restaurantName);
         String body = NotificationMessageUtil.formatReservationCompleteNotificationBody(reservedDate, reservedTime, minCapacity,
-                maxCapacity, restaurantPhoneNumber);
+                maxCapacity);
         String url = NotificationMessageUtil.formatReservationNotificationUrl();
 
         return new FcmMessageDto(title, body, url);
@@ -716,13 +713,9 @@ public class NotificationService {
      */
     private FcmMessageDto formattingReservationCanceledNotification(Reservation reservation, User user, boolean isCODPassed) {
         // 예약 완료 알림 메세지에 필요한 정보 변수 선언
-
         String restaurantName = reservation.getRestaurant().getName();
-        String restaurantPhoneNumber = PhoneNumberUtil.formatPhoneNumber(reservation.getRestaurant().getPhoneNumber());
         LocalDate reservedDate = reservation.getReservationDate();
         LocalTime reservedTime = reservation.getReservationTime().getTimeSlot();
-        int minCapacity = reservation.getSeatType().getMinCapacity();
-        int maxCapacity = reservation.getSeatType().getMaxCapacity();
 
         String title;
         String body;
@@ -730,12 +723,10 @@ public class NotificationService {
         // 알림 메세지 data 별 포멧팅
         if (isCODPassed) {
             title = NotificationMessageUtil.formatReservationFullCanceledNotificationTitle(restaurantName);
-            body = NotificationMessageUtil.formatReservationFullCanceledNotificationBody(reservedDate, reservedTime, minCapacity,
-                    maxCapacity, restaurantPhoneNumber, user.getNormalTicketCount());
+            body = NotificationMessageUtil.formatReservationFullCanceledNotificationBody(reservedDate, reservedTime, user.getNormalTicketCount());
         } else {
             title = NotificationMessageUtil.formatReservationNullCanceledNotificationTitle(restaurantName);
-            body = NotificationMessageUtil.formatReservationNullCanceledNotificationBody(reservedDate, reservedTime, minCapacity,
-                    maxCapacity, restaurantPhoneNumber, user.getNormalTicketCount());
+            body = NotificationMessageUtil.formatReservationNullCanceledNotificationBody(reservedDate, reservedTime, user.getNormalTicketCount());
         }
 
         String url = NotificationMessageUtil.formatReservationNotificationUrl();

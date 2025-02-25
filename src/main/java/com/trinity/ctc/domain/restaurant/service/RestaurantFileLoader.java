@@ -2,8 +2,8 @@ package com.trinity.ctc.domain.restaurant.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.trinity.ctc.domain.category.repository.CategoryRepository;
 import com.trinity.ctc.domain.category.entity.Category;
+import com.trinity.ctc.domain.category.repository.CategoryRepository;
 import com.trinity.ctc.domain.restaurant.entity.Menu;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
 import com.trinity.ctc.domain.restaurant.entity.RestaurantCategory;
@@ -11,14 +11,16 @@ import com.trinity.ctc.domain.restaurant.entity.RestaurantImage;
 import com.trinity.ctc.domain.restaurant.repository.RestaurantRepository;
 import com.trinity.ctc.util.exception.CustomException;
 import com.trinity.ctc.util.exception.error_code.JsonParseErrorCode;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import com.trinity.ctc.util.formatter.PhoneNumberUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -73,7 +75,7 @@ public class RestaurantFileLoader {
 
         String name = restaurantNode.get("name").asText();
         String address = restaurantNode.get("address").asText();
-        String phoneNumber = formatPhoneNumber(restaurantNode.get("phone_number").decimalValue().toPlainString());
+        String phoneNumber = parsePhoneNumber(restaurantNode.get("phone_number"));
         String operatingHour = restaurantNode.get("operating_hour").asText();
         String expandedDays = restaurantNode.get("expanded_days").asText();
         String timeRange = restaurantNode.get("time_range").asText();
@@ -152,9 +154,27 @@ public class RestaurantFileLoader {
         }
     }
 
-    private String formatPhoneNumber(String phoneNumber) {
-        phoneNumber = "0" + phoneNumber.replace(".0", "");
-        return "0" + phoneNumber.substring(1, phoneNumber.length() - 1);
+    private String parsePhoneNumber(JsonNode phoneNode) {
+        if (phoneNode == null || phoneNode.isNull()) {
+            return null;
+        }
+
+        String phoneNumberStr;
+
+        if (phoneNode.isNumber()) {
+            // 숫자로 인식되면 long으로 변환 후 문자열로 변환 (E 표기법 방지)
+            phoneNumberStr = String.valueOf(phoneNode.asLong());
+        } else {
+            // 이미 문자열이면 그대로 사용
+            phoneNumberStr = phoneNode.asText();
+        }
+
+        // 0으로 시작하지 않는 경우 '0' 추가
+        if (!phoneNumberStr.startsWith("0")) {
+            phoneNumberStr = "0" + phoneNumberStr;
+        }
+
+        return PhoneNumberUtil.formatPhoneNumber(phoneNumberStr);
     }
 
     private int parseIntValue(JsonNode node, int defaultValue) {

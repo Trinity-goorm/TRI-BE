@@ -30,7 +30,6 @@ public class ReservationEventListener {
         notificationService.sendReservationCanceledNotification(reservationEvent.getReservation().getUser(),
                                                                 reservationEvent.getReservation(), reservationEvent.isCODPassed());
         notificationService.deleteReservationNotification(reservationEvent.getReservation().getId());
-
     }
 
     @Async
