@@ -17,4 +17,5 @@ public class KakaoApiProperties {
     private String userInfoUrl;
     private String grantType;
     private String logoutUrl;
+    private String accessTokenValidationUrl;
 }
