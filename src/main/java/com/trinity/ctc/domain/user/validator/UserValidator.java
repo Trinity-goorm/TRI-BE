@@ -15,6 +15,6 @@ public class UserValidator {
     }
 
     public void validateCategorySelection(int selectCount) {
-        if (selectCount < 3) throw new CustomException(UserErrorCode.NOT_ENOUGH_CATEGORY_SELECT);
+        if (selectCount != 3) throw new CustomException(UserErrorCode.INVALID_CATEGORY_COUNT);
     }
 }

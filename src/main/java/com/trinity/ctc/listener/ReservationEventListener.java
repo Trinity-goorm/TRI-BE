@@ -1,6 +1,8 @@
 package com.trinity.ctc.listener;
 
+import com.trinity.ctc.domain.notification.entity.SeatNotification;
 import com.trinity.ctc.domain.notification.service.NotificationService;
+import com.trinity.ctc.domain.seat.entity.Seat;
 import com.trinity.ctc.event.PreOccupancyCanceledEvent;
 import com.trinity.ctc.event.ReservationCanceledEvent;
 import com.trinity.ctc.event.ReservationCompleteEvent;

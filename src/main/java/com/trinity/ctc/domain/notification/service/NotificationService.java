@@ -18,6 +18,7 @@ import com.trinity.ctc.domain.notification.util.fomatter.NotificationMessageUtil
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
 import com.trinity.ctc.domain.reservation.service.ReservationService;
+import com.trinity.ctc.domain.reservation.status.ReservationStatus;
 import com.trinity.ctc.domain.seat.entity.Seat;
 import com.trinity.ctc.domain.seat.repository.SeatRepository;
 import com.trinity.ctc.domain.user.entity.User;
@@ -164,6 +165,7 @@ public class NotificationService {
         // 알림 타입과 오늘 날짜로 당일 예약 알림 정보 가져오기
         List<ReservationNotification> reservationNotificationList = reservationNotificationRepository
                 .findAllByTypeAndDate(NotificationType.DAILY_NOTIFICATION, today);
+        if(reservationNotificationList.isEmpty()) return;
 
         // history 테이블과 알림 발송 후 알림 메세지 삭제를 위한 알림 ID 담을 list 세팅
         List<NotificationHistory> notificationHistoryList = new ArrayList<>();
@@ -238,6 +240,7 @@ public class NotificationService {
     private GroupFcmInformationDto buildReservationNotification(ReservationNotification notification) {
         // FCM 토큰 가져오기
         List<String> tokenList = fcmRepository.findByUser(notification.getUser().getId());
+        if(tokenList.isEmpty()) throw new CustomException(FcmErrorCode.NO_FCM_TOKEN_REGISTERED);
 
         List<Message> messageList = new ArrayList<>();
         List<FcmMessageDto> messageDtoList = new ArrayList<>();
@@ -353,6 +356,16 @@ public class NotificationService {
                     throw new CustomException(NotificationErrorCode.ALREADY_SUBSCRIBED);
                 });
 
+        // 이미 해당 자리에 예약이 되어 있을 경우, 422 반환
+/*        Seat seat = seatRepository.findById(seatId).orElseThrow(() -> new CustomException(SeatErrorCode.NOT_FOUND));
+        List<ReservationStatus> statusList = Arrays.asList(ReservationStatus.COMPLETED, ReservationStatus.IN_PROGRESS);
+        if(reservationRepository.existsByReservationDataV1(userId,
+                seat.getRestaurant().getId(),
+                seat.getReservationDate(),
+                seat.getReservationTime().getTimeSlot(),
+                seat.getSeatType().getId(),
+                statusList)) throw new CustomException(NotificationErrorCode.ALREADY_RESERVED);
+*/
         // 빈자리 알림 신청 내역 build
         SeatNotification seatNotification = SeatNotification.builder()
                 .user(user)
@@ -443,12 +456,18 @@ public class NotificationService {
      */
     @Transactional
     public void sendSeatNotification(long seatId) {
+        // 빈자리 알림 정보 가져오기(구독자 정보)
+        List<SeatNotification> seatNotificationList = seatNotificationRepository.findAllBySeatId(seatId);
+
+        // 빈자리 알림 구독자
+        if(seatNotificationList.isEmpty()) return;
+
         // 빈자리 알림 메세지 정보(구독한 빈자리 알림)
         SeatNotificationMessage seatNotificationMessage = seatNotificationMessageRepository.findBySeatId(seatId)
                 .orElseThrow(() -> new CustomException(NotificationErrorCode.NOT_FOUND));
 
-        // 빈자리 알림 정보 가져오기(구독자 정보)
-        List<SeatNotification> seatNotificationList = seatNotificationRepository.findAllBySeatId(seatId);
+
+
 
         // 알림 타입 세팅
         NotificationType type = NotificationType.SEAT_NOTIFICATION;
@@ -486,6 +505,7 @@ public class NotificationService {
             List<String> userTokens = fcmRepository.findByUser(notification.getUser().getId());
             tokenList.addAll(userTokens);
         }
+        if(tokenList.isEmpty()) throw new CustomException(FcmErrorCode.NO_FCM_TOKEN_REGISTERED);
 
         // FCM 메시지 빌드 후 반환
         return MulticastMessage.builder()
@@ -552,6 +572,8 @@ public class NotificationService {
                     .sentAt(resultList.get(i).getSentAt())
                     .sentResult(resultList.get(i).getSentResult())
                     .errorCode(resultList.get(i).getErrorCode())
+//                    .fcmToken(messageDtoList.get(i).getFcmToken())
+                    // FCM 토큰 저장 필요!!!
                     .user(seatNotificationList.get(i).getUser())
                     .build();
 
@@ -643,8 +665,8 @@ public class NotificationService {
      */
     private GroupFcmInformationDto buildMessageList(User user, FcmMessageDto fcmMessageDto) {
         List<Fcm> tokenList = user.getFcmList();
-        log.info(tokenList.size() + " tokens");
-        log.info("token:" + tokenList.get(0).getToken());
+        if(tokenList.isEmpty()) throw new CustomException(FcmErrorCode.NO_FCM_TOKEN_REGISTERED);
+
         List<Message> messageList = new ArrayList<>();
         List<FcmMessageDto> fcmMessageDtoList = new ArrayList<>();
         Message message;
@@ -688,6 +710,8 @@ public class NotificationService {
      */
     @Transactional
     public void sendReservationCanceledNotification(Long userId, Long reservationId, boolean isCODPassed) {
+        log.info("asdfadsfasdf");
+
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
         Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(() -> new CustomException(ReservationErrorCode.NOT_FOUND));
         FcmMessageDto messageData = formattingReservationCanceledNotification(reservation, user, isCODPassed);
@@ -734,15 +758,5 @@ public class NotificationService {
         String url = NotificationMessageUtil.formatReservationNotificationUrl();
 
         return new FcmMessageDto(title, body, url);
-    }
-
-    /**
-     * 예약 완료 알림 테스트용 메서드 (mock test 코드 작성 후 삭제 예정)
-     * @param userId
-     * @param reservationId
-     */
-    @Transactional
-    public void testReservationNotification(long userId, long reservationId) {
-        sendReservationSuccessNotification(userId, reservationId);
     }
 }
