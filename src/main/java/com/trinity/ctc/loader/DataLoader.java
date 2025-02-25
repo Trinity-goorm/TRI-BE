@@ -4,6 +4,7 @@ import com.trinity.ctc.domain.category.service.CategoryService;
 import com.trinity.ctc.domain.restaurant.service.RestaurantService;
 import com.trinity.ctc.domain.seat.service.SeatBatchService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.stereotype.Component;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 @ShellComponent
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "spring.shell.interactive.enabled", havingValue = "true", matchIfMissing = false)
 public class DataLoader {
 
     private final CategoryService categoryService;
