@@ -23,10 +23,7 @@ import com.trinity.ctc.domain.seat.repository.SeatRepository;
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.util.exception.CustomException;
-import com.trinity.ctc.util.exception.error_code.FcmErrorCode;
-import com.trinity.ctc.util.exception.error_code.NotificationErrorCode;
-import com.trinity.ctc.util.exception.error_code.SeatErrorCode;
-import com.trinity.ctc.util.exception.error_code.UserErrorCode;
+import com.trinity.ctc.util.exception.error_code.*;
 import com.trinity.ctc.util.formatter.DateTimeUtil;
 import com.trinity.ctc.util.validator.TicketValidator;
 import lombok.RequiredArgsConstructor;
@@ -125,7 +122,6 @@ public class NotificationService {
         String restaurantName = reservation.getRestaurant().getName();
         LocalDate reservedDate = reservation.getReservationDate();
         LocalTime reservedTime = reservation.getReservationTime().getTimeSlot();
-        Long reservationId = reservation.getId();
         LocalDateTime scheduledTime = DateTimeUtil.combineWithDate(reservedDate, reservedTime).minusHours(1);
 
         // 알림 메세지 data 별 포멧팅    
@@ -514,9 +510,9 @@ public class NotificationService {
                 LocalDateTime time = LocalDateTime.now();
 
                 if (sendResponse.isSuccessful()) {
-                    FcmSendingResultDto fcmSendingResultDto = new FcmSendingResultDto(time, SentResult.SUCCESS);
+                    resultList.add(new FcmSendingResultDto(time, SentResult.SUCCESS));
                 } else {
-                    FcmSendingResultDto fcmSendingResultDto = new FcmSendingResultDto(time, SentResult.FAILED, sendResponse.getException().getMessagingErrorCode());
+                    resultList.add(new FcmSendingResultDto(time, SentResult.FAILED, sendResponse.getException().getMessagingErrorCode()));
                 }
             }
         } catch (FirebaseMessagingException e) {
@@ -596,8 +592,10 @@ public class NotificationService {
      */
     @Transactional
     public void sendReservationSuccessNotification(User user, Reservation reservation) {
-        FcmMessageDto messageData = formattingReservationCompleteNotification(reservation);
+        user = userRepository.findById(user.getId()).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
+        reservation = reservationRepository.findById(reservation.getId()).orElseThrow(() -> new CustomException(ReservationErrorCode.NOT_FOUND));
 
+        FcmMessageDto messageData = formattingReservationCompleteNotification(reservation);
         GroupFcmInformationDto groupFcmInformationDto = buildMessageList(user, messageData);
         List<Message> messageList = groupFcmInformationDto.getMessageList();
         List<FcmMessageDto> messageDtoList = groupFcmInformationDto.getMessageDtoList();
@@ -687,6 +685,9 @@ public class NotificationService {
      */
     @Transactional
     public void sendReservationCanceledNotification(User user, Reservation reservation, boolean isCODPassed) {
+        log.info("user: " + user.getId() + " reservation: " + reservation.getId() + " isCODPassed: " + isCODPassed);
+        user = userRepository.findById(user.getId()).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
+        reservation = reservationRepository.findById(reservation.getId()).orElseThrow(() -> new CustomException(ReservationErrorCode.NOT_FOUND));
         FcmMessageDto messageData = formattingReservationCanceledNotification(reservation, user, isCODPassed);
         GroupFcmInformationDto groupFcmInformationDto = buildMessageList(user, messageData);
 
