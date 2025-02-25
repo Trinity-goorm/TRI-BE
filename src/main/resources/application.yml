@@ -39,6 +39,8 @@ swagger:
       paths: /api/users/**
     notification:
       paths: /api/notifications/**
+    data:
+      paths: /api/data/**
 
 springdoc:
   api-docs:

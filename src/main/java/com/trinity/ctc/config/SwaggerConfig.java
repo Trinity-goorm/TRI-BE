@@ -46,6 +46,9 @@ public class SwaggerConfig {
     @Value("${swagger.group.search.paths}")
     private String[] searchPaths;
 
+    @Value("/api/data/**")
+    private String[] dataPaths;
+
     @Bean
     public OpenAPI customOpenAPI() {
         List<Server> servers = new ArrayList<>();
@@ -136,11 +139,25 @@ public class SwaggerConfig {
                 .build();
     }
 
+    /**
+     * Search API 그룹
+     */
     @Bean
     public GroupedOpenApi searchOpenApi() {
         return GroupedOpenApi.builder()
                 .group("Search API")
                 .pathsToMatch(searchPaths)
+                .build();
+    }
+
+    /**
+     * Data Load API 그룹
+     */
+    @Bean
+    public GroupedOpenApi dataOpenApi() {
+        return GroupedOpenApi.builder()
+                .group("Data Load API")
+                .pathsToMatch(dataPaths)
                 .build();
     }
 }
