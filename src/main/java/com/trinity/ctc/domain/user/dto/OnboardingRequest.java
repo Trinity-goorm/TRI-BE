@@ -13,11 +13,11 @@ public class OnboardingRequest {
     @Schema(description = "유저 ID", example = "1")
     private long userId;
 
-    @Schema(description = "닉네임", example = "USER1")
-    private String name;
-
     @Schema(description = "성별", example = "MALE")
     private Sex sex;
+
+    @Schema(description = "닉네임", example = "USER1")
+    private String name;
 
     @Schema(description = "생년월일", example = "1995-08-25")
     private LocalDate birthday;
