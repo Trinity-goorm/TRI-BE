@@ -620,7 +620,6 @@ public class NotificationService {
     private FcmMessageDto formattingReservationCompleteNotification(Reservation reservation) {
         // 예약 완료 알림 메세지에 필요한 정보 변수 선언
         String restaurantName = reservation.getRestaurant().getName();
-        String restaurantPhoneNumber = reservation.getRestaurant().getPhoneNumber();
         LocalDate reservedDate = reservation.getReservationDate();
         LocalTime reservedTime = reservation.getReservationTime().getTimeSlot();
         int minCapacity = reservation.getSeatType().getMinCapacity();
@@ -713,13 +712,9 @@ public class NotificationService {
      */
     private FcmMessageDto formattingReservationCanceledNotification(Reservation reservation, User user, boolean isCODPassed) {
         // 예약 완료 알림 메세지에 필요한 정보 변수 선언
-
         String restaurantName = reservation.getRestaurant().getName();
-        String restaurantPhoneNumber = reservation.getRestaurant().getPhoneNumber();
         LocalDate reservedDate = reservation.getReservationDate();
         LocalTime reservedTime = reservation.getReservationTime().getTimeSlot();
-        int minCapacity = reservation.getSeatType().getMinCapacity();
-        int maxCapacity = reservation.getSeatType().getMaxCapacity();
 
         String title;
         String body;

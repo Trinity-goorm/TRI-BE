@@ -98,6 +98,7 @@ public class User {
     }
 
     public void updateOnboardingInformation(OnboardingRequest onboardingRequest, UserPreference userPreference) {
+        this.nickname = onboardingRequest.getNickname();
         this.sex = onboardingRequest.getSex();
         this.birthday = onboardingRequest.getBirthday();
         this.phoneNumber = onboardingRequest.getPhoneNumber();
