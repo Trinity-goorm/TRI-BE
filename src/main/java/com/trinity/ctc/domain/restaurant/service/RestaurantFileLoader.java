@@ -2,8 +2,8 @@ package com.trinity.ctc.domain.restaurant.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.trinity.ctc.domain.category.repository.CategoryRepository;
 import com.trinity.ctc.domain.category.entity.Category;
+import com.trinity.ctc.domain.category.repository.CategoryRepository;
 import com.trinity.ctc.domain.restaurant.entity.Menu;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
 import com.trinity.ctc.domain.restaurant.entity.RestaurantCategory;
@@ -12,14 +12,15 @@ import com.trinity.ctc.domain.restaurant.repository.RestaurantRepository;
 import com.trinity.ctc.util.exception.CustomException;
 import com.trinity.ctc.util.exception.error_code.JsonParseErrorCode;
 import com.trinity.ctc.util.formatter.PhoneNumberUtil;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
