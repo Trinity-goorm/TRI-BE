@@ -34,6 +34,10 @@ public class NotificationController {
             description = "이미 구독 중인 경우"
     )
     @ApiResponse(
+            responseCode = "422",
+            description = "이미 예약 중인 자리일 경우"
+    )
+    @ApiResponse(
             responseCode = "509",
             description = "빈자리 알림 신청 티켓이 부족한 경우"
     )
@@ -71,29 +75,6 @@ public class NotificationController {
     )
     public ResponseEntity<Void> cancelSubscribeSeatNotification(@RequestParam long seatNotificationId) {
         notificationService.cancelSubscribeSeatNotification(seatNotificationId);
-        return ResponseEntity.noContent().build();
-    }
-
-    /**
-     * 예약 알림 테스트용 api(mock test 코드 작성 후 삭제 예정)
-     * @param userId
-     * @param reservationId
-     * @return
-     */
-    @PostMapping("/reservations/test")
-    public ResponseEntity<Void> testReservationNotification(@RequestParam long userId, @RequestParam long reservationId) {
-        notificationService.testReservationNotification(userId, reservationId);
-        return ResponseEntity.noContent().build();
-    }
-
-    /**
-     * 빈자리 알림 테스트용 api(mock test 코드 작성 후 삭제 예정)
-     * @param reservationId
-     * @return
-     */
-    @PostMapping("/seats/test")
-    public ResponseEntity<Void> testSeatNotification(@RequestParam long reservationId) {
-        notificationService.testSeatNotification(reservationId);
         return ResponseEntity.noContent().build();
     }
 }
