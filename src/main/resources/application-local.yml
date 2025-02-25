@@ -22,6 +22,12 @@ spring:
     open-in-view: false  # OSIV 끄기 (가능하면 끄는 것이 성능적으로 유리)
 
 ---
+spring:
+  shell:
+    interactive:
+      enabled: true
+
+---
 logging:
   level:
     org.hibernate.SQL: DEBUG  # SQL 쿼리 출력

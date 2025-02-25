@@ -39,12 +39,15 @@ swagger:
       paths: /api/users/**
     notification:
       paths: /api/notifications/**
+    data:
+      paths: /api/data/**
 
 springdoc:
   api-docs:
     path: /api-docs # OpenAPI 명세 기본 경로
   swagger-ui:
     path: /swagger-ui.html # Swagger UI 기본 경로
+    operations-sorter: method
 ---
 firebase:
   project-id: catchping-fcmserver
