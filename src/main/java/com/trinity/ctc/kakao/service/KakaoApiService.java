@@ -90,10 +90,6 @@ public class KakaoApiService {
                 log.warn("유효하지 않은 액세스 토큰으로 로그아웃 요청 → 로그아웃 성공으로 처리");
                 return KakaoLogoutResponse.of(-1L);
             }
-            if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
-                log.warn("유효하지 않은 액세스 토큰으로 로그아웃 요청 → 로그아웃 성공으로 처리");
-                return KakaoLogoutResponse.of(-1L);
-            }
             throw new CustomException(KakaoErrorCode.LOGOUT_REQUEST_FAILED);
         } catch (ResourceAccessException e) {
             throw new CustomException(KakaoErrorCode.NETWORK_ERROR);
