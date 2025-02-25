@@ -71,6 +71,7 @@ public class KakaoApiService {
 
     public KakaoLogoutResponse deleteToken(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + accessToken);
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
@@ -86,6 +87,10 @@ public class KakaoApiService {
         } catch (HttpClientErrorException e) {
             // 401 Unauthorized (토큰 만료 또는 유효하지 않음) → 로그아웃 성공으로 처리
             if (!isAccessTokenValid(accessToken)) {
+                log.warn("유효하지 않은 액세스 토큰으로 로그아웃 요청 → 로그아웃 성공으로 처리");
+                return KakaoLogoutResponse.of(-1L);
+            }
+            if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
                 log.warn("유효하지 않은 액세스 토큰으로 로그아웃 요청 → 로그아웃 성공으로 처리");
                 return KakaoLogoutResponse.of(-1L);
             }
