@@ -36,7 +36,6 @@ public class FcmService {
         LocalDateTime registeredAt = fcmTokenRequest.getTimeStamp();
         LocalDateTime expiresAt = registeredAt.plusDays(30);
 
-
         // FCM 토큰 entity 빌드
         Fcm fcm = Fcm.builder()
                 .token(fcmTokenRequest.getFcmToken())

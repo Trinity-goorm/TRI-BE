@@ -43,7 +43,6 @@ public class AuthController {
         UserLoginResponse response = authService.authenticateWithKakao(code);
 
         fcmService.registerFcmToken(fcmTokenRequest, response.getId());
-
         return ResponseEntity.ok(response);
     }
 
