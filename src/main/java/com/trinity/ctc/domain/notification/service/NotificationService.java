@@ -57,11 +57,14 @@ public class NotificationService {
     /**
      * 예약 이벤트를 통해 예약 알림에 필요한 entity(user, reservation)를 받아오고, 예약 알림 entity을 DB에 저장하는 메서드
      *
-     * @param user        사용자
-     * @param reservation 예약 정보
+     * @param userId        사용자
+     * @param reservationId 예약 정보
      */
     @Transactional
-    public void registerReservationNotification(User user, Reservation reservation) {
+    public void registerReservationNotification(long userId, long reservationId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
+        Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(() -> new CustomException(ReservationErrorCode.NOT_FOUND));
+
         // 당일 예약 알림 메세지 포멧팅
         ReservationNotification dailyNotification = formattingDailyNotification(user, reservation);
 
@@ -451,7 +454,6 @@ public class NotificationService {
 
         List<FcmSendingResultDto> resultList = handleMulticastNotification(seatNotificationMessage, seatNotificationList);
 
-
         List<NotificationHistory> notificationHistoryList = buildMulticastNotificationHistory(seatNotificationList, seatNotificationMessage, type, resultList);
 
         // 전송된 알림 히스토리를 전부 history 테이블에 저장하는 메서드
@@ -587,13 +589,13 @@ public class NotificationService {
     /**
      * 예약 완료 알림 전송 메서드
      *
-     * @param user
-     * @param reservation
+     * @param userId
+     * @param reservationId
      */
     @Transactional
-    public void sendReservationSuccessNotification(User user, Reservation reservation) {
-        user = userRepository.findById(user.getId()).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
-        reservation = reservationRepository.findById(reservation.getId()).orElseThrow(() -> new CustomException(ReservationErrorCode.NOT_FOUND));
+    public void sendReservationSuccessNotification(Long userId, Long reservationId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
+        Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(() -> new CustomException(ReservationErrorCode.NOT_FOUND));
 
         FcmMessageDto messageData = formattingReservationCompleteNotification(reservation);
         GroupFcmInformationDto groupFcmInformationDto = buildMessageList(user, messageData);
@@ -679,15 +681,14 @@ public class NotificationService {
     /**
      * 예약 취소 알림 전송 메서드
      *
-     * @param user
-     * @param reservation
+     * @param userId
+     * @param reservationId
      * @param isCODPassed
      */
     @Transactional
-    public void sendReservationCanceledNotification(User user, Reservation reservation, boolean isCODPassed) {
-        log.info("user: " + user.getId() + " reservation: " + reservation.getId() + " isCODPassed: " + isCODPassed);
-        user = userRepository.findById(user.getId()).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
-        reservation = reservationRepository.findById(reservation.getId()).orElseThrow(() -> new CustomException(ReservationErrorCode.NOT_FOUND));
+    public void sendReservationCanceledNotification(Long userId, Long reservationId, boolean isCODPassed) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
+        Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(() -> new CustomException(ReservationErrorCode.NOT_FOUND));
         FcmMessageDto messageData = formattingReservationCanceledNotification(reservation, user, isCODPassed);
         GroupFcmInformationDto groupFcmInformationDto = buildMessageList(user, messageData);
 
@@ -741,8 +742,6 @@ public class NotificationService {
      */
     @Transactional
     public void testReservationNotification(long userId, long reservationId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(() -> new RuntimeException("Reservation not found"));
-        sendReservationSuccessNotification(user, reservation);
+        sendReservationSuccessNotification(userId, reservationId);
     }
 }

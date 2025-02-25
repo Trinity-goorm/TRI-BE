@@ -8,5 +8,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public class PreOccupancyCanceledEvent {
     private final Long reservationId;
-    private final Seat seat;
+    private final Long SeatId;
+    private final int availableSeats;
 }
