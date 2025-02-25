@@ -21,7 +21,7 @@ kakao:
 swagger:
   server-url:
     local: http://localhost:8080
-    production: https://api.catchping.com
+    production: https://catchping.com
   group:
     auth:
       paths: /api/auth/**

@@ -43,6 +43,9 @@ dependencies {
 
 	// spring shell
 	implementation 'org.springframework.shell:spring-shell-starter:3.2.3'
+
+	// actuator healthcheck
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 }
 
 tasks.named('test') {
