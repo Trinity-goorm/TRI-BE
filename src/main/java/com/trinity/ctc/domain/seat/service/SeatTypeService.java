@@ -1,5 +1,6 @@
 package com.trinity.ctc.domain.seat.service;
 
+import com.trinity.ctc.domain.seat.dto.InsertSeatTypeRequest;
 import com.trinity.ctc.domain.seat.entity.SeatType;
 import com.trinity.ctc.domain.seat.repository.SeatTypeRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,5 +21,17 @@ public class SeatTypeService {
     public List<SeatType> getAllSeatTypes() {
         log.debug("[SELECT] 모든 좌석타입 획득");
         return seatTypeRepository.findAll();
+    }
+
+    @Transactional
+    public void insertInitialSeatType(List<InsertSeatTypeRequest> requests) {
+        List<SeatType> seatTypes = requests.stream()
+                .map(seat -> SeatType.builder()
+                        .minCapacity(seat.getMinCapacity())
+                        .maxCapacity(seat.getMaxCapacity())
+                        .build())
+                .toList();
+
+        seatTypeRepository.saveAll(seatTypes);
     }
 }
