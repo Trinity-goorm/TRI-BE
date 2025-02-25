@@ -31,12 +31,11 @@ public class KakaoApiService {
 
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
 
-        log.info("헤더 세팅");
         body.add("grant_type", kakaoApiProperties.getGrantType());
         body.add("client_id", kakaoApiProperties.getClientId());
         body.add("redirect_uri", kakaoApiProperties.getRedirectUri());
         body.add("code", authorizationCode);
-        log.info("바디 세팅");
+
         HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(body, headers);
 
         KakaoTokenResponse tokenResponse = restTemplate.postForObject(
@@ -45,7 +44,6 @@ public class KakaoApiService {
                 KakaoTokenResponse.class
         );
 
-        log.info("response 세팅");
         return tokenResponse;
     }
 

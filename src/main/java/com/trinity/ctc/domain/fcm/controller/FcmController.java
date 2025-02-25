@@ -33,7 +33,6 @@ public class FcmController {
     @PostMapping("/test")
     public ResponseEntity<Void> test(@RequestParam String code, @RequestBody FcmTokenRequest fcmTokenRequest) {
 
-        log.info("gone?");
         fcmService.registerFcmToken(fcmTokenRequest,1L);
 
         return ResponseEntity.noContent().build();
