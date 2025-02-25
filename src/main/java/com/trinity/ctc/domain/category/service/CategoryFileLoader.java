@@ -8,6 +8,7 @@ import com.trinity.ctc.util.exception.error_code.CategoryErrorCode;
 import com.trinity.ctc.util.exception.error_code.JsonParseErrorCode;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.core.io.ClassPathResource;
@@ -20,8 +21,8 @@ public class CategoryFileLoader {
         List<Category> categories = new ArrayList<>();
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            File file = new ClassPathResource("crawlingData/categories.json").getFile();
-            JsonNode rootNode = objectMapper.readTree(file);
+            InputStream inputStream= new ClassPathResource("crawlingData/categories.json").getInputStream();
+            JsonNode rootNode = objectMapper.readTree(inputStream);
 
             for (JsonNode node : rootNode) {
                 Category category

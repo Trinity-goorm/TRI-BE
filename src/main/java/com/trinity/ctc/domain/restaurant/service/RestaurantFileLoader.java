@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,9 +63,10 @@ public class RestaurantFileLoader {
     }
 
     private JsonNode readJsonFile(String filePath) throws IOException {
-        File file = new ClassPathResource(filePath).getFile();
-        return objectMapper.readTree(file);
+        InputStream inputStream = new ClassPathResource(filePath).getInputStream();
+        return objectMapper.readTree(inputStream);
     }
+
 
     private Restaurant parseRestaurant(JsonNode restaurantNode, List<Menu> menuList) {
         int sum = 0;
