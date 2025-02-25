@@ -64,5 +64,4 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             "JOIN FETCH r.seatType st " +
             "WHERE r.user.id = :userId")
     Slice<Reservation> findAllByUserId(@Param("userId") Long userId, Pageable pageable);
-
 }
