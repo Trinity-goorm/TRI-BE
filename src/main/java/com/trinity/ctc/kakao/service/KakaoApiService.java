@@ -71,6 +71,7 @@ public class KakaoApiService {
 
     public KakaoLogoutResponse deleteToken(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + accessToken);
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
