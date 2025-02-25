@@ -15,6 +15,13 @@ spring:
         jdbc:
           fetch_size: 1000 # 데이터 패치 크기
           batch_size: 1000 # 배치 크기
+
+---
+spring:
+  shell:
+    interactive:
+      enabled: false
+
 ---
 logging:
   level:
@@ -27,4 +34,4 @@ logging:
 common:
   seat:
     available:
-      count: 10
+      count: 1

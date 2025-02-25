@@ -16,6 +16,7 @@ import com.trinity.ctc.domain.seat.entity.SeatType;
 import com.trinity.ctc.domain.seat.repository.SeatRepository;
 import com.trinity.ctc.domain.seat.repository.SeatTypeRepository;
 import com.trinity.ctc.domain.user.entity.User;
+import com.trinity.ctc.event.PreOccupancyCanceledEvent;
 import com.trinity.ctc.event.ReservationCanceledEvent;
 import com.trinity.ctc.event.ReservationCompleteEvent;
 import com.trinity.ctc.domain.user.repository.UserRepository;
@@ -100,7 +101,7 @@ public class ReservationService {
         reservation.completeReservation();
 
         // 예약 완료 이벤트 발행
-        eventPublisher.publishEvent(new ReservationCompleteEvent(reservation));
+        eventPublisher.publishEvent(new ReservationCompleteEvent(reservation.getUser().getId(), reservation.getId()));
 
         // 결과 반환
         return ReservationResultResponse.of(true, reservationId, reservation.getRestaurant().getName(), reservation.getReservationDate(), reservation.getReservationTime().getTimeSlot());
@@ -126,6 +127,7 @@ public class ReservationService {
         seat.cancelOneReservation();
         log.info("[예약 취소 후] 가용좌석 수: {}", seat.getAvailableSeats());
 
+        eventPublisher.publishEvent(new PreOccupancyCanceledEvent(reservationId, seat.getId(), seat.getAvailableSeats()));
         // 결과 반환
         return ReservationResultResponse.of(true, reservationId, reservation.getRestaurant().getName(), reservation.getReservationDate(), reservation.getReservationTime().getTimeSlot());
     }
@@ -164,7 +166,7 @@ public class ReservationService {
         seat.cancelOneReservation();
         log.info("[예약 취소 후] 가용좌석 수: {}", seat.getAvailableSeats());
 
-        eventPublisher.publishEvent(new ReservationCanceledEvent(reservation, seat, isCODPassed));
+        eventPublisher.publishEvent(new ReservationCanceledEvent(user.getId(), reservationId, seat.getId(), seat.getAvailableSeats(), isCODPassed));
 
         return ReservationResultResponse.of(true, reservationId, reservation.getRestaurant().getName(), reservation.getReservationDate(), reservation.getReservationTime().getTimeSlot(), isCODPassed);
     }

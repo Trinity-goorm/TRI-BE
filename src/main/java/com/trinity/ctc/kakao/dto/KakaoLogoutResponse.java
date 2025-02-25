@@ -13,15 +13,11 @@ public class KakaoLogoutResponse {
 
     @JsonProperty("id")
     @Schema(description = "사용자 식별자", example = "1")
-    private String id;
-
-    @Schema(description = "로그아웃 상태", example = "success")
-    private final String status;
+    private Long id;
 
     @Builder
-    public static KakaoLogoutResponse of(String id, String status) {
+    public static KakaoLogoutResponse of(Long id){
         return KakaoLogoutResponse.builder()
-            .status(status)
             .id(id)
             .build();
     }

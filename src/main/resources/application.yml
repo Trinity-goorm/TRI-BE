@@ -16,11 +16,12 @@ kakao:
     user-info-url: "https://kapi.kakao.com/v2/user/me"
     grant-type: "authorization_code"
     logout-url: "https://kapi.kakao.com/v1/user/logout"
+    access-token-validation-url: "https://kapi.kakao.com/v1/user/access_token_info"
 ---
 swagger:
   server-url:
     local: http://localhost:8080
-    production: https://api.catchping.com
+    production: https://catchping.com
   group:
     auth:
       paths: /api/auth/**
@@ -38,16 +39,22 @@ swagger:
       paths: /api/users/**
     notification:
       paths: /api/notifications/**
+    data:
+      paths: /api/data/**
 
 springdoc:
   api-docs:
     path: /api-docs # OpenAPI 명세 기본 경로
   swagger-ui:
     path: /swagger-ui.html # Swagger UI 기본 경로
+    operations-sorter: method
 ---
 firebase:
   project-id: catchping-fcmserver
   credentials: ${FIREBASE_CREDENTIALS}
 
+ai:
+  api:
+    url: "http://10.0.172.33:5000/recommend"
 
 

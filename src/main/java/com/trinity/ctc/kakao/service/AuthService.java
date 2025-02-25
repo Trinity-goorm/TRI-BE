@@ -1,16 +1,14 @@
 package com.trinity.ctc.kakao.service;
 
 import com.trinity.ctc.domain.user.entity.User;
+import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.domain.user.status.UserStatus;
 import com.trinity.ctc.kakao.dto.KakaoLogoutResponse;
 import com.trinity.ctc.kakao.dto.KakaoTokenResponse;
 import com.trinity.ctc.kakao.dto.KakaoUserInfoResponse;
 import com.trinity.ctc.kakao.dto.UserLoginResponse;
-import com.trinity.ctc.domain.user.repository.UserRepository;
-
 import java.util.Collections;
 import java.util.Optional;
-
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -33,7 +31,6 @@ public class AuthService {
         KakaoTokenResponse tokenResponse = kakaoApiService.getAccessToken(authorizationCode);
         KakaoUserInfoResponse userInfo = kakaoApiService.getUserInfo(tokenResponse.getAccessToken());
         UserLoginResponse response = handleUserInfo(userInfo, tokenResponse);
-
         return response;
     }
 
