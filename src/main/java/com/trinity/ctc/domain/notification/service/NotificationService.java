@@ -150,6 +150,7 @@ public class NotificationService {
      *
      * @param reservationId 예약 ID
      */
+    @Transactional
     public void deleteReservationNotification(Long reservationId) {
         reservationNotificationRepository.deleteAllByReservation(reservationId);
     }
