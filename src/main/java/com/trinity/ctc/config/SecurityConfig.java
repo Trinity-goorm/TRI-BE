@@ -34,7 +34,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));  // 허용할 프론트엔드 도메인
+        configuration.setAllowedOrigins(List.of("http://localhost:5173", "https://localhost:8080", "https://catch-ping.com"));  // 허용할 프론트엔드 도메인
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));  // 허용할 HTTP 메서드
         configuration.setAllowedHeaders(List.of("*"));  // 모든 요청 헤더 허용
         configuration.setAllowCredentials(true);  // 쿠키나 인증 정보를 허용할 경우 true
