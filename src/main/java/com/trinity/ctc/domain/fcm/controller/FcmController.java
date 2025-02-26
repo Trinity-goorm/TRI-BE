@@ -30,10 +30,10 @@ public class FcmController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/test")
-    public ResponseEntity<Void> test(@RequestParam String code, @RequestBody FcmTokenRequest fcmTokenRequest) {
+    @DeleteMapping("/test")
+    public ResponseEntity<Void> test() {
 
-        fcmService.registerFcmToken(fcmTokenRequest,1L);
+        fcmService.expireFcmToken();
 
         return ResponseEntity.noContent().build();
     }
