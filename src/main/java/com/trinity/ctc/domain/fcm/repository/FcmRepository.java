@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -18,7 +17,9 @@ public interface FcmRepository extends JpaRepository<Fcm, Long> {
     void deleteByToken(String token);
 
     @Transactional
-    void deleteByExpiresAtBefore(Date currentDate);
+    @Modifying
+    @Query("DELETE FROM Fcm f WHERE f.expiresAt < :currentDate")
+    void deleteByExpiresAtBefore(LocalDateTime currentDate);
 
     @Transactional
     @Modifying

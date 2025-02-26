@@ -13,7 +13,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Service
 @RequiredArgsConstructor
@@ -77,7 +76,8 @@ public class FcmService {
     @Scheduled(cron = "0 0 0 * * ?")
     public void expireFcmToken() {
         // 현재 시간 기준으로 만료 시간이 지난 토큰 record 삭제
-        Date currentDate = new Date();
+        LocalDateTime currentDate = LocalDateTime.now();
+        log.info(currentDate.toString());
         fcmRepository.deleteByExpiresAtBefore(currentDate);
     }
 }
