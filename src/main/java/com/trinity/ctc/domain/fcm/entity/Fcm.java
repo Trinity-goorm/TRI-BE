@@ -31,7 +31,7 @@ public class Fcm {
     private User user;
 
     @Builder
-    public Fcm(String token, LocalDateTime registeredAt, LocalDateTime expiresAt, User user){
+    public Fcm(String token, LocalDateTime registeredAt, LocalDateTime expiresAt, User user) {
         this.token = token;
         this.registeredAt = registeredAt;
         this.expiresAt = expiresAt;

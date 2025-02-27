@@ -32,7 +32,7 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
             "WHERE sa.restaurant.id = :restaurantId " +
             "AND sa.reservationDate = :selectedDate " +
             "AND sa.reservationTime.timeSlot = :reservationTime " +
-            "AND sa.seatType.id = :seatTypeId" )
+            "AND sa.seatType.id = :seatTypeId")
     Seat findByReservationData(@Param("restaurantId") Long restaurantId,
                                @Param("selectedDate") LocalDate selectedDate,
                                @Param("reservationTime") LocalTime reservationTime,

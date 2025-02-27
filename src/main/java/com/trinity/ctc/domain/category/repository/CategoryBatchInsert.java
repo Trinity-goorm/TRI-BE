@@ -3,6 +3,7 @@ package com.trinity.ctc.domain.category.repository;
 import com.trinity.ctc.domain.category.entity.Category;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+
 import java.util.List;
 
 @Repository

@@ -26,6 +26,6 @@ public class UserDetailResponse {
     private final int emptyTicketCount;
 
     public static UserDetailResponse of(long userId, String username, String phoneNumber, int normalTicketCount, int emptyTicketCount) {
-        return new UserDetailResponse(userId, username,phoneNumber, normalTicketCount, emptyTicketCount);
+        return new UserDetailResponse(userId, username, phoneNumber, normalTicketCount, emptyTicketCount);
     }
 }

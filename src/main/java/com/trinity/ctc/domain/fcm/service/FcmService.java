@@ -5,8 +5,8 @@ import com.trinity.ctc.domain.fcm.entity.Fcm;
 import com.trinity.ctc.domain.fcm.repository.FcmRepository;
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.domain.user.repository.UserRepository;
-import com.trinity.ctc.util.exception.CustomException;
-import com.trinity.ctc.util.exception.error_code.UserErrorCode;
+import com.trinity.ctc.global.exception.CustomException;
+import com.trinity.ctc.global.exception.error_code.UserErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -23,8 +23,9 @@ public class FcmService {
 
     /**
      * 로그인 시, 해당 기기에 대한 사용자의 fcm 토큰 정보 초기화
+     *
      * @param fcmTokenRequest FCM토큰 정보 요청 DTO(토큰값, 등록 시간)
-     * @param userId 사용자 ID
+     * @param userId          사용자 ID
      */
     public void registerFcmToken(FcmTokenRequest fcmTokenRequest, Long userId) {
         // 유저 entity
@@ -49,6 +50,7 @@ public class FcmService {
 
     /**
      * 로그아웃 시, 해당 기기에 대한 사용자의 fcm 토큰 정보 삭제
+     *
      * @param fcmTokenRequest FCM토큰 정보 요청 DTO(토큰값, null)
      */
     public void deleteFcmToken(FcmTokenRequest fcmTokenRequest) {
@@ -57,6 +59,7 @@ public class FcmService {
 
     /**
      * 로그인 세션이 유지된 상태에서 접속 시, fcm 토큰 만료 기간 갱신
+     *
      * @param fcmTokenRequest FCM토큰 정보 요청 DTO(토큰값, 업데이트 시간)
      */
     public void renewFcmToken(FcmTokenRequest fcmTokenRequest) {
@@ -77,7 +80,6 @@ public class FcmService {
     public void expireFcmToken() {
         // 현재 시간 기준으로 만료 시간이 지난 토큰 record 삭제
         LocalDateTime currentDate = LocalDateTime.now();
-        log.info(currentDate.toString());
         fcmRepository.deleteByExpiresAtBefore(currentDate);
     }
 }

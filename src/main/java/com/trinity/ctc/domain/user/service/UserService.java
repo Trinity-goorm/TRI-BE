@@ -12,9 +12,9 @@ import com.trinity.ctc.domain.user.entity.UserPreference;
 import com.trinity.ctc.domain.user.entity.UserPreferenceCategory;
 import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.domain.user.validator.UserValidator;
-import com.trinity.ctc.util.common.SortOrder;
-import com.trinity.ctc.util.exception.CustomException;
-import com.trinity.ctc.util.exception.error_code.UserErrorCode;
+import com.trinity.ctc.global.util.common.SortOrder;
+import com.trinity.ctc.global.exception.CustomException;
+import com.trinity.ctc.global.exception.error_code.UserErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -36,6 +36,7 @@ public class UserService {
 
     /**
      * 온보딩 요청 DTO의 정보로 user entity를 build 후 저장하는 메서드
+     *
      * @param onboardingRequest
      */
     @Transactional
@@ -72,18 +73,20 @@ public class UserService {
 
     /**
      * 사용자 프로필 정보 반환
+     *
      * @param userId
      * @return 사용자 프로필 정보
      */
     @Transactional(readOnly = true)
     public UserDetailResponse getUserDetail(long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
-        return UserDetailResponse.of(user.getId(), user.getNickname(),user.getPhoneNumber() , user.getNormalTicketCount(), user.getEmptyTicketCount());
+        return UserDetailResponse.of(user.getId(), user.getNickname(), user.getPhoneNumber(), user.getNormalTicketCount(), user.getEmptyTicketCount());
     }
 
 
     /**
      * 사용자 예약리스트 반환
+     *
      * @param userId
      * @return 예약정보 리스트 및 개수
      */

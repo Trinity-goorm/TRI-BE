@@ -9,7 +9,9 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -44,7 +46,7 @@ public class SearchController {
             )
     )
     public ResponseEntity<List<RestaurantPreviewResponse>> getRestaurantsBySearch(@RequestBody
-    RestaurantPreviewRequest request, @RequestParam String keyword) {
+                                                                                  RestaurantPreviewRequest request, @RequestParam String keyword) {
         return ResponseEntity.ok(searchService.search(request, keyword));
     }
 

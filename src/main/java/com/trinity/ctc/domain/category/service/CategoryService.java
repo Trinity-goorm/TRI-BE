@@ -2,9 +2,10 @@ package com.trinity.ctc.domain.category.service;
 
 import com.trinity.ctc.domain.category.repository.CategoryBatchInsert;
 import com.trinity.ctc.domain.category.entity.Category;
-import com.trinity.ctc.util.exception.CustomException;
-import com.trinity.ctc.util.exception.error_code.CategoryErrorCode;
+import com.trinity.ctc.global.exception.CustomException;
+import com.trinity.ctc.global.exception.error_code.CategoryErrorCode;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 
 @Service

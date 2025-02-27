@@ -42,7 +42,7 @@ public class SubscriptionResponse {
     @Schema(description = "빈자리 알림 신청자 수", example = "13")
     private int subscriberCount;
 
-    public static SubscriptionResponse of (long seatNotificationId, Seat seat, int subscriberCount) {
+    public static SubscriptionResponse of(long seatNotificationId, Seat seat, int subscriberCount) {
         return new SubscriptionResponse(seatNotificationId,
                 seat.getRestaurant().getName(),
                 seat.getRestaurant().getRestaurantCategoryList().stream()

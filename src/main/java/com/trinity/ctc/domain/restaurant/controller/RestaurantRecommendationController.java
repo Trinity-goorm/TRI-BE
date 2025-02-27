@@ -32,8 +32,8 @@ public class RestaurantRecommendationController {
             description = "식당 목록 반환 성공",
             content = @Content(
                     mediaType = "application/json",
-                array = @ArraySchema(schema = @Schema(implementation = RestaurantPreviewResponse.class)
-            )
+                    array = @ArraySchema(schema = @Schema(implementation = RestaurantPreviewResponse.class)
+                    )
             )
     )
     public ResponseEntity<List<RestaurantPreviewResponse>> getRecommendedRestaurants(@PathVariable Long userId) {
