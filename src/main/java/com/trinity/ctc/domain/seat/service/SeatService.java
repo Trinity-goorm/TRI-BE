@@ -6,10 +6,10 @@ import com.trinity.ctc.domain.seat.dto.GroupedSeatResponse;
 import com.trinity.ctc.domain.seat.dto.GroupedTimeSlotResponse;
 import com.trinity.ctc.domain.seat.entity.Seat;
 import com.trinity.ctc.domain.seat.repository.SeatRepository;
-import com.trinity.ctc.util.formatter.DateTimeUtil;
-import com.trinity.ctc.util.helper.GroupingHelper;
-import com.trinity.ctc.util.validator.DateTimeValidator;
-import com.trinity.ctc.util.validator.SeatAvailabilityValidator;
+import com.trinity.ctc.global.util.formatter.DateTimeUtil;
+import com.trinity.ctc.global.util.helper.GroupingHelper;
+import com.trinity.ctc.global.util.validator.DateTimeValidator;
+import com.trinity.ctc.global.util.validator.SeatAvailabilityValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static com.trinity.ctc.util.validator.DateTimeValidator.isToday;
+import static com.trinity.ctc.global.util.validator.DateTimeValidator.isToday;
 
 @Service
 @RequiredArgsConstructor

@@ -1,7 +1,7 @@
 package com.trinity.ctc.domain.notification.validator;
 
-import com.trinity.ctc.util.exception.CustomException;
-import com.trinity.ctc.util.exception.error_code.EmptyTicketErrorCode;
+import com.trinity.ctc.global.exception.CustomException;
+import com.trinity.ctc.global.exception.error_code.EmptyTicketErrorCode;
 
 public class EmptyTicketValidator {
     private EmptyTicketValidator() {}

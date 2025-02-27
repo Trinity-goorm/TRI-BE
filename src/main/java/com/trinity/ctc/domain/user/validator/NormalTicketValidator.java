@@ -1,7 +1,7 @@
 package com.trinity.ctc.domain.user.validator;
 
-import com.trinity.ctc.util.exception.CustomException;
-import com.trinity.ctc.util.exception.error_code.TicketErrorCode;
+import com.trinity.ctc.global.exception.CustomException;
+import com.trinity.ctc.global.exception.error_code.TicketErrorCode;
 
 public class NormalTicketValidator {
 

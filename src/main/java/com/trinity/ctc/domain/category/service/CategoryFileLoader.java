@@ -3,8 +3,8 @@ package com.trinity.ctc.domain.category.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trinity.ctc.domain.category.entity.Category;
-import com.trinity.ctc.util.exception.CustomException;
-import com.trinity.ctc.util.exception.error_code.JsonParseErrorCode;
+import com.trinity.ctc.global.exception.CustomException;
+import com.trinity.ctc.global.exception.error_code.JsonParseErrorCode;
 
 import java.io.IOException;
 import java.io.InputStream;

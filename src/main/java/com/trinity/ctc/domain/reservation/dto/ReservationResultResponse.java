@@ -1,6 +1,6 @@
 package com.trinity.ctc.domain.reservation.dto;
 
-import com.trinity.ctc.util.formatter.DateTimeUtil;
+import com.trinity.ctc.global.util.formatter.DateTimeUtil;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

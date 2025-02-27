@@ -4,9 +4,9 @@ import com.trinity.ctc.domain.reservation.dto.ReservationRequest;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
 import com.trinity.ctc.domain.reservation.status.ReservationStatus;
-import com.trinity.ctc.util.exception.CustomException;
-import com.trinity.ctc.util.exception.error_code.ReservationErrorCode;
-import com.trinity.ctc.util.validator.DateTimeValidator;
+import com.trinity.ctc.global.exception.CustomException;
+import com.trinity.ctc.global.exception.error_code.ReservationErrorCode;
+import com.trinity.ctc.global.util.validator.DateTimeValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

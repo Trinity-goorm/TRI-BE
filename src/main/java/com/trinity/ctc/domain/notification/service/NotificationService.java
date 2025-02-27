@@ -14,7 +14,7 @@ import com.trinity.ctc.domain.notification.repository.SeatNotificationMessageRep
 import com.trinity.ctc.domain.notification.repository.SeatNotificationRepository;
 import com.trinity.ctc.domain.notification.result.SentResult;
 import com.trinity.ctc.domain.notification.type.NotificationType;
-import com.trinity.ctc.domain.notification.util.fomatter.NotificationMessageUtil;
+import com.trinity.ctc.domain.notification.fomatter.NotificationMessageUtil;
 import com.trinity.ctc.domain.notification.validator.EmptyTicketValidator;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
@@ -22,10 +22,9 @@ import com.trinity.ctc.domain.seat.entity.Seat;
 import com.trinity.ctc.domain.seat.repository.SeatRepository;
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.domain.user.repository.UserRepository;
-import com.trinity.ctc.util.exception.CustomException;
-import com.trinity.ctc.util.exception.error_code.*;
-import com.trinity.ctc.util.formatter.DateTimeUtil;
-import com.trinity.ctc.domain.user.validator.NormalTicketValidator;
+import com.trinity.ctc.global.exception.CustomException;
+import com.trinity.ctc.global.exception.error_code.*;
+import com.trinity.ctc.global.util.formatter.DateTimeUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -37,7 +36,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 
-import static com.trinity.ctc.util.formatter.DateTimeUtil.combineWithDate;
+import static com.trinity.ctc.global.util.formatter.DateTimeUtil.combineWithDate;
 
 @Slf4j
 @EnableAsync
