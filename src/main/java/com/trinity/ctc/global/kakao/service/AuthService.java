@@ -30,20 +30,19 @@ public class AuthService {
 
         KakaoTokenResponse tokenResponse = kakaoApiService.getAccessToken(authorizationCode);
         KakaoUserInfoResponse userInfo = kakaoApiService.getUserInfo(tokenResponse.getAccessToken());
-        UserLoginResponse response = handleUserInfo(userInfo, tokenResponse);
-        return response;
+
+        return handleUserInfo(userInfo, tokenResponse);
     }
 
     private UserLoginResponse handleUserInfo(KakaoUserInfoResponse userInfo, KakaoTokenResponse tokenResponse) {
-        Long kakaoId = Long.parseLong(userInfo.getKakaoId());
+        Long kakaoId = userInfo.getKakaoId();
 
         // 회원 존재 여부 확인
-        Optional<User> existingUser = userRepository.findByKakaoId(kakaoId);
+        User existingUser = userRepository.findByKakaoId(kakaoId).orElse(null);
 
-        if (existingUser.isPresent()) {
-            User user = existingUser.get();
-            createLoginSession(user);
-            return UserLoginResponse.existingUser(user, tokenResponse);
+        if (existingUser != null && existingUser.getStatus() == UserStatus.AVAILABLE) {
+            createLoginSession(existingUser);
+            return UserLoginResponse.existingUser(existingUser, tokenResponse);
 
         } else {
             User newUser = registerNewMember(kakaoId);

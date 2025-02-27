@@ -66,11 +66,12 @@ public class RestaurantRecommendationService {
 
         AIRecommendationRequest request = new AIRecommendationRequest(
             user.getId(),
-            preferredCategories,
-            minPrice,
-            maxPrice,
-            likeList,
-            searchHistory);
+            preferredCategories
+//            minPrice,
+//            maxPrice,
+//            likeList,
+//            searchHistory
+            );
         log.info("AI 추천 요청: {}", request.getUserId(), request.getPreferredCategories());
 
 
