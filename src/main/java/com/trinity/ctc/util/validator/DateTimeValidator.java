@@ -1,7 +1,7 @@
 package com.trinity.ctc.util.validator;
 
-import com.trinity.ctc.util.exception.CustomException;
 import com.trinity.ctc.util.exception.error_code.DateTimeErrorCode;
+import com.trinity.ctc.util.exception.CustomException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

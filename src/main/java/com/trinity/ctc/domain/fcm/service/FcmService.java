@@ -77,7 +77,6 @@ public class FcmService {
     public void expireFcmToken() {
         // 현재 시간 기준으로 만료 시간이 지난 토큰 record 삭제
         LocalDateTime currentDate = LocalDateTime.now();
-        log.info(currentDate.toString());
         fcmRepository.deleteByExpiresAtBefore(currentDate);
     }
 }

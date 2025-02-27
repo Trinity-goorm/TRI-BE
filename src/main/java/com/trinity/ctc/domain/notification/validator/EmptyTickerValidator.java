@@ -1,29 +1,10 @@
-package com.trinity.ctc.util.validator;
+package com.trinity.ctc.domain.notification.validator;
 
 import com.trinity.ctc.util.exception.CustomException;
-import com.trinity.ctc.util.exception.error_code.TicketErrorCode;
 import com.trinity.ctc.util.exception.error_code.EmptyTicketErrorCode;
 
-public class TicketValidator {
-
-    private TicketValidator() {}
-
-    public static void validateTicketCount(int CurrentTicketCount, int price) {
-        validateTicketCount(CurrentTicketCount);
-        validateTicketPay(CurrentTicketCount, price);
-    }
-
-    private static void validateTicketCount(int CurrentTicketCount) {
-        if (CurrentTicketCount < 0) {
-            throw new CustomException(TicketErrorCode.NEGATIVE_TICKET_COUNT);
-        }
-    }
-
-    private static void validateTicketPay(int CurrentTicketCount, int price) {
-        if (CurrentTicketCount - price < 0) {
-            throw new CustomException(TicketErrorCode.NOT_ENOUGH_REMAINING_TICKETS);
-        }
-    }
+public class EmptyTickerValidator {
+    private EmptyTickerValidator() {}
 
     // 빈자리 티켓 사용 시, 현재 티켓 수와 사용 시, 티켓 수 검증(사용 티켓 수(1)를 CONSTANT 처리해야 할 듯)
     public static void validateEmptyTicketUsage(int CurrentEmptyTicketCount) {
@@ -38,6 +19,4 @@ public class TicketValidator {
             throw new CustomException(EmptyTicketErrorCode.NEGATIVE_EMPTY_TICKET_COUNT);
         }
     }
-
-
 }

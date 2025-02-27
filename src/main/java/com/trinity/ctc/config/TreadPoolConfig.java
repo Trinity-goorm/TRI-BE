@@ -20,6 +20,7 @@ public class TreadPoolConfig {
         taskExecutor.setCorePoolSize(CORE_POOL_SIZE);
         taskExecutor.setMaxPoolSize(MAX_POOL_SIZE);
         taskExecutor.setQueueCapacity(QUEUE_CAPACITY);
+        taskExecutor.setThreadNamePrefix("TreadPool-");
 
         taskExecutor.initialize();
         return taskExecutor;

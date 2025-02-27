@@ -1,4 +1,4 @@
-package com.trinity.ctc.util.validator;
+package com.trinity.ctc.domain.seat.validator;
 
 import com.trinity.ctc.util.exception.CustomException;
 import com.trinity.ctc.util.exception.error_code.SeatErrorCode;

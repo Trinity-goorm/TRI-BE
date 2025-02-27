@@ -17,8 +17,6 @@ import com.trinity.ctc.domain.notification.type.NotificationType;
 import com.trinity.ctc.domain.notification.util.fomatter.NotificationMessageUtil;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
-import com.trinity.ctc.domain.reservation.service.ReservationService;
-import com.trinity.ctc.domain.reservation.status.ReservationStatus;
 import com.trinity.ctc.domain.seat.entity.Seat;
 import com.trinity.ctc.domain.seat.repository.SeatRepository;
 import com.trinity.ctc.domain.user.entity.User;
@@ -26,7 +24,7 @@ import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.util.exception.CustomException;
 import com.trinity.ctc.util.exception.error_code.*;
 import com.trinity.ctc.util.formatter.DateTimeUtil;
-import com.trinity.ctc.util.validator.TicketValidator;
+import com.trinity.ctc.domain.user.validator.NormalTicketValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -53,7 +51,6 @@ public class NotificationService {
     private final SeatRepository seatRepository;
     private final SeatNotificationMessageRepository seatNotificationMessageRepository;
     private final SeatNotificationRepository seatNotificationRepository;
-    private final ReservationService reservationService;
 
     /**
      * 예약 이벤트를 통해 예약 알림에 필요한 entity(user, reservation)를 받아오고, 예약 알림 entity을 DB에 저장하는 메서드
@@ -344,7 +341,7 @@ public class NotificationService {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
         // 티켓 개수 검증, 509 반환
-        TicketValidator.validateEmptyTicketUsage(user.getEmptyTicketCount());
+        NormalTicketValidator.validateEmptyTicketUsage(user.getEmptyTicketCount());
 
         SeatNotificationMessage seatNotificationMessage = seatNotificationMessageRepository.findBySeatId(seatId)
                 .orElseGet(() -> registerSeatNotificationMessage(seatId));
@@ -466,9 +463,6 @@ public class NotificationService {
         SeatNotificationMessage seatNotificationMessage = seatNotificationMessageRepository.findBySeatId(seatId)
                 .orElseThrow(() -> new CustomException(NotificationErrorCode.NOT_FOUND));
 
-
-
-
         // 알림 타입 세팅
         NotificationType type = NotificationType.SEAT_NOTIFICATION;
 
@@ -582,15 +576,6 @@ public class NotificationService {
         // 알림 history 빌드
 
         return notificationHistoryList;
-    }
-
-    /**
-     * 빈자리 알림 테스트 메서드(mock test 코드 작성 후 삭제 예정)
-     *
-     * @param reservationId
-     */
-    public void testSeatNotification(long reservationId) {
-        reservationService.cancelReservation(reservationId);
     }
 
     /**

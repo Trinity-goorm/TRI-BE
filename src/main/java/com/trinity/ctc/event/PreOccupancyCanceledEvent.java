@@ -1,6 +1,5 @@
 package com.trinity.ctc.event;
 
-import com.trinity.ctc.domain.seat.entity.Seat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

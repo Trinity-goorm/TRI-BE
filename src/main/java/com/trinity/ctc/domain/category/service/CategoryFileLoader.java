@@ -4,9 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trinity.ctc.domain.category.entity.Category;
 import com.trinity.ctc.util.exception.CustomException;
-import com.trinity.ctc.util.exception.error_code.CategoryErrorCode;
 import com.trinity.ctc.util.exception.error_code.JsonParseErrorCode;
-import java.io.File;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;

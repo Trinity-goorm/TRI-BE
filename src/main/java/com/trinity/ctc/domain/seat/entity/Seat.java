@@ -3,7 +3,7 @@ package com.trinity.ctc.domain.seat.entity;
 import com.trinity.ctc.domain.notification.entity.SeatNotificationMessage;
 import com.trinity.ctc.domain.reservation.entity.ReservationTime;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
-import com.trinity.ctc.util.validator.CapacityValidator;
+import com.trinity.ctc.domain.seat.validator.CapacityValidator;
 import jakarta.persistence.*;
 import lombok.Getter;
 
