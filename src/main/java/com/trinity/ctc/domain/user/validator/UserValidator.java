@@ -2,8 +2,8 @@ package com.trinity.ctc.domain.user.validator;
 
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.domain.user.status.UserStatus;
-import com.trinity.ctc.util.exception.CustomException;
-import com.trinity.ctc.util.exception.error_code.UserErrorCode;
+import com.trinity.ctc.global.exception.CustomException;
+import com.trinity.ctc.global.exception.error_code.UserErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +11,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class UserValidator {
     public void validateUserStatus(User user) {
-        if(user.getStatus() != UserStatus.TEMPORARILY_UNAVAILABLE) throw new CustomException(UserErrorCode.NOT_TEMPORAL_USER);
+        if (user.getStatus() != UserStatus.TEMPORARILY_UNAVAILABLE)
+            throw new CustomException(UserErrorCode.NOT_TEMPORAL_USER);
     }
 
     public void validateCategorySelection(int selectCount) {

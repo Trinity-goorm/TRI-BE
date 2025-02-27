@@ -1,12 +1,12 @@
 package com.trinity.ctc.util;
 
-import com.trinity.ctc.util.formatter.DateTimeUtil;
+import com.trinity.ctc.global.util.formatter.DateTimeUtil;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import static com.trinity.ctc.util.validator.DateTimeValidator.isMoreThanOneDayAway;
+import static com.trinity.ctc.global.util.validator.DateTimeValidator.isMoreThanOneDayAway;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class DateTimeUtilTest {

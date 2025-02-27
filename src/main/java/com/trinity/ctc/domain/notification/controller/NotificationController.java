@@ -55,8 +55,8 @@ public class NotificationController {
             responseCode = "200",
             description = "신청 성공",
             content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = SubscriptionListResponse.class)
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = SubscriptionListResponse.class)
             )
     )
     public ResponseEntity<SubscriptionListResponse> getSeatNotifications(@RequestParam long userId) {

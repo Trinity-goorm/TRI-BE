@@ -23,7 +23,7 @@ public class AIRecommendationClient {
 
         HttpEntity<AIRecommendationRequest> entity = new HttpEntity<>(request, headers);
         ResponseEntity<AIRecommendationResponse> response = restTemplate.exchange(
-            AI_SERVER_URL, HttpMethod.POST, entity, AIRecommendationResponse.class);
+                AI_SERVER_URL, HttpMethod.POST, entity, AIRecommendationResponse.class);
 
         return response.getBody();
     }

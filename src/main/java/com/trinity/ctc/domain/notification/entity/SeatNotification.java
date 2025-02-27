@@ -26,7 +26,7 @@ public class SeatNotification {
     private SeatNotificationMessage seatNotificationMessage;
 
     @Builder
-    public SeatNotification (User user, SeatNotificationMessage seatNotificationMessage) {
+    public SeatNotification(User user, SeatNotificationMessage seatNotificationMessage) {
         this.user = user;
         this.seatNotificationMessage = seatNotificationMessage;
     }

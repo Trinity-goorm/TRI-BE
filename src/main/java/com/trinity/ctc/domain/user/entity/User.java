@@ -11,7 +11,7 @@ import com.trinity.ctc.domain.search.entity.SearchHistory;
 import com.trinity.ctc.domain.user.dto.OnboardingRequest;
 import com.trinity.ctc.domain.user.status.Sex;
 import com.trinity.ctc.domain.user.status.UserStatus;
-import com.trinity.ctc.util.validator.TicketValidator;
+import com.trinity.ctc.domain.user.validator.NormalTicketValidator;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -87,7 +87,7 @@ public class User {
     }
 
     public void payNormalTickets() {
-        TicketValidator.validateTicketCount(this.normalTicketCount, 10);
+        NormalTicketValidator.validateTicketCount(this.normalTicketCount, 10);
         this.normalTicketCount -= 10;
     }
 

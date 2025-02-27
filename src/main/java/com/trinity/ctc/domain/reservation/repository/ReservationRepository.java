@@ -24,23 +24,23 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             "AND r.seatType.id = :seatTypeId " +
             "AND r.status IN (:statuses)")
     boolean existsByReservationDataV1(@Param("userId") Long userId,
-                                    @Param("restaurantId") Long restaurantId,
-                                    @Param("selectedDate") LocalDate selectedDate,
-                                    @Param("reservationTime") LocalTime reservationTime,
-                                    @Param("seatTypeId") Long seatTypeId,
-                                    @Param("statuses") List<ReservationStatus> statuses);
+                                      @Param("restaurantId") Long restaurantId,
+                                      @Param("selectedDate") LocalDate selectedDate,
+                                      @Param("reservationTime") LocalTime reservationTime,
+                                      @Param("seatTypeId") Long seatTypeId,
+                                      @Param("statuses") List<ReservationStatus> statuses);
 
     @Query(value = """
-        SELECT EXISTS (
-            SELECT 1 FROM reservation r
-            WHERE r.user_id = :userId
-              AND r.restaurant_id = :restaurantId
-              AND r.reservation_date = :selectedDate
-              AND r.reservation_time_id = (SELECT rt.id FROM reservation_time rt WHERE rt.time_slot = :reservationTime)
-              AND r.seat_type_id = :seatTypeId
-              AND r.status IN (:statuses)
-        )
-    """, nativeQuery = true)
+                SELECT EXISTS (
+                    SELECT 1 FROM reservation r
+                    WHERE r.user_id = :userId
+                      AND r.restaurant_id = :restaurantId
+                      AND r.reservation_date = :selectedDate
+                      AND r.reservation_time_id = (SELECT rt.id FROM reservation_time rt WHERE rt.time_slot = :reservationTime)
+                      AND r.seat_type_id = :seatTypeId
+                      AND r.status IN (:statuses)
+                )
+            """, nativeQuery = true)
     boolean existsReservationNative(
             @Param("userId") Long userId,
             @Param("restaurantId") Long restaurantId,

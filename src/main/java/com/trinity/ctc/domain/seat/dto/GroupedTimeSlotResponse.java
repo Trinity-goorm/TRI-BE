@@ -24,7 +24,7 @@ public class GroupedTimeSlotResponse {
     @Schema(description = "좌석별 예약가능 정보", implementation = GroupedSeatResponse.class)
     private final List<GroupedSeatResponse> groupedSeats;
 
-    public static GroupedTimeSlotResponse fromGroupedSeats(String timeSlot, boolean isAvailable, List<GroupedSeatResponse> seats ) {
+    public static GroupedTimeSlotResponse fromGroupedSeats(String timeSlot, boolean isAvailable, List<GroupedSeatResponse> seats) {
         return new GroupedTimeSlotResponse(
                 timeSlot, isAvailable, seats
         );

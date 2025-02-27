@@ -29,12 +29,4 @@ public class FcmController {
         fcmService.renewFcmToken(fcmTokenRequest);
         return ResponseEntity.noContent().build();
     }
-
-    @DeleteMapping("/test")
-    public ResponseEntity<Void> test() {
-
-        fcmService.expireFcmToken();
-
-        return ResponseEntity.noContent().build();
-    }
 }

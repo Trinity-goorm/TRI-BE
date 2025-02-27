@@ -10,7 +10,9 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,19 +32,19 @@ public class LikeController {
 
     @PostMapping("/{userId}/{restaurantId}")
     @Operation(
-        summary = "찜하기",
-        description = "사용자가 식당을 찜하는 기능"
+            summary = "찜하기",
+            description = "사용자가 식당을 찜하는 기능"
     )
     @ApiResponse(
-        responseCode = "200",
-        description = "찜하기 성공",
-        content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = LikeResponse.class)
-        )
+            responseCode = "200",
+            description = "찜하기 성공",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = LikeResponse.class)
+            )
     )
     public ResponseEntity<LikeResponse> likeRestaurant(@PathVariable Long userId,
-        @PathVariable Long restaurantId) {
+                                                       @PathVariable Long restaurantId) {
         try {
             likeService.likeRestaurant(userId, restaurantId);
             return ResponseEntity.ok(new LikeResponse(true, "찜하기 완료"));
@@ -53,19 +55,19 @@ public class LikeController {
 
     @DeleteMapping("/{userId}/{restaurantId}")
     @Operation(
-        summary = "찜하기 취소",
-        description = "사용자가 찜한 식당을 찜하기 취소하는 기능"
+            summary = "찜하기 취소",
+            description = "사용자가 찜한 식당을 찜하기 취소하는 기능"
     )
     @ApiResponse(
-        responseCode = "200",
-        description = "찜하기 취소 성공",
-        content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = UnLikeResponse.class)
-        )
+            responseCode = "200",
+            description = "찜하기 취소 성공",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = UnLikeResponse.class)
+            )
     )
     public ResponseEntity<UnLikeResponse> unlikeRestaurant(@PathVariable Long userId,
-        @PathVariable Long restaurantId) {
+                                                           @PathVariable Long restaurantId) {
         try {
             likeService.unlikeRestaurant(userId, restaurantId);
             return ResponseEntity.ok(new UnLikeResponse(true, "찜하기 취소 완료"));
@@ -77,16 +79,16 @@ public class LikeController {
 
     @GetMapping("{userId}")
     @Operation(
-        summary = "찜한 식당 목록 조회",
-        description = "사용자가 찜한 식당 목록을 조회하는 기능"
+            summary = "찜한 식당 목록 조회",
+            description = "사용자가 찜한 식당 목록을 조회하는 기능"
     )
     @ApiResponse(
-        responseCode = "200",
-        description = "조회 성공",
-        content = @Content(
-            mediaType = "application/json",
-            array = @ArraySchema(schema = @Schema(implementation = RestaurantDetailResponse.class))
-        )
+            responseCode = "200",
+            description = "조회 성공",
+            content = @Content(
+                    mediaType = "application/json",
+                    array = @ArraySchema(schema = @Schema(implementation = RestaurantDetailResponse.class))
+            )
     )
     public ResponseEntity<List<RestaurantDetailResponse>> getLikeList(@PathVariable Long userId) {
         return ResponseEntity.ok(likeService.getLikeList(userId));
