@@ -28,8 +28,8 @@ public class AuthController {
 
     @PostMapping("/login")
     @Operation(
-        summary = "카카오 로그인",
-        description = "카카오 로그인을 수행합니다."
+            summary = "카카오 로그인",
+            description = "카카오 로그인을 수행합니다."
     )
     @ApiResponse(
             responseCode = "200",
@@ -48,8 +48,8 @@ public class AuthController {
 
     @PostMapping("/logout")
     @Operation(
-        summary = "카카오 로그아웃",
-        description = "카카오 로그아웃을 수행합니다."
+            summary = "카카오 로그아웃",
+            description = "카카오 로그아웃을 수행합니다."
     )
     @ApiResponse(
             responseCode = "200",

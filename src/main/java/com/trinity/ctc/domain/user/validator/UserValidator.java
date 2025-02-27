@@ -11,7 +11,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class UserValidator {
     public void validateUserStatus(User user) {
-        if(user.getStatus() != UserStatus.TEMPORARILY_UNAVAILABLE) throw new CustomException(UserErrorCode.NOT_TEMPORAL_USER);
+        if (user.getStatus() != UserStatus.TEMPORARILY_UNAVAILABLE)
+            throw new CustomException(UserErrorCode.NOT_TEMPORAL_USER);
     }
 
     public void validateCategorySelection(int selectCount) {

@@ -47,7 +47,8 @@ public class JsonUtil implements AttributeConverter<Map<String, Object>, String>
             return null;
         }
         try {
-            return objectMapper.readValue(dbData, new TypeReference<>() {});
+            return objectMapper.readValue(dbData, new TypeReference<>() {
+            });
         } catch (JsonProcessingException e) {
             throw new CustomException(JsonParseErrorCode.ENTITY_CONVERT_FAILED);
         }

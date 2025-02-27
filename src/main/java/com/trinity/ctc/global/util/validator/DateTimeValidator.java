@@ -8,10 +8,12 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 public class DateTimeValidator {
-    private DateTimeValidator() {}
+    private DateTimeValidator() {
+    }
 
     /**
      * 오늘인지 확인
+     *
      * @param localDate
      * @return 오늘인지 아닌지
      */
@@ -22,6 +24,7 @@ public class DateTimeValidator {
 
     /**
      * 과거인지 확인
+     *
      * @param localDate
      */
     public static void isPast(LocalDate localDate) {
@@ -33,6 +36,7 @@ public class DateTimeValidator {
 
     /**
      * 날짜 기준으로 이틀포함 이전인지 확인
+     *
      * @param localDate
      * @return 이틀 전이면 true, 아니면 false
      */

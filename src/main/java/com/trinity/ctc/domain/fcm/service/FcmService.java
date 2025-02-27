@@ -23,8 +23,9 @@ public class FcmService {
 
     /**
      * 로그인 시, 해당 기기에 대한 사용자의 fcm 토큰 정보 초기화
+     *
      * @param fcmTokenRequest FCM토큰 정보 요청 DTO(토큰값, 등록 시간)
-     * @param userId 사용자 ID
+     * @param userId          사용자 ID
      */
     public void registerFcmToken(FcmTokenRequest fcmTokenRequest, Long userId) {
         // 유저 entity
@@ -49,6 +50,7 @@ public class FcmService {
 
     /**
      * 로그아웃 시, 해당 기기에 대한 사용자의 fcm 토큰 정보 삭제
+     *
      * @param fcmTokenRequest FCM토큰 정보 요청 DTO(토큰값, null)
      */
     public void deleteFcmToken(FcmTokenRequest fcmTokenRequest) {
@@ -57,6 +59,7 @@ public class FcmService {
 
     /**
      * 로그인 세션이 유지된 상태에서 접속 시, fcm 토큰 만료 기간 갱신
+     *
      * @param fcmTokenRequest FCM토큰 정보 요청 DTO(토큰값, 업데이트 시간)
      */
     public void renewFcmToken(FcmTokenRequest fcmTokenRequest) {

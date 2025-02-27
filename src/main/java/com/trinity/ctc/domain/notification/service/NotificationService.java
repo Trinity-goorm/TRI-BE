@@ -162,7 +162,7 @@ public class NotificationService {
         // 알림 타입과 오늘 날짜로 당일 예약 알림 정보 가져오기
         List<ReservationNotification> reservationNotificationList = reservationNotificationRepository
                 .findAllByTypeAndDate(NotificationType.DAILY_NOTIFICATION, today);
-        if(reservationNotificationList.isEmpty()) return;
+        if (reservationNotificationList.isEmpty()) return;
 
         // history 테이블과 알림 발송 후 알림 메세지 삭제를 위한 알림 ID 담을 list 세팅
         List<NotificationHistory> notificationHistoryList = new ArrayList<>();
@@ -237,7 +237,7 @@ public class NotificationService {
     private GroupFcmInformationDto buildReservationNotification(ReservationNotification notification) {
         // FCM 토큰 가져오기
         List<String> tokenList = fcmRepository.findByUser(notification.getUser().getId());
-        if(tokenList.isEmpty()) throw new CustomException(FcmErrorCode.NO_FCM_TOKEN_REGISTERED);
+        if (tokenList.isEmpty()) throw new CustomException(FcmErrorCode.NO_FCM_TOKEN_REGISTERED);
 
         List<Message> messageList = new ArrayList<>();
         List<FcmMessageDto> messageDtoList = new ArrayList<>();
@@ -378,6 +378,7 @@ public class NotificationService {
 
     /**
      * 빈자리 알림 최초 신청 시, 구독 message를 등록하는 메서드
+     *
      * @param seatId
      * @return
      */
@@ -410,6 +411,7 @@ public class NotificationService {
 
     /**
      * 빈자리 알림 신청 취소 메서드
+     *
      * @param seatNotificationId
      */
     @Transactional
@@ -419,6 +421,7 @@ public class NotificationService {
 
     /**
      * 사용자의 빈자리 알림 신청 내역 반환 메서드
+     *
      * @param userId
      * @return
      */
@@ -448,7 +451,8 @@ public class NotificationService {
     // 빈자리 알림 발송 시작점
 
     /**
-     * 빈자리에 대한 예약 취소 이벤트 발생 시, 빈자리 알림을 발송하는 메서드 
+     * 빈자리에 대한 예약 취소 이벤트 발생 시, 빈자리 알림을 발송하는 메서드
+     *
      * @param seatId
      */
     @Transactional
@@ -457,7 +461,7 @@ public class NotificationService {
         List<SeatNotification> seatNotificationList = seatNotificationRepository.findAllBySeatId(seatId);
 
         // 빈자리 알림 구독자
-        if(seatNotificationList.isEmpty()) return;
+        if (seatNotificationList.isEmpty()) return;
 
         // 빈자리 알림 메세지 정보(구독한 빈자리 알림)
         SeatNotificationMessage seatNotificationMessage = seatNotificationMessageRepository.findBySeatId(seatId)
@@ -476,6 +480,7 @@ public class NotificationService {
 
     /**
      * multicastMessage를 처리하는 메서드
+     *
      * @param seatNotificationMessage
      * @param seatNotificationList
      * @return
@@ -489,6 +494,7 @@ public class NotificationService {
 
     /**
      * 빈자리 알림 FCM 메세지릴 build하는 메서드
+     *
      * @param seatNotificationMessage
      * @param seatNotificationList
      * @return
@@ -499,7 +505,7 @@ public class NotificationService {
             List<String> userTokens = fcmRepository.findByUser(notification.getUser().getId());
             tokenList.addAll(userTokens);
         }
-        if(tokenList.isEmpty()) throw new CustomException(FcmErrorCode.NO_FCM_TOKEN_REGISTERED);
+        if (tokenList.isEmpty()) throw new CustomException(FcmErrorCode.NO_FCM_TOKEN_REGISTERED);
 
         // FCM 메시지 빌드 후 반환
         return MulticastMessage.builder()
@@ -512,6 +518,7 @@ public class NotificationService {
 
     /**
      * MulticastMessage를 발송하는 내부 메서드
+     *
      * @param message
      * @return
      */
@@ -542,6 +549,7 @@ public class NotificationService {
 
     /**
      * Multicast Message의 알림 history 데이터를 build 하는 메서드
+     *
      * @param seatNotificationList
      * @param seatNotificationMessage
      * @param type
@@ -622,6 +630,7 @@ public class NotificationService {
 
     /**
      * 예약 완료 알림 메세지를 포멧팅하는 내부 메서드
+     *
      * @param reservation
      * @return
      */
@@ -644,13 +653,14 @@ public class NotificationService {
 
     /**
      * FCM 메세지 리스트를 build하는 내부 메서드
+     *
      * @param user
      * @param fcmMessageDto
      * @return
      */
     private GroupFcmInformationDto buildMessageList(User user, FcmMessageDto fcmMessageDto) {
         List<Fcm> tokenList = user.getFcmList();
-        if(tokenList.isEmpty()) throw new CustomException(FcmErrorCode.NO_FCM_TOKEN_REGISTERED);
+        if (tokenList.isEmpty()) throw new CustomException(FcmErrorCode.NO_FCM_TOKEN_REGISTERED);
 
         List<Message> messageList = new ArrayList<>();
         List<FcmMessageDto> fcmMessageDtoList = new ArrayList<>();
@@ -675,6 +685,7 @@ public class NotificationService {
 
     /**
      * 하나의 사용자를 대상으로 하는 단 건 알림을 발송하는 내부 메서드
+     *
      * @param messageList
      * @param type
      * @param fcmMessageDtoList
@@ -717,6 +728,7 @@ public class NotificationService {
 
     /**
      * 예약 취소 메세지를 포멧팅하는 내부 메서드
+     *
      * @param reservation
      * @param user
      * @param isCODPassed

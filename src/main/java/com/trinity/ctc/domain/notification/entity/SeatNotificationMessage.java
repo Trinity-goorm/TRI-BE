@@ -31,7 +31,7 @@ public class SeatNotificationMessage {
     private List<SeatNotification> seatNotificationList = new ArrayList<>();
 
     @Builder
-    public SeatNotificationMessage (String title, String body, String url, Seat seat) {
+    public SeatNotificationMessage(String title, String body, String url, Seat seat) {
         this.title = title;
         this.body = body;
         this.url = url;

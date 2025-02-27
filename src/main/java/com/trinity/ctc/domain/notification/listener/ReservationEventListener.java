@@ -26,9 +26,10 @@ public class ReservationEventListener {
     @Async
     @EventListener
     public void handleReservationCanceledEvent(ReservationCanceledEvent reservationEvent) {
-        if(reservationEvent.getAvailableSeats() == 1) notificationService.sendSeatNotification(reservationEvent.getSeatId());
+        if (reservationEvent.getAvailableSeats() == 1)
+            notificationService.sendSeatNotification(reservationEvent.getSeatId());
         notificationService.sendReservationCanceledNotification(reservationEvent.getUserId(),
-                                                                reservationEvent.getReservationId(), reservationEvent.isCODPassed());
+                reservationEvent.getReservationId(), reservationEvent.isCODPassed());
         notificationService.deleteReservationNotification(reservationEvent.getReservationId());
     }
 
@@ -36,7 +37,8 @@ public class ReservationEventListener {
     @EventListener
     public void handlePreOccupancyCanceledEvent(PreOccupancyCanceledEvent preOccupancyCanceledEvent) {
 //        빈자리 알림 발송
-        if(preOccupancyCanceledEvent.getAvailableSeats() == 1) notificationService.sendSeatNotification(preOccupancyCanceledEvent.getSeatId());
+        if (preOccupancyCanceledEvent.getAvailableSeats() == 1)
+            notificationService.sendSeatNotification(preOccupancyCanceledEvent.getSeatId());
     }
 }
 

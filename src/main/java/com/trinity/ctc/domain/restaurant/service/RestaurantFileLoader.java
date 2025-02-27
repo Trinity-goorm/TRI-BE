@@ -46,7 +46,7 @@ public class RestaurantFileLoader {
                     List<RestaurantImage> images = parseImages(restaurantNode);
                     List<Menu> menuList = parseMenus(menusNode, restaurantNode);
 
-                    Restaurant restaurant = parseRestaurant(restaurantNode,menuList);
+                    Restaurant restaurant = parseRestaurant(restaurantNode, menuList);
                     restaurant.addImageList(images);
                     restaurant.addMenuList(menuList);
 
@@ -88,19 +88,19 @@ public class RestaurantFileLoader {
         double rating = parseDoubleValue(restaurantNode.get("score"), 0.0);
 
         return Restaurant.builder()
-            .name(name)
-            .address(address)
-            .phoneNumber(phoneNumber)
-            .convenience(convenience)
-            .operatingHour(operatingHour)
-            .expandedDays(expandedDays)
-            .timeRange(timeRange)
-            .caution(caution)
-            .isDeleted(isDeleted)
-            .reviewCount(reviewCount)
-            .rating(rating)
-            .averagePrice(length>0 ? sum/menuList.size() : 0)
-            .build();
+                .name(name)
+                .address(address)
+                .phoneNumber(phoneNumber)
+                .convenience(convenience)
+                .operatingHour(operatingHour)
+                .expandedDays(expandedDays)
+                .timeRange(timeRange)
+                .caution(caution)
+                .isDeleted(isDeleted)
+                .reviewCount(reviewCount)
+                .rating(rating)
+                .averagePrice(length > 0 ? sum / menuList.size() : 0)
+                .build();
     }
 
     private List<RestaurantImage> parseImages(JsonNode restaurantNode) {
@@ -128,11 +128,11 @@ public class RestaurantFileLoader {
                 boolean isActive = menuNode.get("is_active").asBoolean();
 
                 menuList.add(Menu.builder()
-                    .name(menuName)
-                    .price(price)
-                    .isDeleted(isDeleted)
-                    .isActive(isActive)
-                    .build());
+                        .name(menuName)
+                        .price(price)
+                        .isDeleted(isDeleted)
+                        .isActive(isActive)
+                        .build());
             }
         }
         return menuList;
@@ -141,17 +141,17 @@ public class RestaurantFileLoader {
     private void attachCategory(Restaurant restaurant, List<Category> categories, JsonNode restaurantNode) {
         Long categoryId = parseCategoryId(restaurantNode);
         Category category = categories.stream()
-            .filter(c -> c.getId()==categoryId)
-            .findFirst()
-            .orElse(null);
+                .filter(c -> c.getId() == categoryId)
+                .findFirst()
+                .orElse(null);
 
         if (category != null) {
             restaurant = restaurantRepository.save(restaurant);
             category = categoryRepository.save(category);
             restaurant.addCategory(RestaurantCategory.builder()
-                .restaurant(restaurant)
-                .category(category)
-                .build());
+                    .restaurant(restaurant)
+                    .category(category)
+                    .build());
         }
     }
 

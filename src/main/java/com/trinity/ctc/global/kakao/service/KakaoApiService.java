@@ -57,9 +57,9 @@ public class KakaoApiService {
         HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
 
         KakaoUserInfoResponse kakaoUserInfoResponse = restTemplate.postForObject(
-            kakaoApiProperties.getUserInfoUrl(),
-            requestEntity,
-            KakaoUserInfoResponse.class
+                kakaoApiProperties.getUserInfoUrl(),
+                requestEntity,
+                KakaoUserInfoResponse.class
         );
         return kakaoUserInfoResponse;
     }
@@ -73,10 +73,10 @@ public class KakaoApiService {
         try {
             // 정상적인 로그아웃 요청 수행
             ResponseEntity<KakaoLogoutResponse> response = restTemplate.exchange(
-                kakaoApiProperties.getLogoutUrl(),
-                HttpMethod.POST,
-                requestEntity,
-                KakaoLogoutResponse.class
+                    kakaoApiProperties.getLogoutUrl(),
+                    HttpMethod.POST,
+                    requestEntity,
+                    KakaoLogoutResponse.class
             );
             return response.getBody();
         } catch (HttpClientErrorException e) {
@@ -94,7 +94,6 @@ public class KakaoApiService {
     }
 
 
-
     public boolean isAccessTokenValid(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + accessToken);
@@ -103,10 +102,10 @@ public class KakaoApiService {
 
         try {
             restTemplate.exchange(
-                kakaoApiProperties.getAccessTokenValidationUrl(),
-                HttpMethod.GET,
-                requestEntity,
-                String.class
+                    kakaoApiProperties.getAccessTokenValidationUrl(),
+                    HttpMethod.GET,
+                    requestEntity,
+                    String.class
             );
             return true;  // 유효한 토큰
         } catch (HttpClientErrorException e) {

@@ -1,6 +1,7 @@
 package com.trinity.ctc.domain.user.repository;
 
 import com.trinity.ctc.domain.user.entity.User;
+
 import java.util.Optional;
 
 import com.trinity.ctc.kakao.dto.KakaoUserInfoResponse;

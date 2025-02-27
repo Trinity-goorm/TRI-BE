@@ -7,7 +7,8 @@ import java.time.LocalTime;
 import java.util.List;
 
 public class SeatAvailabilityValidator {
-    private SeatAvailabilityValidator() {}
+    private SeatAvailabilityValidator() {
+    }
 
     public static boolean validate(Seat seat, boolean isToday) {
         return isToday ? checkAvailabilityForToday(seat) : checkAvailabilityForFuture(seat);

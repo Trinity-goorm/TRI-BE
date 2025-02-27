@@ -59,7 +59,7 @@ public class Reservation {
     private List<ReservationNotification> reservationNotificationList = new ArrayList<>();
 
     @Builder
-    public Reservation(LocalDate reservationDate, ReservationStatus status, Restaurant restaurant, User user, ReservationTime reservationTime ,SeatType seatType) {
+    public Reservation(LocalDate reservationDate, ReservationStatus status, Restaurant restaurant, User user, ReservationTime reservationTime, SeatType seatType) {
         this.reservationDate = reservationDate;
         this.status = status;
         this.restaurant = restaurant;

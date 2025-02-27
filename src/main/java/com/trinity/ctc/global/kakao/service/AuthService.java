@@ -7,8 +7,10 @@ import com.trinity.ctc.global.kakao.dto.KakaoLogoutResponse;
 import com.trinity.ctc.global.kakao.dto.KakaoTokenResponse;
 import com.trinity.ctc.global.kakao.dto.KakaoUserInfoResponse;
 import com.trinity.ctc.global.kakao.dto.UserLoginResponse;
+
 import java.util.Collections;
 import java.util.Optional;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;

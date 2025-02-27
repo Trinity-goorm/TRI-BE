@@ -33,6 +33,7 @@ public class SeatService {
 
     /**
      * 오늘 예약가능 시간 및 좌석 별 남은 좌석 수 반환 (현재시간 한시간 뒤부터)
+     *
      * @param restaurantId
      * @param selectedDate
      * @return 좌석정보리스트와 예약가능여부 리스트
@@ -53,6 +54,7 @@ public class SeatService {
 
     /**
      * 14일간의 날짜별 예약 가능 여부 반환
+     *
      * @param restaurantId
      * @return 날짜별 예약 가능 여부 리스트 (ReservationAvailabilityDto 형태)
      */
@@ -61,19 +63,21 @@ public class SeatService {
         LocalDate today = LocalDate.now();
 
         return IntStream.range(0, 14)
-            .mapToObj(i -> {
-                LocalDate targetDate = today.plusDays(i);
-                List<Seat> availableSeatList= fetchAvailableSeats(restaurantId, targetDate);
-                // 예약 가능 여부 판단
-                boolean isAvailable = SeatAvailabilityValidator.isAnySeatAvailable(availableSeatList, isToday(targetDate));
-                return new ReservationAvailabilityResponse(targetDate, isAvailable);
-            })
-            .collect(Collectors.toList());
+                .mapToObj(i -> {
+                    LocalDate targetDate = today.plusDays(i);
+                    List<Seat> availableSeatList = fetchAvailableSeats(restaurantId, targetDate);
+                    // 예약 가능 여부 판단
+                    boolean isAvailable = SeatAvailabilityValidator.isAnySeatAvailable(availableSeatList, isToday(targetDate));
+                    return new ReservationAvailabilityResponse(targetDate, isAvailable);
+                })
+                .collect(Collectors.toList());
     }
 
     /* 내부 메서드 */
+
     /**
      * 특정 식당, 날짜의 예약가능데이터 획득
+     *
      * @param restaurantId
      * @param selectedDate
      * @return 특정 식당, 날짜의 예약가능데이터
@@ -86,6 +90,7 @@ public class SeatService {
 
     /**
      * 예약시갅으로 그룹화 -> 에약시간 별 좌석타입들
+     *
      * @param groupedByTimeslot
      * @param isToday
      * @return
@@ -99,6 +104,7 @@ public class SeatService {
 
     /**
      * 그룹화된 타임슬롯 응답 생성
+     *
      * @param timeslot
      * @param seats
      * @param isToday

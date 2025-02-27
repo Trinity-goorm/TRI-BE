@@ -17,8 +17,10 @@ import com.trinity.ctc.domain.restaurant.repository.RestaurantRepository;
 import com.trinity.ctc.global.exception.CustomException;
 import com.trinity.ctc.global.exception.error_code.RestaurantErrorCode;
 import com.trinity.ctc.global.exception.error_code.UserErrorCode;
+
 import java.util.List;
 import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -55,8 +57,8 @@ public class RestaurantService {
     @Transactional(readOnly = true)
     public RestaurantDetailResponse getRestaurantDetail(Long restaurantId) {
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
-            .orElseThrow(
-                () -> new CustomException(RestaurantErrorCode.NOT_FOUND));
+                .orElseThrow(
+                        () -> new CustomException(RestaurantErrorCode.NOT_FOUND));
 
         log.info("[SELECT] 식당 상세정보 획득 ID: {}", restaurantId);
         return RestaurantDetailResponse.fromEntity(restaurant);
@@ -65,12 +67,12 @@ public class RestaurantService {
     @Transactional(readOnly = true)
     public List<RestaurantPreviewResponse> getRestaurantsByCategory(RestaurantPreviewRequest request, Long categoryId) {
         User user = userRepository.findById(request.getUserId())
-            .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
+                .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
         SortingStrategy sortingStrategy = SortingStrategyFactory.getStrategy(request.getSortType());
         Sort sort = sortingStrategy.getSort();
 
-        Pageable pageable = PageRequest.of(request.getPage()-1, 30, sort);
+        Pageable pageable = PageRequest.of(request.getPage() - 1, 30, sort);
 
         Page<Restaurant> restaurants = restaurantRepository.findByCategory(categoryId, pageable);
 
@@ -80,16 +82,16 @@ public class RestaurantService {
 
     public List<RestaurantPreviewResponse> convertToRestaurantDtoList(Page<Restaurant> restaurants, User user) {
         return restaurants.stream()
-            .map(restaurant -> {
-                boolean isWishlisted = likeRepository.existsByUserAndRestaurant(user, restaurant);
+                .map(restaurant -> {
+                    boolean isWishlisted = likeRepository.existsByUserAndRestaurant(user, restaurant);
 
-                // 14일간 날짜별 예약 가능 여부 조회
-                List<ReservationAvailabilityResponse> reservation = seatService
-                    .getAvailabilityForNext14Days(restaurant.getId());
+                    // 14일간 날짜별 예약 가능 여부 조회
+                    List<ReservationAvailabilityResponse> reservation = seatService
+                            .getAvailabilityForNext14Days(restaurant.getId());
 
-                log.info("reservation 사이즈: {}", reservation.size());
-                return RestaurantPreviewResponse.fromEntity(restaurant, isWishlisted, reservation);
-            })
-            .collect(Collectors.toList());
+                    log.info("reservation 사이즈: {}", reservation.size());
+                    return RestaurantPreviewResponse.fromEntity(restaurant, isWishlisted, reservation);
+                })
+                .collect(Collectors.toList());
     }
 }

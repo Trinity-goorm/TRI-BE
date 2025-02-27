@@ -1,6 +1,7 @@
 package com.trinity.ctc.global.config;
 
 import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -18,15 +19,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())  // POST 테스트 시 CSRF 비활성화
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // CORS 설정
-            .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/api/**").permitAll()
-                    .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/v3/api-docs/**").permitAll()
-                    .anyRequest().authenticated()  // 그 외 경로는 인증 필요
-            )  // 기본 로그인 페이지 비활성화
-            .httpBasic(AbstractHttpConfigurer::disable)
-            .formLogin(AbstractHttpConfigurer::disable);  // HTTP Basic 인증 비활성화
+                .csrf(csrf -> csrf.disable())  // POST 테스트 시 CSRF 비활성화
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // CORS 설정
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/v3/api-docs/**").permitAll()
+                        .anyRequest().authenticated()  // 그 외 경로는 인증 필요
+                )  // 기본 로그인 페이지 비활성화
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable);  // HTTP Basic 인증 비활성화
 
         return http.build();
     }

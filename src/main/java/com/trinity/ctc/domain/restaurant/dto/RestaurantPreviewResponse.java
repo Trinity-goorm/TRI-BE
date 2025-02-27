@@ -4,8 +4,10 @@ import com.trinity.ctc.domain.reservation.dto.ReservationAvailabilityResponse;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
 import com.trinity.ctc.domain.restaurant.entity.RestaurantImage;
 import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.List;
 import java.util.stream.Collectors;
+
 import lombok.Builder;
 import lombok.Getter;
 
@@ -51,21 +53,21 @@ public class RestaurantPreviewResponse {
     public static RestaurantPreviewResponse fromEntity(Restaurant restaurant, boolean isWishlisted, List<ReservationAvailabilityResponse> reservation) {
 
         return RestaurantPreviewResponse.builder()
-            .restaurantId(restaurant.getId())
-            .name(restaurant.getName())
-            .rating(restaurant.getRating())
-            .category(restaurant.getRestaurantCategoryList().stream()
-                .map(rc -> rc.getCategory().getName())
-                .collect(Collectors.joining(", ")))
-            .location(restaurant.getAddress())
-            .operatingDays(restaurant.getExpandedDays())
-            .operatingHours(restaurant.getOperatingHour())
-            .imageUrls(restaurant.getImageUrls().stream()
-                .map(RestaurantImage::getUrl)
-                .collect(Collectors.toList()))
-            .averagePrice(restaurant.getAveragePrice())
-            .isWishlisted(isWishlisted)
-            .reservation(reservation)
-            .build();
+                .restaurantId(restaurant.getId())
+                .name(restaurant.getName())
+                .rating(restaurant.getRating())
+                .category(restaurant.getRestaurantCategoryList().stream()
+                        .map(rc -> rc.getCategory().getName())
+                        .collect(Collectors.joining(", ")))
+                .location(restaurant.getAddress())
+                .operatingDays(restaurant.getExpandedDays())
+                .operatingHours(restaurant.getOperatingHour())
+                .imageUrls(restaurant.getImageUrls().stream()
+                        .map(RestaurantImage::getUrl)
+                        .collect(Collectors.toList()))
+                .averagePrice(restaurant.getAveragePrice())
+                .isWishlisted(isWishlisted)
+                .reservation(reservation)
+                .build();
     }
 }

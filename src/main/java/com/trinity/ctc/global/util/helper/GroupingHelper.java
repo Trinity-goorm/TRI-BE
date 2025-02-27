@@ -8,7 +8,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class GroupingHelper {
-    private GroupingHelper() {}
+    private GroupingHelper() {
+    }
 
     public static Map<LocalTime, List<Seat>> groupByTimeSlot(List<Seat> seats) {
         return seats.stream()

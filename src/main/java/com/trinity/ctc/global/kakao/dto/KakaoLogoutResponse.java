@@ -16,9 +16,9 @@ public class KakaoLogoutResponse {
     private Long id;
 
     @Builder
-    public static KakaoLogoutResponse of(Long id){
+    public static KakaoLogoutResponse of(Long id) {
         return KakaoLogoutResponse.builder()
-            .id(id)
-            .build();
+                .id(id)
+                .build();
     }
 }

@@ -62,6 +62,7 @@ public class SwaggerConfig {
                         .description("캐치핑 프로젝트의 API 명세서")
                         .version("v1"));
     }
+
     /**
      * Auth API 그룹
      */
@@ -85,7 +86,7 @@ public class SwaggerConfig {
     }
 
     /**
-     *  Fcm API 그룹
+     * Fcm API 그룹
      */
     @Bean
     public GroupedOpenApi FcmOpenApi() {

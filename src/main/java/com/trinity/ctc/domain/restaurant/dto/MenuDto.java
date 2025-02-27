@@ -18,9 +18,9 @@ public class MenuDto {
 
     public static MenuDto fromEntity(Menu menu) {
         return MenuDto.builder()
-            .name(menu.getName())
-            .price(menu.getPrice())
-            .build();
+                .name(menu.getName())
+                .price(menu.getPrice())
+                .build();
     }
 
     public static int getPrices(Menu menu) {

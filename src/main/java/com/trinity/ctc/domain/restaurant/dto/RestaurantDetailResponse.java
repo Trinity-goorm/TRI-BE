@@ -43,31 +43,31 @@ public class RestaurantDetailResponse {
     private String timeRange;
 
     @Schema(description = "편의시설", example = "[\n"
-        + "        \"WIFI\",\n"
-        + "        \"동물출입\",\n"
-        + "        \"주차\",\n"
-        + "        \"휠체어사용\",\n"
-        + "        \"놀이방\",\n"
-        + "        \"흡연실\"\n"
-        + "    ]")
+            + "        \"WIFI\",\n"
+            + "        \"동물출입\",\n"
+            + "        \"주차\",\n"
+            + "        \"휠체어사용\",\n"
+            + "        \"놀이방\",\n"
+            + "        \"흡연실\"\n"
+            + "    ]")
     private List<String> facilities;
 
     @Schema(description = "주의사항", example = "[\n"
-        + "        \"예약가능\",\n"
-        + "        \"배달불가\",\n"
-        + "        \"포장가능\"\n"
-        + "    ]")
+            + "        \"예약가능\",\n"
+            + "        \"배달불가\",\n"
+            + "        \"포장가능\"\n"
+            + "    ]")
     private List<String> cautions;
 
     @Schema(description = "메뉴 리스트", example = "[\n"
-        + "        {\n"
-        + "            \"name\": \"대하구이\",\n"
-        + "            \"price\": 13000\n"
-        + "        },\n"
-        + "        {\n"
-        + "            \"name\": \"탕수육\",\n"
-        + "            \"price\": 21000\n"
-        + "        }]")
+            + "        {\n"
+            + "            \"name\": \"대하구이\",\n"
+            + "            \"price\": 13000\n"
+            + "        },\n"
+            + "        {\n"
+            + "            \"name\": \"탕수육\",\n"
+            + "            \"price\": 21000\n"
+            + "        }]")
     private List<MenuDto> menus;
 
     @Schema(description = "찜 수", example = "0")
@@ -76,36 +76,36 @@ public class RestaurantDetailResponse {
     public static RestaurantDetailResponse fromEntity(Restaurant restaurant) {
         // 식당 운영시간
         return RestaurantDetailResponse.builder()
-            .restaurantId(restaurant.getId())
-            .name(restaurant.getName())
-            .imageUrls(restaurant.getImageUrls().stream().map(RestaurantImage::getUrl).collect(Collectors.toList()))
-            .location(restaurant.getAddress())
-            .category(restaurant.getRestaurantCategoryList().stream()
-                .map(rc -> rc.getCategory().getName())
-                .collect(Collectors.joining(", ")))
-            .rating(restaurant.getRating())
-            .averagePrice(restaurant.getAveragePrice())
-            .expandedDays(restaurant.getExpandedDays())
-            .timeRange(restaurant.getTimeRange())
-            .facilities(List.of(restaurant.getConvenience().split("\n")))
-            .cautions(List.of(restaurant.getCaution().split(", ")))
-            .menus(restaurant.getMenus().stream().map(MenuDto::fromEntity).collect(Collectors.toList()))
-            .wishCount(restaurant.getLikeList().size())
-            .build();
+                .restaurantId(restaurant.getId())
+                .name(restaurant.getName())
+                .imageUrls(restaurant.getImageUrls().stream().map(RestaurantImage::getUrl).collect(Collectors.toList()))
+                .location(restaurant.getAddress())
+                .category(restaurant.getRestaurantCategoryList().stream()
+                        .map(rc -> rc.getCategory().getName())
+                        .collect(Collectors.joining(", ")))
+                .rating(restaurant.getRating())
+                .averagePrice(restaurant.getAveragePrice())
+                .expandedDays(restaurant.getExpandedDays())
+                .timeRange(restaurant.getTimeRange())
+                .facilities(List.of(restaurant.getConvenience().split("\n")))
+                .cautions(List.of(restaurant.getCaution().split(", ")))
+                .menus(restaurant.getMenus().stream().map(MenuDto::fromEntity).collect(Collectors.toList()))
+                .wishCount(restaurant.getLikeList().size())
+                .build();
     }
 
     public static RestaurantDetailResponse fromLike(Restaurant restaurant) {
         return RestaurantDetailResponse.builder()
-            .restaurantId(restaurant.getId())
-            .name(restaurant.getName())
-            .imageUrls(restaurant.getImageUrls().stream().map(RestaurantImage::getUrl).collect(Collectors.toList()))
-            .location(restaurant.getAddress())
-            .averagePrice(restaurant.getAveragePrice())
-            .category(restaurant.getRestaurantCategoryList().stream()
-                .map(rc -> rc.getCategory().getName())
-                .collect(Collectors.joining(", ")))
-            .rating(restaurant.getRating())
-            .build();
+                .restaurantId(restaurant.getId())
+                .name(restaurant.getName())
+                .imageUrls(restaurant.getImageUrls().stream().map(RestaurantImage::getUrl).collect(Collectors.toList()))
+                .location(restaurant.getAddress())
+                .averagePrice(restaurant.getAveragePrice())
+                .category(restaurant.getRestaurantCategoryList().stream()
+                        .map(rc -> rc.getCategory().getName())
+                        .collect(Collectors.joining(", ")))
+                .rating(restaurant.getRating())
+                .build();
     }
 }
 

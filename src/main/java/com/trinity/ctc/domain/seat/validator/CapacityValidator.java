@@ -5,7 +5,8 @@ import com.trinity.ctc.global.exception.error_code.SeatErrorCode;
 
 public class CapacityValidator {
 
-    private CapacityValidator() {}
+    private CapacityValidator() {
+    }
 
     public static void isValid(int minCapacity, int maxCapacity, int availableSeats) {
         if (minCapacity < 0 || maxCapacity < 0 || availableSeats < 0) {

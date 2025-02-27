@@ -25,5 +25,5 @@ public interface SeatNotificationMessageRepository extends JpaRepository<SeatNot
             "    SELECT a FROM Seat a WHERE a.reservationDate < :currentDate OR " +
             "         (a.reservationDate = :currentDate AND a.reservationTime.timeSlot < :currentTime))")
     List<SeatNotificationMessage> findAllByCurrentDateTime(@Param("currentDate") LocalDate currentDate,
-                                                                  @Param("currentTime") LocalTime currentTime);
+                                                           @Param("currentTime") LocalTime currentTime);
 }

@@ -4,7 +4,8 @@ import com.trinity.ctc.global.exception.CustomException;
 import com.trinity.ctc.global.exception.error_code.EmptyTicketErrorCode;
 
 public class EmptyTicketValidator {
-    private EmptyTicketValidator() {}
+    private EmptyTicketValidator() {
+    }
 
     // 빈자리 티켓 사용 시, 현재 티켓 수와 사용 시, 티켓 수 검증(사용 티켓 수(1)를 CONSTANT 처리해야 할 듯)
     public static void validateEmptyTicketUsage(int CurrentEmptyTicketCount) {
