@@ -13,10 +13,7 @@ import com.trinity.ctc.domain.user.status.Sex;
 import com.trinity.ctc.domain.user.status.UserStatus;
 import com.trinity.ctc.util.validator.TicketValidator;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -24,7 +21,8 @@ import java.util.List;
 
 @Entity
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Setter
+@NoArgsConstructor
 public class User {
 
     @Id

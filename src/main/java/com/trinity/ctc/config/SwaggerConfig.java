@@ -1,7 +1,10 @@
 package com.trinity.ctc.config;
 
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,12 +58,24 @@ public class SwaggerConfig {
         servers.add(new Server().url(localServerUrl).description("로컬 서버"));
         servers.add(new Server().url(productionServerUrl).description("프로덕션 서버"));
 
+        String securityJwtName = "JWT";
+        SecurityRequirement securityRequirement = new SecurityRequirement().addList(securityJwtName);
+
+        Components components = new Components()
+                .addSecuritySchemes(securityJwtName, new SecurityScheme()
+                        .name(securityJwtName)
+                        .type(SecurityScheme.Type.HTTP)
+                        .scheme("bearer")
+                        .bearerFormat(securityJwtName));
+
         return new OpenAPI()
                 .servers(servers)
                 .info(new Info()
                         .title("캐치핑 API")
                         .description("캐치핑 프로젝트의 API 명세서")
-                        .version("v1"));
+                        .version("v1"))
+                .addSecurityItem(securityRequirement)
+                .components(components);
     }
     /**
      * Auth API 그룹
