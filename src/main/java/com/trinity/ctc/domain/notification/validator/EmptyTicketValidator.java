@@ -3,8 +3,8 @@ package com.trinity.ctc.domain.notification.validator;
 import com.trinity.ctc.util.exception.CustomException;
 import com.trinity.ctc.util.exception.error_code.EmptyTicketErrorCode;
 
-public class EmptyTickerValidator {
-    private EmptyTickerValidator() {}
+public class EmptyTicketValidator {
+    private EmptyTicketValidator() {}
 
     // 빈자리 티켓 사용 시, 현재 티켓 수와 사용 시, 티켓 수 검증(사용 티켓 수(1)를 CONSTANT 처리해야 할 듯)
     public static void validateEmptyTicketUsage(int CurrentEmptyTicketCount) {

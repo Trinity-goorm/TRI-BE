@@ -15,6 +15,7 @@ import com.trinity.ctc.domain.notification.repository.SeatNotificationRepository
 import com.trinity.ctc.domain.notification.result.SentResult;
 import com.trinity.ctc.domain.notification.type.NotificationType;
 import com.trinity.ctc.domain.notification.util.fomatter.NotificationMessageUtil;
+import com.trinity.ctc.domain.notification.validator.EmptyTicketValidator;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
 import com.trinity.ctc.domain.seat.entity.Seat;
@@ -341,7 +342,7 @@ public class NotificationService {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
         // 티켓 개수 검증, 509 반환
-        NormalTicketValidator.validateEmptyTicketUsage(user.getEmptyTicketCount());
+        EmptyTicketValidator.validateEmptyTicketUsage(user.getEmptyTicketCount());
 
         SeatNotificationMessage seatNotificationMessage = seatNotificationMessageRepository.findBySeatId(seatId)
                 .orElseGet(() -> registerSeatNotificationMessage(seatId));
