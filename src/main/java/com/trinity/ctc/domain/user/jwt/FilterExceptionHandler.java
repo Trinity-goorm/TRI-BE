@@ -1,6 +1,6 @@
 package com.trinity.ctc.domain.user.jwt;
 
-import com.trinity.ctc.util.exception.CustomAccessDeniedException;
+import com.trinity.ctc.global.exception.CustomAccessDeniedHandler;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,13 +25,6 @@ public class FilterExceptionHandler implements Filter {
             throws IOException, ServletException {
         try {
             filterChain.doFilter(servletRequest, servletResponse);
-        } catch (CustomAccessDeniedException ex) {
-            log.warn("🚨 CustomAccessDeniedException caught: {}", ex.getMessage());
-
-            HttpServletRequest request = (HttpServletRequest) servletRequest;
-            HttpServletResponse response = (HttpServletResponse) servletResponse;
-
-            authenticationEntryPoint.commence(request, response, new AuthenticationException(ex.getMessage()) {});
         } catch (Exception ex) {
             log.error("🚨 Unhandled exception: {}", ex.getMessage(), ex);
             HttpServletResponse response = (HttpServletResponse) servletResponse;

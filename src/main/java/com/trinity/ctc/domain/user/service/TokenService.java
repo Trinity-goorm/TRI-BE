@@ -3,7 +3,7 @@ package com.trinity.ctc.domain.user.service;
 import com.trinity.ctc.domain.user.entity.RefreshToken;
 import com.trinity.ctc.domain.user.jwt.JWTUtil;
 import com.trinity.ctc.domain.user.repository.RefreshTokenRepository;
-import com.trinity.ctc.util.exception.CustomException;
+import com.trinity.ctc.global.exception.CustomException;
 import com.trinity.ctc.util.exception.error_code.TokenErrorCode;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;

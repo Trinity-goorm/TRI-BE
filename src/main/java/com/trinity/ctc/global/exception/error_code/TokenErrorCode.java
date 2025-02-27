@@ -1,5 +1,6 @@
 package com.trinity.ctc.util.exception.error_code;
 
+import com.trinity.ctc.global.exception.error_code.ErrorCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

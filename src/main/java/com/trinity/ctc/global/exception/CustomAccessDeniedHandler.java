@@ -1,7 +1,7 @@
-package com.trinity.ctc.util.exception;
+package com.trinity.ctc.global.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.trinity.ctc.util.exception.error_code.UserErrorCode;
+import com.trinity.ctc.global.exception.error_code.UserErrorCode;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,7 +14,7 @@ import java.io.IOException;
 
 @Slf4j
 @Component
-public class CustomAccessDeniedHandler implements AccessDeniedHandler {
+public class CustomAccessDeniedHandler extends Throwable implements AccessDeniedHandler {
 
     private final ObjectMapper mapper = new ObjectMapper();
 

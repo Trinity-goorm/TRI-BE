@@ -1,6 +1,6 @@
-package com.trinity.ctc.util.exception;
+package com.trinity.ctc.global.exception;
 
-import com.trinity.ctc.util.exception.error_code.ErrorCode;
+import com.trinity.ctc.global.exception.error_code.ErrorCode;
 import org.springframework.security.access.AccessDeniedException;
 
 public class CustomAccessDeniedException extends AccessDeniedException {

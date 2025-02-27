@@ -1,14 +1,12 @@
 package com.trinity.ctc.global.config;
 
-import java.util.List;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trinity.ctc.domain.user.jwt.*;
 import com.trinity.ctc.domain.user.repository.RefreshTokenRepository;
 import com.trinity.ctc.domain.user.repository.UserRepository;
-import com.trinity.ctc.kakao.service.AuthService;
-import com.trinity.ctc.kakao.service.KakaoApiService;
-import com.trinity.ctc.util.exception.CustomAccessDeniedHandler;
+import com.trinity.ctc.global.exception.CustomAccessDeniedHandler;
+import com.trinity.ctc.global.kakao.service.AuthService;
+import com.trinity.ctc.global.kakao.service.KakaoApiService;
 import com.trinity.ctc.util.exception.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

@@ -4,23 +4,20 @@ import com.trinity.ctc.domain.user.dto.CustomUserDetails;
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.domain.user.status.UserStatus;
+import com.trinity.ctc.global.exception.CustomException;
+import com.trinity.ctc.global.exception.error_code.UserErrorCode;
 import com.trinity.ctc.global.kakao.dto.KakaoLogoutResponse;
 import com.trinity.ctc.global.kakao.dto.KakaoTokenResponse;
 import com.trinity.ctc.global.kakao.dto.KakaoUserInfoResponse;
 import com.trinity.ctc.global.kakao.dto.UserLoginResponse;
-
-import java.util.Collections;
-import java.util.Optional;
-
-import com.trinity.ctc.util.exception.CustomException;
-import com.trinity.ctc.util.exception.error_code.UserErrorCode;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
 
 @Slf4j
 @Service

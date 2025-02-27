@@ -1,6 +1,5 @@
 package com.trinity.ctc.domain.user.jwt;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trinity.ctc.domain.user.dto.KakaoLoginRequest;
 import com.trinity.ctc.domain.user.entity.RefreshToken;
@@ -8,13 +7,10 @@ import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.domain.user.repository.RefreshTokenRepository;
 import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.domain.user.status.UserStatus;
-import com.trinity.ctc.kakao.dto.KakaoTokenResponse;
-import com.trinity.ctc.kakao.dto.KakaoUserInfoResponse;
-import com.trinity.ctc.kakao.service.AuthService;
-import com.trinity.ctc.kakao.service.KakaoApiService;
-import com.trinity.ctc.util.exception.CustomAccessDeniedException;
-import com.trinity.ctc.util.exception.CustomException;
-import com.trinity.ctc.util.exception.error_code.UserErrorCode;
+import com.trinity.ctc.global.kakao.dto.KakaoTokenResponse;
+import com.trinity.ctc.global.kakao.dto.KakaoUserInfoResponse;
+import com.trinity.ctc.global.kakao.service.AuthService;
+import com.trinity.ctc.global.kakao.service.KakaoApiService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,13 +18,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
