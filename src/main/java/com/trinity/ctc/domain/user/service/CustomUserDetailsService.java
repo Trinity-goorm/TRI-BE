@@ -22,15 +22,15 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     /**
-     * Email 기반으로 UserDetails 획득
-     * @param phoneNumber
+     * kakaoId 기반으로 UserDetails 획득
+     * @param kakaoId
      * @return
      * @throws UsernameNotFoundException
      */
     @Override
-    public UserDetails loadUserByUsername(String phoneNumber) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String kakaoId) throws UsernameNotFoundException {
 
-        User user = userRepository.findByPhoneNumber((phoneNumber)).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
+        User user = userRepository.findByKakaoId((Long.parseLong(kakaoId))).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
         return new CustomUserDetails(user);
     }

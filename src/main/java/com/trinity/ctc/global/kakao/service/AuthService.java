@@ -84,8 +84,8 @@ public class AuthService {
     }
 
     /**
-     * 현재 사용자 이메일 반환
-     * @return
+     * 현재 사용자 kakaoId 반환
+     * @return kakaoId
      */
     public String getAuthenticatedKakaoId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -97,12 +97,11 @@ public class AuthService {
         return userDetails.getUsername();
     }
 
-    public Long getAuthenticatedUserId() {
-        User user = userRepository.findByKakaoId(Long.valueOf(getAuthenticatedKakaoId()))
-                .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
-        return user.getId();
-    }
-
+    /**
+     * 임시 회원가입 진행
+     * @param kakaoId
+     * @return 임시회원
+     */
     @Transactional
     public User registerTempUser(Long kakaoId) {
         log.info("임시 회원가입 진행 - Kakao ID: {}", kakaoId);

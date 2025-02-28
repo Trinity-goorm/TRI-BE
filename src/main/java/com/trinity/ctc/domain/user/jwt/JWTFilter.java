@@ -44,9 +44,9 @@ public class JWTFilter extends OncePerRequestFilter {
         log.info("Checking Access token expired----------------");
         try {
             jwtUtil.isExpired(accessToken);
-            log.info("Token is valid.");
+            log.info("[IS EXPIRED] Token is valid.");
         } catch (ExpiredJwtException e) {
-            log.info("Token expired: {}", e.getMessage());
+            log.info("[IS EXPIRED] Token expired: {}", e.getMessage());
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().println("access token expired");
             response.getWriter().close();
@@ -71,7 +71,7 @@ public class JWTFilter extends OncePerRequestFilter {
         log.info("Status: {}", status);
 
         User user = new User();
-        user.setKakaoId(user.getKakaoId());
+        user.setKakaoId(Long.parseLong(kakaoId));
         user.setStatus(status);
         CustomUserDetails customUserDetails = new CustomUserDetails(user);
 

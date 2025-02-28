@@ -3,10 +3,12 @@ package com.trinity.ctc.domain.user.dto;
 import com.trinity.ctc.domain.user.entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @Slf4j
 public class CustomUserDetails implements UserDetails {
@@ -23,20 +25,8 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-
-        Collection<GrantedAuthority> collection = new ArrayList<>();
-
-        collection.add(new GrantedAuthority() {
-
-            @Override
-            public String getAuthority() {
-                String status = user.getStatus().toString();
-                log.debug("Status: {}", status);
-                return status;
-            }
-        });
-
-        return collection;
+        return List.of(new SimpleGrantedAuthority("ROLE_" + user.getStatus().name()));
+        // 예: "ROLE_AVAILABLE", "ROLE_TEMPORARILY_UNAVAILABLE"
     }
 
     @Override
@@ -47,7 +37,7 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public String getUsername() {
 
-        return user.getPhoneNumber();
+        return String.valueOf(user.getKakaoId());
     }
 
     @Override

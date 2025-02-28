@@ -59,8 +59,9 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)  // POST 테스트 시 CSRF 비활성화
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // CORS 설정
             .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/login", "/token").permitAll()
-                    .requestMatchers("/api/**").hasAuthority("USER")
+                    .requestMatchers("/login", "/token", "/users/kakao/login").permitAll()
+                    .requestMatchers("/api/users/onboarding/**").hasRole("TEMPORARILY_UNAVAILABLE")
+                    .requestMatchers("/api/**", "/logout", "/users/kakao/logout").hasRole("AVAILABLE")
                     .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/v3/api-docs/**").permitAll()
                     .anyRequest().authenticated()  // 그 외 경로는 인증 필요
             )  // 기본 로그인 페이지 비활성화

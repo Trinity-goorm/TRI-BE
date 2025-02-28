@@ -73,8 +73,18 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         // 2. 액세스 토큰으로 사용자 정보 조회
         KakaoUserInfoResponse kakaoUserInfoResponse = kakaoApiService.getUserInfo(kakaoAccessTokenResponse.getAccessToken());
 
-        // 3. Spring Security 인증 객체 생성
-        return new UsernamePasswordAuthenticationToken(kakaoUserInfoResponse.getKakaoId(), null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
+        // 3. 유저 정보 조회 (없으면 임시 사용자 등록)
+        User user = userRepository.findByKakaoId(Long.parseLong(kakaoUserInfoResponse.getKakaoId()))
+                .orElseGet(() -> authService.registerTempUser(Long.parseLong(kakaoUserInfoResponse.getKakaoId())));
+
+        log.info("✅ Kakao ID: {}, User Status: {}", user.getKakaoId(), user.getStatus());
+
+        // 4. 실제 UserStatus를 기반으로 인증 객체 생성
+        return new UsernamePasswordAuthenticationToken(
+                kakaoUserInfoResponse.getKakaoId(),
+                null,
+                List.of(new SimpleGrantedAuthority(user.getStatus().name()))  // ✅ 실제 상태 반영
+        );
     }
 
 
@@ -99,12 +109,12 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> authoritiesIterator = authorities.iterator();
         GrantedAuthority authority = authoritiesIterator.next();
-        String role = authority.getAuthority();
-        log.info("{} has role: {}", kakaoId, role);
+        String status = authority.getAuthority();
+        log.info("{} has role: {}", kakaoId, status);
 
         // 토큰 생성
-        String accessToken = jwtUtil.createJwt("access", kakaoId, role, 600000L);
-        String refreshToken = jwtUtil.createJwt("refresh", kakaoId, role, 86400000L);
+        String accessToken = jwtUtil.createJwt("access", kakaoId, status, 600000L);
+        String refreshToken = jwtUtil.createJwt("refresh", kakaoId, status, 86400000L);
 
         // Refresh 토큰 저장
         addRefreshToken(kakaoId, refreshToken, 86400000L);
@@ -126,17 +136,16 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         ObjectMapper objectMapper = new ObjectMapper();
         String responseBody;
 
-        if (user.getStatus() == UserStatus.TEMPORARILY_UNAVAILABLE) {
-            log.warn("🚨 온보딩이 필요한 사용자: {}", kakaoId);
+        // ✅ 온보딩이 필요한 경우에도 토큰을 발급하고 클라이언트가 처리할 수 있도록 응답
+        boolean needOnboarding = status.equals(UserStatus.TEMPORARILY_UNAVAILABLE.name());
 
-            responseBody = objectMapper.writeValueAsString(
-                    new LoginResponse(true, "온보딩이 필요한 사용자입니다.")
-            );
+        if (needOnboarding) {
+            log.warn("🚨 온보딩이 필요한 사용자: {}", kakaoId);
+            responseBody = objectMapper.writeValueAsString(new LoginResponse(true, "온보딩이 필요한 사용자입니다."));
         } else {
-            responseBody = objectMapper.writeValueAsString(
-                    new LoginResponse(false, "로그인 성공")
-            );
+            responseBody = objectMapper.writeValueAsString(new LoginResponse(false, "로그인 성공"));
         }
+
 
         response.getWriter().write(responseBody);
         response.setStatus(HttpStatus.OK.value());

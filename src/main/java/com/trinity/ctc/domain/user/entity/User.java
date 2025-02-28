@@ -14,9 +14,12 @@ import com.trinity.ctc.domain.user.status.UserStatus;
 import com.trinity.ctc.domain.user.validator.NormalTicketValidator;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Entity
@@ -102,5 +105,9 @@ public class User {
         this.phoneNumber = onboardingRequest.getPhoneNumber();
         this.userPreference = userPreference;
         this.status = UserStatus.AVAILABLE;
+    }
+
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_" + status.name()));
     }
 }
