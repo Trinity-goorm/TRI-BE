@@ -12,6 +12,7 @@ import com.trinity.ctc.domain.user.entity.UserPreference;
 import com.trinity.ctc.domain.user.entity.UserPreferenceCategory;
 import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.domain.user.validator.UserValidator;
+import com.trinity.ctc.global.kakao.service.AuthService;
 import com.trinity.ctc.global.util.common.SortOrder;
 import com.trinity.ctc.global.exception.CustomException;
 import com.trinity.ctc.global.exception.error_code.UserErrorCode;
@@ -33,6 +34,7 @@ public class UserService {
     private final CategoryRepository categoryRepository;
     private final UserValidator userValidator;
     private final ReservationRepository reservationRepository;
+    private final AuthService authService;
 
     /**
      * 온보딩 요청 DTO의 정보로 user entity를 build 후 저장하는 메서드
@@ -80,6 +82,13 @@ public class UserService {
     @Transactional(readOnly = true)
     public UserDetailResponse getUserDetail(long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
+        return UserDetailResponse.of(user.getId(), user.getNickname(), user.getPhoneNumber(), user.getNormalTicketCount(), user.getEmptyTicketCount());
+    }
+
+
+    @Transactional(readOnly = true)
+    public UserDetailResponse getUserDetailV2(long kakaoId) {
+        User user = userRepository.findByKakaoId(kakaoId).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
         return UserDetailResponse.of(user.getId(), user.getNickname(), user.getPhoneNumber(), user.getNormalTicketCount(), user.getEmptyTicketCount());
     }
 

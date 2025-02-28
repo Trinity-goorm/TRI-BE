@@ -18,4 +18,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Transactional
     @Query("UPDATE User u SET u.emptyTicketCount = 10")
     void resetAllEmptyTickets();
+
+    Optional<User> findByPhoneNumber(String phoneNumber);
 }

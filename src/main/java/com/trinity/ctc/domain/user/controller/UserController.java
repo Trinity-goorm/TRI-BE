@@ -81,4 +81,18 @@ public class UserController {
         UserReservationListResponse userReservationListResponse = userService.getUserReservations(userId, page, size, sortBy);
         return ResponseEntity.ok(userReservationListResponse);
     }
+
+    @GetMapping("/detail/v2")
+    @Operation(
+            summary = "kakao ID 기반 사용자 프로필 정보 반환",
+            description = "사용자 프로필 정보를 반환하는 API"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "성공"
+    )
+    public ResponseEntity<UserDetailResponse> getUserDetailV2(@RequestParam long kakaoId) {
+        UserDetailResponse result = userService.getUserDetailV2(kakaoId);
+        return ResponseEntity.ok(result);
+    }
 }

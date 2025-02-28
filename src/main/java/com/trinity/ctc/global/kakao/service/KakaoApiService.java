@@ -27,6 +27,11 @@ public class KakaoApiService {
         this.kakaoApiProperties = kakaoApiProperties;
     }
 
+    /**
+     * 카카오 엑세스토큰 발급
+     * @param authorizationCode
+     * @return
+     */
     public KakaoTokenResponse getAccessToken(String authorizationCode) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -49,6 +54,11 @@ public class KakaoApiService {
         return tokenResponse;
     }
 
+    /**
+     * 카카오 ID 획득
+     * @param accessToken
+     * @return
+     */
     public KakaoUserInfoResponse getUserInfo(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + accessToken);
@@ -64,6 +74,11 @@ public class KakaoApiService {
         return kakaoUserInfoResponse;
     }
 
+    /**
+     * 로그아웃을 위한 토큰 삭제
+     * @param accessToken
+     * @return
+     */
     public KakaoLogoutResponse deleteToken(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + accessToken);
@@ -94,6 +109,11 @@ public class KakaoApiService {
     }
 
 
+    /**
+     * 엑세스토큰 유효성 검증
+     * @param accessToken
+     * @return
+     */
     public boolean isAccessTokenValid(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + accessToken);
