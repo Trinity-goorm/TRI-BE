@@ -59,7 +59,7 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)  // POST 테스트 시 CSRF 비활성화
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // CORS 설정
             .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/login", "/token", "/users/kakao/login").permitAll()
+                    .requestMatchers("/login", "/token", "/token/reissue", "/users/kakao/login").permitAll()
                     .requestMatchers("/api/users/onboarding/**").hasRole("TEMPORARILY_UNAVAILABLE")
                     .requestMatchers("/api/**", "/logout", "/users/kakao/logout").hasRole("AVAILABLE")
                     .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/v3/api-docs/**").permitAll()
@@ -73,7 +73,7 @@ public class SecurityConfig {
         http
                 .addFilterAt(new LoginFilter(jwtUtil, objectMapper, refreshTokenRepository, userRepository, kakaoApiService, authService), UsernamePasswordAuthenticationFilter.class);
         http
-                .addFilterBefore(new CustomLogoutFilter(jwtUtil, refreshTokenRepository), LogoutFilter.class);
+                .addFilterBefore(new CustomLogoutFilter(jwtUtil, refreshTokenRepository, kakaoApiService), LogoutFilter.class);
 
         //세션 설정
         http

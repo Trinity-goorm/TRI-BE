@@ -1,6 +1,8 @@
 package com.trinity.ctc.domain.user.jwt;
 
 import com.trinity.ctc.domain.user.repository.RefreshTokenRepository;
+import com.trinity.ctc.global.kakao.dto.KakaoLogoutResponse;
+import com.trinity.ctc.global.kakao.service.KakaoApiService;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -9,21 +11,19 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
 
 @Slf4j
+@RequiredArgsConstructor
 public class CustomLogoutFilter extends GenericFilterBean {
 
     private final JWTUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
-
-    public CustomLogoutFilter(JWTUtil jwtUtil, RefreshTokenRepository refreshTokenRepository) {
-        this.jwtUtil = jwtUtil;
-        this.refreshTokenRepository = refreshTokenRepository;
-    }
+    private final KakaoApiService kakaoApiService;
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
@@ -46,6 +46,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
         }
 
         log.info("=======로그아웃 시작!======");
+
         // Refresh 토큰 추출
         String refresh = null;
         Cookie[] cookies = request.getCookies();

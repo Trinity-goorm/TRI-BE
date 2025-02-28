@@ -31,6 +31,11 @@ public class AuthService {
         this.userRepository = userRepository;
     }
 
+    /**
+     * 카카오 인증 구현 (미사용)
+     * @param authorizationCode
+     * @return
+     */
     @Transactional
     public UserLoginResponse authenticateWithKakao(String authorizationCode) {
 
@@ -40,6 +45,12 @@ public class AuthService {
         return handleUserInfo(userInfo, tokenResponse);
     }
 
+    /**
+     * 로그인 정보 반환 (구버전) -> 현재는 미사용
+     * @param userInfo
+     * @param tokenResponse
+     * @return
+     */
     private UserLoginResponse handleUserInfo(KakaoUserInfoResponse userInfo, KakaoTokenResponse tokenResponse) {
         Long kakaoId = Long.valueOf(userInfo.getKakaoId());
 
@@ -57,6 +68,11 @@ public class AuthService {
     }
 
 
+    /**
+     * 구버전 임시회원가입
+     * @param kakaoId
+     * @return
+     */
     private User registerNewMember(Long kakaoId) {
         User newUser = User.builder()
                 .kakaoId(kakaoId)
@@ -70,6 +86,9 @@ public class AuthService {
         return newUser;
     }
 
+    /**
+     * 로그인 세션 생성
+     */
     private void createLoginSession(User user) {
         // Spring Security를 사용하여 인증 세션 생성
         UsernamePasswordAuthenticationToken authenticationToken =
@@ -78,6 +97,9 @@ public class AuthService {
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     }
 
+    /**
+     * 카카오 엑세스 토큰을 받아 카카오 로그아웃
+     */
     public KakaoLogoutResponse logout(String accessToken) {
         KakaoLogoutResponse logoutResponse = kakaoApiService.deleteToken(accessToken);
         return logoutResponse;

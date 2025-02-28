@@ -84,13 +84,13 @@ public class TokenService {
         }
 
         String kakaoId = jwtUtil.getKakaoId(refresh);
-        String role = String.valueOf(jwtUtil.getStatus(refresh));
+        String status = String.valueOf(jwtUtil.getStatus(refresh));
 
-        log.info("[Reissue Service] - username: {}, role: {}", kakaoId, role);
+        log.info("[Reissue Service] - username: {}, role: {}", kakaoId, status);
 
         // 새로운 JWT 생성
-        String newAccess = jwtUtil.createJwt("access", kakaoId, role, 600000L);
-        String newRefresh = jwtUtil.createJwt("refresh", kakaoId, role, 86400000L);
+        String newAccess = jwtUtil.createJwt("access", kakaoId, status, 600000L);
+        String newRefresh = jwtUtil.createJwt("refresh", kakaoId, status, 86400000L);
         log.info("[Reissue Service] - newAccess: {}", newAccess);
         log.info("[Reissue Service] - newRefresh: {}", newRefresh);
 
