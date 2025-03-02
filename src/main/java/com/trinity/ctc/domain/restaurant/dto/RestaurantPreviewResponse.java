@@ -3,6 +3,7 @@ package com.trinity.ctc.domain.restaurant.dto;
 import com.trinity.ctc.domain.reservation.dto.ReservationAvailabilityResponse;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
 import com.trinity.ctc.domain.restaurant.entity.RestaurantImage;
+import com.trinity.ctc.domain.user.entity.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
@@ -15,6 +16,9 @@ import lombok.Getter;
 @Builder
 @Schema(description = "식당 미리보기 정보 반환")
 public class RestaurantPreviewResponse {
+
+    @Schema(description = "사용자 이름", example = "홍길동")
+    private String userName;
 
     @Schema(description = "식당 ID", example = "1")
     private Long restaurantId;
@@ -50,9 +54,10 @@ public class RestaurantPreviewResponse {
     private List<ReservationAvailabilityResponse> reservation; // 날짜별 예약 가능 여부 리스트로 변경
 
 
-    public static RestaurantPreviewResponse fromEntity(Restaurant restaurant, boolean isWishlisted, List<ReservationAvailabilityResponse> reservation) {
+    public static RestaurantPreviewResponse fromEntity(User user, Restaurant restaurant, boolean isWishlisted, List<ReservationAvailabilityResponse> reservation) {
 
         return RestaurantPreviewResponse.builder()
+                .userName(user.getNickname())
                 .restaurantId(restaurant.getId())
                 .name(restaurant.getName())
                 .rating(restaurant.getRating())

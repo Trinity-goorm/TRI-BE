@@ -4,6 +4,7 @@ import com.trinity.ctc.domain.restaurant.dto.RestaurantPreviewRequest;
 import com.trinity.ctc.domain.restaurant.dto.RestaurantPreviewResponse;
 import com.trinity.ctc.domain.search.dto.SearchHistoryResponse;
 import com.trinity.ctc.domain.search.service.SearchService;
+import com.trinity.ctc.domain.user.dto.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -14,6 +15,7 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,12 +47,16 @@ public class SearchController {
                     schema = @Schema(implementation = RestaurantPreviewResponse.class)
             )
     )
-    public ResponseEntity<List<RestaurantPreviewResponse>> getRestaurantsBySearch(@RequestBody
-                                                                                  RestaurantPreviewRequest request, @RequestParam String keyword) {
-        return ResponseEntity.ok(searchService.search(request, keyword));
+    public ResponseEntity<List<RestaurantPreviewResponse>> getRestaurantsBySearch(
+        @RequestBody RestaurantPreviewRequest request,
+        @RequestParam String keyword,
+        @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+
+        String kakaoId = customUserDetails.getUsername();
+        return ResponseEntity.ok(searchService.search(kakaoId,request, keyword));
     }
 
-    @GetMapping("/history/{userId}")
+    @GetMapping("/history")
     @Operation(
             summary = "검색 기록 조회",
             description = "사용자의 검색 기록 조회"
@@ -63,11 +69,12 @@ public class SearchController {
                     schema = @Schema(implementation = SearchHistoryResponse.class)
             )
     )
-    public ResponseEntity<List<SearchHistoryResponse>> getSearchHistory(@PathVariable Long userId) {
-        return ResponseEntity.ok(searchService.getSearchHistory(userId));
+    public ResponseEntity<List<SearchHistoryResponse>> getSearchHistory(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        String kakaoId = customUserDetails.getUsername();
+        return ResponseEntity.ok(searchService.getSearchHistory(kakaoId));
     }
 
-    @DeleteMapping("/history/{userId}/{searchHistoryId}")
+    @DeleteMapping("/history/{searchHistoryId}")
     @Operation(
             summary = "검색 기록 삭제",
             description = "사용자의 검색 기록 삭제"
@@ -80,8 +87,9 @@ public class SearchController {
                     schema = @Schema(implementation = String.class)
             )
     )
-    public ResponseEntity<String> deleteSearchHistory(@PathVariable Long userId, @PathVariable Long searchHistoryId) {
-        searchService.deleteSearchHistory(userId, searchHistoryId);
+    public ResponseEntity<String> deleteSearchHistory(@PathVariable Long searchHistoryId, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        String kakaoId = customUserDetails.getUsername();
+        searchService.deleteSearchHistory(kakaoId, searchHistoryId);
         return ResponseEntity.ok("검색 기록이 삭제되었습니다.");
     }
 

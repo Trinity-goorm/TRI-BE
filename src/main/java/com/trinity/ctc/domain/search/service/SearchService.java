@@ -15,12 +15,11 @@ import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.global.exception.CustomException;
 import com.trinity.ctc.global.exception.error_code.SearchErrorCode;
 import com.trinity.ctc.global.exception.error_code.UserErrorCode;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,28 +29,36 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SearchService {
     private final RestaurantRepository restaurantRepository;
     private final RestaurantService restaurantService;
     private final UserRepository userRepository;
     private final SearchRepository searchRepository;
 
-    @Transactional()
-    public List<RestaurantPreviewResponse> search(RestaurantPreviewRequest request, String keyword) {
+    @Transactional
+    public List<RestaurantPreviewResponse> search(String kakaoId, RestaurantPreviewRequest request, String keyword) {
+        Optional<User> userOptional = userRepository.findByKakaoId(Long.valueOf(kakaoId));
+        Long userId = userOptional.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND)).getId();
+        log.info("식당 검색 시 userId: {}", userId);
+
         SortingStrategy sortingStrategy = SortingStrategyFactory.getStrategy(request.getSortType());
         Sort sort = sortingStrategy.getSort();
 
         Pageable pageable = PageRequest.of(request.getPage() - 1, 30, sort);
 
         Page<Restaurant> restaurants = restaurantRepository.searchRestaurants(keyword, pageable);
-        User user = userRepository.findById(request.getUserId())
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
-        saveSearchHistory(request.getUserId(), keyword);
+        saveSearchHistory(userId, keyword);
         return restaurantService.convertToRestaurantDtoList(restaurants, user);
     }
 
-    public List<SearchHistoryResponse> getSearchHistory(Long userId) {
+    public List<SearchHistoryResponse> getSearchHistory(String kakaoId) {
+        Optional<User> userOptional = userRepository.findByKakaoId(Long.valueOf(kakaoId));
+        Long userId = userOptional.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND)).getId();
+
         return searchRepository.findTopByUserIdOrderByCreatedAtDesc(userId, PageRequest.of(0, 15));
     }
 
@@ -78,9 +85,9 @@ public class SearchService {
     }
 
     @Transactional
-    public void deleteSearchHistory(Long userId, Long searchHistoryId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
+    public void deleteSearchHistory(String kakaoId, Long searchHistoryId) {
+        Optional<User> userOptional = userRepository.findByKakaoId(Long.valueOf(kakaoId));
+        User user = userOptional.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
         SearchHistory searchHistory = searchRepository.findById(searchHistoryId)
                 .orElseThrow(
