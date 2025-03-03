@@ -51,10 +51,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     );
 
     @Query("SELECT r FROM Reservation r " +
-            "WHERE r.user.id = :userId " +
+            "WHERE r.user.kakaoId = :kakaoId " +
             "AND r.status IN (:statuses)")
-    List<Reservation> findByUserIdAndStatusIn(@Param("userId") Long userId,
-                                              @Param("statuses") List<ReservationStatus> statuses);
+    List<Reservation> findByKakaoIdAndStatusIn(@Param("kakaoId") Long kakaoId,
+                                               @Param("statuses") List<ReservationStatus> statuses);
 
 
     @Query("SELECT r FROM Reservation r " +

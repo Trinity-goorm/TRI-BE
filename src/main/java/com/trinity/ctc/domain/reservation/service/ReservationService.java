@@ -22,6 +22,7 @@ import com.trinity.ctc.domain.reservation.event.ReservationCompleteEvent;
 import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.global.exception.CustomException;
 import com.trinity.ctc.global.exception.error_code.*;
+import com.trinity.ctc.global.kakao.service.AuthService;
 import com.trinity.ctc.global.util.validator.SeatAvailabilityValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +44,7 @@ public class ReservationService {
     //  이벤트 발행하는 인터페이스
     private final ApplicationEventPublisher eventPublisher;
     private final ReservationValidator reservationValidator;
+    private final AuthService authService;
 
     /**
      * 선점하기
@@ -52,12 +54,15 @@ public class ReservationService {
      */
     @Transactional
     public PreoccupyResponse occupyInAdvance(ReservationRequest reservationRequest) {
-        log.info("[예약 요청] 날짜: {}, 시간: {}, 레스토랑 ID: {}, 사용자 ID: {}, 좌석 타입 ID: {}",
+        log.info("[예약 요청] 날짜: {}, 시간: {}, 레스토랑 ID: {}, 좌석 타입 ID: {}",
                 reservationRequest.getSelectedDate(), reservationRequest.getReservationTime(),
-                reservationRequest.getRestaurantId(), reservationRequest.getUserId(), reservationRequest.getSeatTypeId());
+                reservationRequest.getRestaurantId(), reservationRequest.getSeatTypeId());
+
+        // 사용자 KakaoID 획득
+        Long kakaoId = Long.parseLong(authService.getAuthenticatedKakaoId());
 
         // 사용자 예약이력 검증
-        reservationValidator.validateUserReservation(reservationRequest);
+        reservationValidator.validateUserReservation(reservationRequest, kakaoId);
 
         // 검증 (좌석 남은 자리 확인)
         Seat seat = validateSeatAvailability(reservationRequest);
@@ -68,7 +73,7 @@ public class ReservationService {
         log.info("[좌석 선점 완료] 남은 좌석 수: {}", seat.getAvailableSeats());
 
         // 예약정보 생성 -> 저장
-        Reservation reservation = createReservation(reservationRequest);
+        Reservation reservation = createReservation(reservationRequest, kakaoId);
         reservationRepository.save(reservation);
 
         log.info("[예약 성공] 예약 ID: {}", reservation.getId());
@@ -202,8 +207,8 @@ public class ReservationService {
      * @param reservationRequest
      * @return 예약정보
      */
-    private Reservation createReservation(ReservationRequest reservationRequest) {
-        User user = userRepository.findById(reservationRequest.getUserId())
+    private Reservation createReservation(ReservationRequest reservationRequest, Long kakaoId) {
+        User user = userRepository.findByKakaoId(kakaoId)
                 .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
         Restaurant restaurant = restaurantRepository.findById(reservationRequest.getRestaurantId())
