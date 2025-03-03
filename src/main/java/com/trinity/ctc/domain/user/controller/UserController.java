@@ -53,8 +53,8 @@ public class UserController {
             responseCode = "200",
             description = "성공"
     )
-    public ResponseEntity<UserDetailResponse> getUserDetail(@RequestParam long userId) {
-        UserDetailResponse result = userService.getUserDetail(userId);
+    public ResponseEntity<UserDetailResponse> getUserDetail() {
+        UserDetailResponse result = userService.getUserDetail();
         return ResponseEntity.ok(result);
     }
 

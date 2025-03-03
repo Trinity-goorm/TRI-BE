@@ -75,13 +75,12 @@ public class UserService {
 
     /**
      * 사용자 프로필 정보 반환
-     *
-     * @param userId
      * @return 사용자 프로필 정보
      */
     @Transactional(readOnly = true)
-    public UserDetailResponse getUserDetail(long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
+    public UserDetailResponse getUserDetail() {
+        Long kakaoId = Long.parseLong(authService.getAuthenticatedKakaoId());
+        User user = userRepository.findByKakaoId(kakaoId).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
         return UserDetailResponse.of(user.getId(), user.getNickname(), user.getPhoneNumber(), user.getNormalTicketCount(), user.getEmptyTicketCount());
     }
 
