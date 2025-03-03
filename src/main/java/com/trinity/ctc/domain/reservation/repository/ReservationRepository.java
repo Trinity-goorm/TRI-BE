@@ -64,4 +64,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             "JOIN FETCH r.seatType st " +
             "WHERE r.user.id = :userId")
     Slice<Reservation> findAllByUserId(@Param("userId") Long userId, Pageable pageable);
+
+
+    @Query("SELECT r FROM Reservation r " +
+            "JOIN FETCH r.restaurant rest " +
+            "JOIN FETCH r.user u " +
+            "JOIN FETCH r.reservationTime rt " +
+            "JOIN FETCH r.seatType st " +
+            "WHERE r.user.kakaoId = :kakaoId")
+    Slice<Reservation> findAllByKakaoId(@Param("kakaoId") Long kakaoId, Pageable pageable);
 }

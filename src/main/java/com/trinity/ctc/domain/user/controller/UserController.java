@@ -58,7 +58,7 @@ public class UserController {
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/reservations/{userId}")
+    @GetMapping("/reservations")
     @Operation(
             summary = "사용자 예약리스트 반환",
             description = "사용자 예약리스트를 반환하는 API"
@@ -67,8 +67,7 @@ public class UserController {
             responseCode = "200",
             description = "성공"
     )
-    public ResponseEntity<UserReservationListResponse> getUserReservations(@PathVariable long userId,
-                                                                           @RequestParam(defaultValue = "1") int page,
+    public ResponseEntity<UserReservationListResponse> getUserReservations(@RequestParam(defaultValue = "1") int page,
                                                                            @RequestParam(defaultValue = "10") int size,
                                                                            @Parameter(
                                                                                    description = "정렬 기준 (가능한 값: RESERVE_DATE_ASC, RESERVE_DATE_DESC)",
@@ -78,7 +77,7 @@ public class UserController {
                                                                                    })
                                                                            )
                                                                            @RequestParam(defaultValue = "RESERVE_DATE_DESC") String sortBy) {
-        UserReservationListResponse userReservationListResponse = userService.getUserReservations(userId, page, size, sortBy);
+        UserReservationListResponse userReservationListResponse = userService.getUserReservations(page, size, sortBy);
         return ResponseEntity.ok(userReservationListResponse);
     }
 
