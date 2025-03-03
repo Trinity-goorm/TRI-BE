@@ -113,8 +113,8 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResultResponse cancelPreoccupy(long reservationId, long userId) {
-        log.info("[예약 정보] 예약정보 ID: {}, 예약자 ID: {}", reservationId, userId);
+    public ReservationResultResponse cancelPreoccupy(long reservationId) {
+        log.info("[예약 정보] 예약정보 ID: {}", reservationId);
 
         // 예약정보 가져오기
         Reservation reservation = reservationRepository.findById(reservationId)
@@ -124,7 +124,7 @@ public class ReservationService {
         ReservationValidator.isPreoccupied(reservation.getStatus());
 
         // 예약정보 취소 상태로 변경
-        reservation.cancelReservation();
+        reservation.failReservation();
 
         // 가용좌석 증가 (더티체킹)
         Seat seat = seatRepository.findByReservationData(reservation.getRestaurant().getId(), reservation.getReservationDate(), reservation.getReservationTime().getTimeSlot(), reservation.getSeatType().getId());

@@ -61,7 +61,7 @@ public class ReservationController {
     @PostMapping("/preoccupy/cancel")
     @Operation(
             summary = "예약선점 취소 기능",
-            description = "결제 창에서 타임아웃 또는 뒤로가기 시, 예약상태가 CANCELED로 변경"
+            description = "결제 창에서 타임아웃 또는 뒤로가기 시, 예약상태가 FAILED로 변경"
     )
     @ApiResponse(
             responseCode = "200",
@@ -71,8 +71,8 @@ public class ReservationController {
                     schema = @Schema(implementation = ReservationResultResponse.class)
             )
     )
-    public ResponseEntity<ReservationResultResponse> cancelPreoccupy(@RequestParam long reservationId, @RequestParam long userId) {
-        ReservationResultResponse result = reservationService.cancelPreoccupy(reservationId, userId);
+    public ResponseEntity<ReservationResultResponse> cancelPreoccupy(@RequestParam long reservationId) {
+        ReservationResultResponse result = reservationService.cancelPreoccupy(reservationId);
         return ResponseEntity.ok(result);
     }
 

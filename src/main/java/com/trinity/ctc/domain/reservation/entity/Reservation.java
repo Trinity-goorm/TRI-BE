@@ -76,4 +76,8 @@ public class Reservation {
     public void cancelReservation() {
         this.status = ReservationStatus.CANCELLED;
     }
+
+    public void failReservation() {
+        this.status = ReservationStatus.FAILED;
+    }
 }
