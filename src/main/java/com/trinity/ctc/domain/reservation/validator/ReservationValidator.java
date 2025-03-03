@@ -19,8 +19,8 @@ public class ReservationValidator {
 
     private final ReservationRepository reservationRepository;
 
-    public static void validateReservationUserMatched(long reservationUserId, long requestUserid) {
-        if (reservationUserId != requestUserid) {
+    public static void validateReservationUserMatched(long reservationKakaoId, long requestKakaoId) {
+        if (reservationKakaoId != requestKakaoId) {
             throw new CustomException(ReservationErrorCode.RESERVATION_USER_MISMATCH);
         }
     }

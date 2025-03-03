@@ -52,8 +52,8 @@ public class ReservationController {
                     schema = @Schema(implementation = ReservationResultResponse.class)
             )
     )
-    public ResponseEntity<ReservationResultResponse> completeReservation(@RequestParam long reservationId, @RequestParam long userId) {
-        ReservationResultResponse result = reservationService.complete(reservationId, userId);
+    public ResponseEntity<ReservationResultResponse> completeReservation(@RequestParam long reservationId) {
+        ReservationResultResponse result = reservationService.complete(reservationId);
 
         return ResponseEntity.ok(result);
     }

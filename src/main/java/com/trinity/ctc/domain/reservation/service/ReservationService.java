@@ -83,22 +83,25 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResultResponse complete(long reservationId, long userId) {
+    public ReservationResultResponse complete(long reservationId) {
 
-        log.info("[예약 정보] 예약정보 ID: {}, 예약자 ID: {}", reservationId, userId);
+        log.info("[예약 정보] 예약정보 ID: {}", reservationId);
+
+        // 사용자 정보 획득
+        Long kakaoId = Long.parseLong(authService.getAuthenticatedKakaoId());
 
         // 예약정보 가져오기
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new CustomException(ReservationErrorCode.NOT_FOUND));
 
         // 예약정보의 사용자 검증
-        ReservationValidator.validateReservationUserMatched(reservation.getUser().getId(), userId);
+        ReservationValidator.validateReservationUserMatched(reservation.getUser().getKakaoId(), kakaoId);
 
         // 예약정보 선점여부 검증
         ReservationValidator.isPreoccupied(reservation.getStatus());
 
         // 티켓 차감
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByKakaoId(kakaoId)
                 .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
         user.payNormalTickets();
 
