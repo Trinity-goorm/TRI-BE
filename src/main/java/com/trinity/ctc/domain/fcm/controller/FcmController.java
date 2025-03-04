@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/fcmTokens")
 public class FcmController {
     private final FcmService fcmService;
-    private final JWTUtil jwtUtil;
 
     @PostMapping("/register")
     @Operation(
@@ -36,12 +35,7 @@ public class FcmController {
             description = "요청한 사용자 정보가 DB에 없을 경우"
     )
     public ResponseEntity<Void> registerFcmToken(@RequestBody FcmTokenRequest fcmTokenRequest) {
-//        String accessToken = request.getHeader("Authorization");
-//        accessToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
-//        String kakaoId = jwtUtil.getKakaoId(accessToken);
-
         fcmService.registerFcmToken(fcmTokenRequest);
-
         return ResponseEntity.noContent().build();
     }
 

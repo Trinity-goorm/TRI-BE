@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Notification", description = "알림 관련 API")
 public class NotificationController {
     private final NotificationService notificationService;
-    private final JWTUtil jwtUtil;
 
     @PostMapping("/seats/subscribe")
     @Operation(
@@ -45,10 +44,6 @@ public class NotificationController {
             description = "빈자리 알림 신청 티켓이 부족한 경우"
     )
     public ResponseEntity<Void> subscribeSeatNotification(@RequestParam long seatId) {
-//        String accessToken = request.getHeader("Authorization");
-//        accessToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
-//        String kakaoId = jwtUtil.getKakaoId(accessToken);
-
         notificationService.subscribeSeatNotification(seatId);
         return ResponseEntity.noContent().build();
     }
@@ -67,10 +62,6 @@ public class NotificationController {
             )
     )
     public ResponseEntity<SubscriptionListResponse> getSeatNotifications() {
-//        String accessToken = request.getHeader("Authorization");
-//        accessToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
-//        String kakaoId = jwtUtil.getKakaoId(accessToken);
-
         SubscriptionListResponse subscriptionList = notificationService.getSeatNotifications();
         return ResponseEntity.ok(subscriptionList);
     }

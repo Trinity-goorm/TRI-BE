@@ -4,6 +4,7 @@ import com.trinity.ctc.domain.restaurant.dto.RestaurantPreviewResponse;
 import com.trinity.ctc.domain.restaurant.dto.RestaurantDetailResponse;
 import com.trinity.ctc.domain.restaurant.dto.RestaurantPreviewRequest;
 import com.trinity.ctc.domain.restaurant.service.RestaurantService;
+import com.trinity.ctc.domain.user.dto.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -15,6 +16,7 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -64,7 +66,10 @@ public class RestaurantController {
             )
     )
     public ResponseEntity<List<RestaurantPreviewResponse>> getRestaurantsByCategory(
-            @RequestBody RestaurantPreviewRequest request, @PathVariable Long categoryId) {
-        return ResponseEntity.ok(restaurantService.getRestaurantsByCategory(request, categoryId));
+            @RequestBody RestaurantPreviewRequest request,
+            @PathVariable Long categoryId,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        String kakaoId = userDetails.getUsername();
+        return ResponseEntity.ok(restaurantService.getRestaurantsByCategory(kakaoId, request, categoryId));
     }
 }

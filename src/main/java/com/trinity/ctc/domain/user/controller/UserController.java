@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,6 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class UserController {
     private final UserService userService;
-    private final JWTUtil jwtUtil;
 
     @PostMapping("/onboarding")
     @Operation(
@@ -42,12 +42,8 @@ public class UserController {
             responseCode = "403",
             description = "사용자가 임시 회원이 아닐 경우, 403 반환"
     )
-    public ResponseEntity<Void> saveOnboardingInformation(@RequestBody OnboardingRequest onboardingRequest) {
-//        String accessToken = request.getHeader("Authorization");
-//        accessToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
-//        String kakaoId = jwtUtil.getKakaoId(accessToken);
-
-        userService.saveOnboardingInformation(onboardingRequest);
+    public ResponseEntity<Void> saveOnboardingInformation(@RequestBody OnboardingRequest onboardingRequest, HttpServletRequest request, HttpServletResponse response) {
+        userService.saveOnboardingInformation(onboardingRequest, request, response);
         return ResponseEntity.noContent().build();
     }
 

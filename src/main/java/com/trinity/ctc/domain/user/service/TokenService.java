@@ -93,6 +93,7 @@ public class TokenService {
         User user = userRepository.findByKakaoId(Long.valueOf(kakaoId)).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
         String status = user.getStatus().name();
+//        String status = jwtUtil.getStatus(refresh);
 
         log.info("[Reissue Service] - username: {}, role: {}", kakaoId, status);
 
