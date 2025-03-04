@@ -1,5 +1,6 @@
 package com.trinity.ctc.domain.user.service;
 
+import com.trinity.ctc.domain.user.dto.ReissueTokenRequest;
 import com.trinity.ctc.domain.user.entity.RefreshToken;
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.domain.user.jwt.JWTUtil;
@@ -60,9 +61,10 @@ public class TokenService {
      * @param response
      * @return 새로운 Access 토큰
      */
-    public String reissueToken(HttpServletRequest request, HttpServletResponse response) {
+    public String reissueToken(ReissueTokenRequest requestDto, HttpServletRequest request, HttpServletResponse response) {
 
-        String refresh = getRefreshTokenFromCookie(request.getCookies());
+//        String refresh = getRefreshTokenFromCookie(request.getCookies());
+        String refresh = requestDto.getRefresh();
         log.info("[Reissue Service] - Received refresh token: {}", refresh);
 
         if (refresh == null) {

@@ -126,7 +126,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         // 응답 설정
         response.setHeader("access", accessToken);
-        response.addCookie(createCookie("refresh", refreshToken));
+        response.setHeader("refresh", refreshToken);
+//        response.addCookie(createCookie("refresh", refreshToken));
         response.setStatus(HttpStatus.OK.value());
 
         // ✅ 응답 JSON 구성
