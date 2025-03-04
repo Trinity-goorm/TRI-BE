@@ -2,11 +2,13 @@ package com.trinity.ctc.domain.notification.controller;
 
 import com.trinity.ctc.domain.notification.dto.SubscriptionListResponse;
 import com.trinity.ctc.domain.notification.service.NotificationService;
+import com.trinity.ctc.domain.user.jwt.JWTUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Notification", description = "알림 관련 API")
 public class NotificationController {
     private final NotificationService notificationService;
+    private final JWTUtil jwtUtil;
 
     @PostMapping("/seats/subscribe")
     @Operation(
@@ -41,8 +44,12 @@ public class NotificationController {
             responseCode = "509",
             description = "빈자리 알림 신청 티켓이 부족한 경우"
     )
-    public ResponseEntity<Void> subscribeSeatNotification(@RequestParam long seatId, @RequestParam long userId) {
-        notificationService.subscribeSeatNotification(seatId, userId);
+    public ResponseEntity<Void> subscribeSeatNotification(@RequestParam long seatId) {
+//        String accessToken = request.getHeader("Authorization");
+//        accessToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
+//        String kakaoId = jwtUtil.getKakaoId(accessToken);
+
+        notificationService.subscribeSeatNotification(seatId);
         return ResponseEntity.noContent().build();
     }
 
@@ -59,8 +66,12 @@ public class NotificationController {
                     schema = @Schema(implementation = SubscriptionListResponse.class)
             )
     )
-    public ResponseEntity<SubscriptionListResponse> getSeatNotifications(@RequestParam long userId) {
-        SubscriptionListResponse subscriptionList = notificationService.getSeatNotifications(userId);
+    public ResponseEntity<SubscriptionListResponse> getSeatNotifications() {
+//        String accessToken = request.getHeader("Authorization");
+//        accessToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
+//        String kakaoId = jwtUtil.getKakaoId(accessToken);
+
+        SubscriptionListResponse subscriptionList = notificationService.getSeatNotifications();
         return ResponseEntity.ok(subscriptionList);
     }
 

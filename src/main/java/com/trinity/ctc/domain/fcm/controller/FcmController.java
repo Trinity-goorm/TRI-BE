@@ -2,10 +2,15 @@ package com.trinity.ctc.domain.fcm.controller;
 
 import com.trinity.ctc.domain.fcm.dto.FcmTokenRequest;
 import com.trinity.ctc.domain.fcm.service.FcmService;
+import com.trinity.ctc.domain.user.jwt.JWTUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +20,44 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/fcmTokens")
 public class FcmController {
     private final FcmService fcmService;
+    private final JWTUtil jwtUtil;
+
+    @PostMapping("/register")
+    @Operation(
+            summary = "fcm 토큰 등록",
+            description = "최초 로그인 시, fcm 토큰 정보 등록 요청"
+    )
+    @ApiResponse(
+            responseCode = "204",
+            description = "등록 성공"
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "요청한 사용자 정보가 DB에 없을 경우"
+    )
+    public ResponseEntity<Void> registerFcmToken(@RequestBody FcmTokenRequest fcmTokenRequest) {
+//        String accessToken = request.getHeader("Authorization");
+//        accessToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
+//        String kakaoId = jwtUtil.getKakaoId(accessToken);
+
+        fcmService.registerFcmToken(fcmTokenRequest);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/delete")
+    @Operation(
+            summary = "fcm 토큰 삭제",
+            description = "로그아웃/로그인 세션 만료 시, fcm 토큰 정보 삭제 요청"
+    )
+    @ApiResponse(
+            responseCode = "204",
+            description = "삭제 성공"
+    )
+    public ResponseEntity<Void> deleteFcmToken(@RequestBody FcmTokenRequest fcmTokenRequest) {
+        fcmService.deleteFcmToken(fcmTokenRequest);
+        return ResponseEntity.noContent().build();
+    }
 
     @PostMapping("/renew")
     @Operation(

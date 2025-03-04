@@ -43,8 +43,10 @@ public class UserService {
      */
     @Transactional
     public void saveOnboardingInformation(OnboardingRequest onboardingRequest) {
+        String kakaoId = authService.getAuthenticatedKakaoId();
+
         // update 할 사용자 entity select
-        User user = userRepository.findById(onboardingRequest.getUserId())
+        User user = userRepository.findByKakaoId(Long.valueOf(kakaoId))
                 .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
         // 사용자가 온보딩 중인 사용자인지(status = TEMPORARILY_UNAVAILABLE) 검증, 아닐 경우 403 반환

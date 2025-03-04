@@ -24,6 +24,7 @@ import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.global.exception.CustomException;
 import com.trinity.ctc.global.exception.error_code.*;
+import com.trinity.ctc.global.kakao.service.AuthService;
 import com.trinity.ctc.global.util.formatter.DateTimeUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +52,7 @@ public class NotificationService {
     private final SeatRepository seatRepository;
     private final SeatNotificationMessageRepository seatNotificationMessageRepository;
     private final SeatNotificationRepository seatNotificationRepository;
+    private final AuthService authService;
 
     /**
      * 예약 이벤트를 통해 예약 알림에 필요한 entity(user, reservation)를 받아오고, 예약 알림 entity을 DB에 저장하는 메서드
@@ -337,8 +339,10 @@ public class NotificationService {
     }
 
     @Transactional
-    public void subscribeSeatNotification(Long seatId, Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
+    public void subscribeSeatNotification(Long seatId) {
+        String kakaoId = authService.getAuthenticatedKakaoId();
+
+        User user = userRepository.findByKakaoId(Long.valueOf(kakaoId)).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
         // 티켓 개수 검증, 509 반환
         EmptyTicketValidator.validateEmptyTicketUsage(user.getEmptyTicketCount());
@@ -347,9 +351,9 @@ public class NotificationService {
                 .orElseGet(() -> registerSeatNotificationMessage(seatId));
 
         // 이미 신청 내역이 있을 시, 409 반환
-        seatNotificationRepository.findByUserId(userId, seatNotificationMessage)
+        seatNotificationRepository.findByUserId(user.getId(), seatNotificationMessage)
                 .ifPresent(notification -> {
-                    log.info("이미 신청 내역이 존재합니다. userId: {}", userId);
+                    log.info("이미 신청 내역이 존재합니다. userId: {}", user.getId());
                     throw new CustomException(NotificationErrorCode.ALREADY_SUBSCRIBED);
                 });
 
@@ -422,12 +426,14 @@ public class NotificationService {
     /**
      * 사용자의 빈자리 알림 신청 내역 반환 메서드
      *
-     * @param userId
      * @return
      */
     @Transactional
-    public SubscriptionListResponse getSeatNotifications(long userId) {
-        List<SeatNotification> seatNotificationList = seatNotificationRepository.findAllByUserId(userId);
+    public SubscriptionListResponse getSeatNotifications() {
+        String kakaoId = authService.getAuthenticatedKakaoId();
+        User user = userRepository.findByKakaoId(Long.valueOf(kakaoId)).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
+
+        List<SeatNotification> seatNotificationList = seatNotificationRepository.findAllByUserId(user.getId());
         List<SubscriptionResponse> subscriptionResponseList = new ArrayList<>();
         log.info("조회된 SeatNotification 개수: {}", seatNotificationList.size());
 

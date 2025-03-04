@@ -3,12 +3,14 @@ package com.trinity.ctc.domain.user.controller;
 import com.trinity.ctc.domain.user.dto.OnboardingRequest;
 import com.trinity.ctc.domain.user.dto.UserDetailResponse;
 import com.trinity.ctc.domain.user.dto.UserReservationListResponse;
+import com.trinity.ctc.domain.user.jwt.JWTUtil;
 import com.trinity.ctc.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class UserController {
     private final UserService userService;
+    private final JWTUtil jwtUtil;
 
     @PostMapping("/onboarding")
     @Operation(
@@ -40,6 +43,10 @@ public class UserController {
             description = "사용자가 임시 회원이 아닐 경우, 403 반환"
     )
     public ResponseEntity<Void> saveOnboardingInformation(@RequestBody OnboardingRequest onboardingRequest) {
+//        String accessToken = request.getHeader("Authorization");
+//        accessToken = accessToken.startsWith("Bearer ") ? accessToken.substring(7) : accessToken;
+//        String kakaoId = jwtUtil.getKakaoId(accessToken);
+
         userService.saveOnboardingInformation(onboardingRequest);
         return ResponseEntity.noContent().build();
     }

@@ -1,14 +1,18 @@
 package com.trinity.ctc.domain.user.service;
 
 import com.trinity.ctc.domain.user.entity.RefreshToken;
+import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.domain.user.jwt.JWTUtil;
 import com.trinity.ctc.domain.user.repository.RefreshTokenRepository;
+import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.global.exception.CustomException;
+import com.trinity.ctc.global.exception.error_code.UserErrorCode;
 import com.trinity.ctc.util.exception.error_code.TokenErrorCode;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -25,10 +29,12 @@ public class TokenService {
 
     private final JWTUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final UserRepository userRepository;
 
-    public TokenService(JWTUtil jwtUtil, RefreshTokenRepository refreshTokenRepository) {
+    public TokenService(JWTUtil jwtUtil, RefreshTokenRepository refreshTokenRepository, UserRepository userRepository) {
         this.jwtUtil = jwtUtil;
         this.refreshTokenRepository = refreshTokenRepository;
+        this.userRepository = userRepository;
     }
 
 
@@ -84,7 +90,9 @@ public class TokenService {
         }
 
         String kakaoId = jwtUtil.getKakaoId(refresh);
-        String status = String.valueOf(jwtUtil.getStatus(refresh));
+        User user = userRepository.findByKakaoId(Long.valueOf(kakaoId)).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
+
+        String status = user.getStatus().name();
 
         log.info("[Reissue Service] - username: {}, role: {}", kakaoId, status);
 
