@@ -16,6 +16,7 @@ import com.trinity.ctc.global.exception.CustomException;
 import com.trinity.ctc.global.exception.error_code.RestaurantErrorCode;
 import com.trinity.ctc.global.exception.error_code.UserErrorCode;
 import jakarta.transaction.Transactional;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -36,9 +37,13 @@ public class RestaurantRecommendationService {
     private final UserPreferenceRepository userPreferenceRepository;
 
     @Transactional
-    public List<RestaurantPreviewResponse> getRecommendedRestaurants(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
+    public List<RestaurantPreviewResponse> getRecommendedRestaurants(String kakaoId) {
+        Optional<User> userOptional = userRepository.findByKakaoId(Long.valueOf(kakaoId));
+        if (userOptional.isEmpty()) {
+            throw new CustomException(UserErrorCode.NOT_FOUND);
+        }
+        User user = userOptional.get();
+        Long userId = user.getId();
         log.info("user 가져오기: {}", userId);
 
         // userPreference의 ID는 userID -> 따라서, findById의 parameter는 userID가 됨
@@ -65,18 +70,17 @@ public class RestaurantRecommendationService {
                 .collect(Collectors.toList());
 
         AIRecommendationRequest request = new AIRecommendationRequest(
-                user.getId(),
                 preferredCategories
 //            minPrice,
 //            maxPrice,
 //            likeList,
 //            searchHistory
         );
-        log.info("AI 추천 요청: {}", request.getUserId(), request.getPreferredCategories());
+        log.info("AI 추천 요청: {}", userId, request.getPreferredCategories());
 
 
-        AIRecommendationResponse aiResponse = aiRecommendationClient.getRecommendations(request);
-//        AIRecommendationResponse aiResponse = aiRecommendationClientDumy.getRecommendations(request);
+//        AIRecommendationResponse aiResponse = aiRecommendationClient.getRecommendations(request);
+        AIRecommendationResponse aiResponse = aiRecommendationClientDumy.getRecommendations(request);
         log.info("AI 추천 결과: {}", aiResponse.getUserId(), aiResponse.getRecommendations());
 
         return aiResponse.getRecommendations().stream()
@@ -86,7 +90,7 @@ public class RestaurantRecommendationService {
 
                     boolean isWishlisted = likeRepository.existsByUserAndRestaurant(user, restaurant);
 
-                    return RestaurantPreviewResponse.fromEntity(restaurant, isWishlisted, List.of());
+                    return RestaurantPreviewResponse.fromEntity(user, restaurant, isWishlisted, List.of());
                 })
                 .collect(Collectors.toList());
     }

@@ -9,7 +9,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class AIRecommendationRequest {
-    private Long userId;
+//    private Long userId;
     private List<String> preferredCategories;
 //    private int minPrice;
 //    private int maxPrice;
