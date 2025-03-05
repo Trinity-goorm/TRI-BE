@@ -39,7 +39,7 @@ public class FcmController {
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     @Operation(
             summary = "fcm 토큰 삭제",
             description = "로그아웃/로그인 세션 만료 시, fcm 토큰 정보 삭제 요청"
@@ -49,6 +49,7 @@ public class FcmController {
             description = "삭제 성공"
     )
     public ResponseEntity<Void> deleteFcmToken(@RequestBody FcmTokenRequest fcmTokenRequest) {
+        log.info("first fcm token: ");
         fcmService.deleteFcmToken(fcmTokenRequest);
         return ResponseEntity.noContent().build();
     }

@@ -9,6 +9,7 @@ import com.trinity.ctc.global.exception.CustomException;
 import com.trinity.ctc.global.exception.error_code.UserErrorCode;
 import com.trinity.ctc.global.kakao.service.AuthService;
 import com.trinity.ctc.global.util.formatter.DateTimeUtil;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -29,6 +30,7 @@ public class FcmService {
      *
      * @param fcmTokenRequest FCM토큰 정보 요청 DTO(토큰값, 등록 시간)
      */
+    @Transactional
     public void registerFcmToken(FcmTokenRequest fcmTokenRequest) {
         String kakaoId = authService.getAuthenticatedKakaoId();
         
@@ -57,7 +59,9 @@ public class FcmService {
      *
      * @param fcmTokenRequest FCM토큰 정보 요청 DTO(토큰값, null)
      */
+    @Transactional
     public void deleteFcmToken(FcmTokenRequest fcmTokenRequest) {
+        log.info("token: " + fcmTokenRequest.getFcmToken());
         fcmRepository.deleteByToken(fcmTokenRequest.getFcmToken());
     }
 
@@ -66,6 +70,7 @@ public class FcmService {
      *
      * @param fcmTokenRequest FCM토큰 정보 요청 DTO(토큰값, 업데이트 시간)
      */
+    @Transactional
     public void renewFcmToken(FcmTokenRequest fcmTokenRequest) {
         String fcmToken = fcmTokenRequest.getFcmToken();
 

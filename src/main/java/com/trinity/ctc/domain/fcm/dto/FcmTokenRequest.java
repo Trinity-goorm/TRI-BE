@@ -1,11 +1,8 @@
 package com.trinity.ctc.domain.fcm.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Schema(description = "FCM 토큰 정보")

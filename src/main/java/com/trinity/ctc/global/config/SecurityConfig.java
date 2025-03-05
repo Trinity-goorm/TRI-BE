@@ -59,7 +59,7 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)  // POST 테스트 시 CSRF 비활성화
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // CORS 설정
             .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/login", "/token", "/token/reissue", "/users/kakao/login", "/api/fcmTokens/register").permitAll()
+                    .requestMatchers("/login", "/token", "/token/reissue", "/users/kakao/login", "/api/fcmTokens/register", "/api/fcmTokens/delete").permitAll()
                     .requestMatchers("/api/users/onboarding/**").hasRole("TEMPORARILY_UNAVAILABLE")
                     .requestMatchers("/api/**", "/logout", "/users/kakao/logout").hasRole("AVAILABLE")
                     .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/v3/api-docs/**").permitAll()
