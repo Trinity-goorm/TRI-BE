@@ -14,6 +14,8 @@ import java.util.List;
 @Repository
 public interface FcmRepository extends JpaRepository<Fcm, Long> {
     @Transactional
+    @Modifying
+    @Query("DELETE FROM Fcm f WHERE f.token = :token")
     void deleteByToken(String token);
 
     @Transactional

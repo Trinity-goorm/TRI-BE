@@ -713,8 +713,6 @@ public class NotificationService {
      */
     @Transactional
     public void sendReservationCanceledNotification(Long userId, Long reservationId, boolean isCODPassed) {
-        log.info("asdfadsfasdf");
-
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
         Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(() -> new CustomException(ReservationErrorCode.NOT_FOUND));
         FcmMessageDto messageData = formattingReservationCanceledNotification(reservation, user, isCODPassed);
