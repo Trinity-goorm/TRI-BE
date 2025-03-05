@@ -120,3 +120,16 @@ jobs:
             
             # 사용하지 않는 이미지 정리
             docker image prune -f
+      
+      - name: Send Discord Notification
+        if: success()
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          title: "🚀 배포 완료!"
+          description: |
+            Repository: ${{ github.repository }}
+            Branch: ${{ github.ref_name }}
+            Commit: ${{ github.event.head_commit.message }}
+            배포가 성공적으로 완료되었습니다.
+          color: 0x28A745 
