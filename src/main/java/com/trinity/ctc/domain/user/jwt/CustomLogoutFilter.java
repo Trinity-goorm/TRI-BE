@@ -86,13 +86,6 @@ public class CustomLogoutFilter extends GenericFilterBean {
         // 🚀 로그아웃 처리
         refreshTokenRepository.deleteByRefreshToken(refresh);
 
-        // 🚀 Refresh 토큰 쿠키 제거
-        Cookie cookie = new Cookie("refresh", null);
-        cookie.setMaxAge(0);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        response.addCookie(cookie);
-
         response.setStatus(HttpServletResponse.SC_OK);
         log.info("✅ Successfully logged out.");
     }
