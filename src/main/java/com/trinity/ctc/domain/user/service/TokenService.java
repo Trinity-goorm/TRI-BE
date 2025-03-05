@@ -111,7 +111,7 @@ public class TokenService {
 
         // response
         response.setHeader("access", newAccess);
-        response.addCookie(createCookie("refresh", newRefresh));
+        response.setHeader("refresh", newRefresh);
 
         // 토큰을 굳이 보낼 이유는 없다. 후에 고민
         return newAccess;
