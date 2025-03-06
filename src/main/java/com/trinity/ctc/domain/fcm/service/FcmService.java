@@ -7,6 +7,9 @@ import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.global.exception.CustomException;
 import com.trinity.ctc.global.exception.error_code.UserErrorCode;
+import com.trinity.ctc.global.kakao.service.AuthService;
+import com.trinity.ctc.global.util.formatter.DateTimeUtil;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -20,20 +23,23 @@ import java.time.LocalDateTime;
 public class FcmService {
     public final FcmRepository fcmRepository;
     public final UserRepository userRepository;
+    public final AuthService authService;
 
     /**
      * 로그인 시, 해당 기기에 대한 사용자의 fcm 토큰 정보 초기화
      *
      * @param fcmTokenRequest FCM토큰 정보 요청 DTO(토큰값, 등록 시간)
-     * @param userId          사용자 ID
      */
-    public void registerFcmToken(FcmTokenRequest fcmTokenRequest, Long userId) {
+    @Transactional
+    public void registerFcmToken(FcmTokenRequest fcmTokenRequest) {
+        String kakaoId = authService.getAuthenticatedKakaoId();
+        
         // 유저 entity
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByKakaoId(Long.valueOf(kakaoId))
                 .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
         // 토큰 등록 시간과 만료 시간 설정
-        LocalDateTime registeredAt = fcmTokenRequest.getTimeStamp();
+        LocalDateTime registeredAt = DateTimeUtil.truncateToMinute(LocalDateTime.now());
         LocalDateTime expiresAt = registeredAt.plusDays(30);
 
         // FCM 토큰 entity 빌드
@@ -53,7 +59,9 @@ public class FcmService {
      *
      * @param fcmTokenRequest FCM토큰 정보 요청 DTO(토큰값, null)
      */
+    @Transactional
     public void deleteFcmToken(FcmTokenRequest fcmTokenRequest) {
+        log.info("token: " + fcmTokenRequest.getFcmToken());
         fcmRepository.deleteByToken(fcmTokenRequest.getFcmToken());
     }
 
@@ -62,11 +70,12 @@ public class FcmService {
      *
      * @param fcmTokenRequest FCM토큰 정보 요청 DTO(토큰값, 업데이트 시간)
      */
+    @Transactional
     public void renewFcmToken(FcmTokenRequest fcmTokenRequest) {
         String fcmToken = fcmTokenRequest.getFcmToken();
 
         // 토큰 업데이트 시간과 만료 시간 설정
-        LocalDateTime updatedAt = fcmTokenRequest.getTimeStamp();
+        LocalDateTime updatedAt = DateTimeUtil.truncateToMinute(LocalDateTime.now());
         LocalDateTime expiresAt = updatedAt.plusDays(30);
 
         // 토큰값이 같은 record 업데이트

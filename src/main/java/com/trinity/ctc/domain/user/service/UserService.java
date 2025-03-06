@@ -5,6 +5,7 @@ import com.trinity.ctc.domain.category.repository.CategoryRepository;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
 import com.trinity.ctc.domain.user.dto.OnboardingRequest;
+import com.trinity.ctc.domain.user.dto.ReissueTokenRequest;
 import com.trinity.ctc.domain.user.dto.UserDetailResponse;
 import com.trinity.ctc.domain.user.dto.UserReservationListResponse;
 import com.trinity.ctc.domain.user.entity.User;
@@ -16,6 +17,9 @@ import com.trinity.ctc.global.kakao.service.AuthService;
 import com.trinity.ctc.global.util.common.SortOrder;
 import com.trinity.ctc.global.exception.CustomException;
 import com.trinity.ctc.global.exception.error_code.UserErrorCode;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -35,6 +39,7 @@ public class UserService {
     private final UserValidator userValidator;
     private final ReservationRepository reservationRepository;
     private final AuthService authService;
+    private final TokenService tokenService;
 
     /**
      * 온보딩 요청 DTO의 정보로 user entity를 build 후 저장하는 메서드
@@ -42,9 +47,16 @@ public class UserService {
      * @param onboardingRequest
      */
     @Transactional
-    public void saveOnboardingInformation(OnboardingRequest onboardingRequest) {
+
+    public void saveOnboardingInformation(OnboardingRequest onboardingRequest, HttpServletRequest request, HttpServletResponse response) {
+        String refreshToken = request.getHeader("refresh");
+
+        ReissueTokenRequest reissueTokenRequest = new ReissueTokenRequest(refreshToken);
+
+        String kakaoId = authService.getAuthenticatedKakaoId();
+
         // update 할 사용자 entity select
-        User user = userRepository.findById(onboardingRequest.getUserId())
+        User user = userRepository.findByKakaoId(Long.valueOf(kakaoId))
                 .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
         // 사용자가 온보딩 중인 사용자인지(status = TEMPORARILY_UNAVAILABLE) 검증, 아닐 경우 403 반환
@@ -71,6 +83,8 @@ public class UserService {
 
         // user entity 내 update 메서드로 user와 영속화된 entity 모두 DB에 반영
         user.updateOnboardingInformation(onboardingRequest, userPreference);
+
+        tokenService.reissueToken(reissueTokenRequest, request, response);
     }
 
     /**

@@ -59,7 +59,7 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)  // POST 테스트 시 CSRF 비활성화
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // CORS 설정
             .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/login", "/token", "/token/reissue", "/users/kakao/login").permitAll()
+                    .requestMatchers("/login", "/token", "/token/reissue", "/users/kakao/login", "/api/fcmTokens/register", "/api/fcmTokens/delete").permitAll()
                     .requestMatchers("/api/users/onboarding/**").hasRole("TEMPORARILY_UNAVAILABLE")
                     .requestMatchers("/api/**", "/logout", "/users/kakao/logout").hasRole("AVAILABLE")
                     .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/v3/api-docs/**").permitAll()
@@ -96,6 +96,9 @@ public class SecurityConfig {
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));  // 허용할 HTTP 메서드
         configuration.setAllowedHeaders(List.of("*"));  // 모든 요청 헤더 허용
         configuration.setAllowCredentials(true);  // 쿠키나 인증 정보를 허용할 경우 true
+
+        configuration.setExposedHeaders(List.of("Access", "Refresh"));
+        configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);  // 모든 경로에 CORS 설정 적용

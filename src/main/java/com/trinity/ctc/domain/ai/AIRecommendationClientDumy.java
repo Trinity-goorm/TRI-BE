@@ -35,8 +35,8 @@ public class AIRecommendationClientDumy {
                 recommendations.add(recommendation);
             });
 
-
-            recommendationResponse = new AIRecommendationResponse(request.getUserId(), recommendations);
+            Long userId = 1L;
+            recommendationResponse = new AIRecommendationResponse(userId, recommendations);
 
         } catch (IOException e) {
             e.printStackTrace();

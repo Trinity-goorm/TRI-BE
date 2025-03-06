@@ -24,7 +24,7 @@ public class SeatNotificationMessage {
     private String url;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "seat_availability_id")
+    @JoinColumn(name = "seat_id")
     private Seat seat;
 
     @OneToMany(mappedBy = "seatNotificationMessage", cascade = CascadeType.ALL, orphanRemoval = true)
