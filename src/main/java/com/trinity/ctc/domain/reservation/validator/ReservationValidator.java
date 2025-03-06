@@ -19,8 +19,8 @@ public class ReservationValidator {
 
     private final ReservationRepository reservationRepository;
 
-    public static void validateReservationUserMatched(long reservationUserId, long requestUserid) {
-        if (reservationUserId != requestUserid) {
+    public static void validateReservationUserMatched(long reservationKakaoId, long requestKakaoId) {
+        if (reservationKakaoId != requestKakaoId) {
             throw new CustomException(ReservationErrorCode.RESERVATION_USER_MISMATCH);
         }
     }
@@ -41,8 +41,8 @@ public class ReservationValidator {
         return DateTimeValidator.isMoreThanOneDayAway(reservationDate);
     }
 
-    public void validateUserReservation(ReservationRequest request) {
-        if (hasExistingReservation(request)) {
+    public void validateUserReservation(ReservationRequest request, Long kakaoId) {
+        if (hasExistingReservation(request, kakaoId)) {
             throw new CustomException(ReservationErrorCode.ALREADY_RESERVED_BY_USER);
         }
     }
@@ -53,9 +53,9 @@ public class ReservationValidator {
      * @param request
      * @return
      */
-    private boolean hasExistingReservation(ReservationRequest request) {
-        List<Reservation> userReservations = reservationRepository.findByUserIdAndStatusIn(
-                request.getUserId(),
+    private boolean hasExistingReservation(ReservationRequest request, Long kakaoId) {
+        List<Reservation> userReservations = reservationRepository.findByKakaoIdAndStatusIn(
+                kakaoId,
                 List.of(ReservationStatus.IN_PROGRESS, ReservationStatus.COMPLETED)
         );
 

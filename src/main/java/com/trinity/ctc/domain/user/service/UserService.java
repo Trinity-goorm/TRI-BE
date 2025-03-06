@@ -89,13 +89,12 @@ public class UserService {
 
     /**
      * 사용자 프로필 정보 반환
-     *
-     * @param userId
      * @return 사용자 프로필 정보
      */
     @Transactional(readOnly = true)
-    public UserDetailResponse getUserDetail(long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
+    public UserDetailResponse getUserDetail() {
+        Long kakaoId = Long.parseLong(authService.getAuthenticatedKakaoId());
+        User user = userRepository.findByKakaoId(kakaoId).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
         return UserDetailResponse.of(user.getId(), user.getNickname(), user.getPhoneNumber(), user.getNormalTicketCount(), user.getEmptyTicketCount());
     }
 
@@ -109,16 +108,16 @@ public class UserService {
 
     /**
      * 사용자 예약리스트 반환
-     *
-     * @param userId
      * @return 예약정보 리스트 및 개수
      */
     @Transactional(readOnly = true)
-    public UserReservationListResponse getUserReservations(long userId, int page, int size, String sortBy) {
+    public UserReservationListResponse getUserReservations(int page, int size, String sortBy) {
         SortOrder sortOrder = SortOrder.fromString(sortBy);
         PageRequest pageRequest = PageRequest.of(page - 1, size, sortOrder.getSort());
 
-        Slice<Reservation> reservations = reservationRepository.findAllByUserId(userId, pageRequest);
+        Long kakaoId = Long.parseLong(authService.getAuthenticatedKakaoId());
+
+        Slice<Reservation> reservations = reservationRepository.findAllByKakaoId(kakaoId, pageRequest);
         return UserReservationListResponse.from(reservations);
     }
 

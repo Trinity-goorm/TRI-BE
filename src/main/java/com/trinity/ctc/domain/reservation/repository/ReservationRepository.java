@@ -51,10 +51,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     );
 
     @Query("SELECT r FROM Reservation r " +
-            "WHERE r.user.id = :userId " +
+            "WHERE r.user.kakaoId = :kakaoId " +
             "AND r.status IN (:statuses)")
-    List<Reservation> findByUserIdAndStatusIn(@Param("userId") Long userId,
-                                              @Param("statuses") List<ReservationStatus> statuses);
+    List<Reservation> findByKakaoIdAndStatusIn(@Param("kakaoId") Long kakaoId,
+                                               @Param("statuses") List<ReservationStatus> statuses);
 
 
     @Query("SELECT r FROM Reservation r " +
@@ -64,4 +64,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             "JOIN FETCH r.seatType st " +
             "WHERE r.user.id = :userId")
     Slice<Reservation> findAllByUserId(@Param("userId") Long userId, Pageable pageable);
+
+
+    @Query("SELECT r FROM Reservation r " +
+            "JOIN FETCH r.restaurant rest " +
+            "JOIN FETCH r.user u " +
+            "JOIN FETCH r.reservationTime rt " +
+            "JOIN FETCH r.seatType st " +
+            "WHERE r.user.kakaoId = :kakaoId")
+    Slice<Reservation> findAllByKakaoId(@Param("kakaoId") Long kakaoId, Pageable pageable);
 }
