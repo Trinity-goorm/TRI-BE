@@ -56,6 +56,10 @@ public class SeatBatchService {
         seatBatchRepository.batchInsertSeats(seats, batchSize);
 
         long endTime = System.nanoTime();
-        log.info("✅ 배치 INSERT 완료! 실행 시간: {}ms", (endTime - startTime) / 1_000_000);
+        double elapsedTimeMs = (endTime - startTime) / 1_000_000.0; // ms 단위로 변환
+
+        // ✅ Throughput (초당 처리량)
+        double throughput = (seats.size() / (elapsedTimeMs / 1000));
+        log.info("✅ 배치 INSERT 완료! 실행 시간: {} ms, 초당 처리량: {} Seats/s", elapsedTimeMs, throughput);
     }
 }

@@ -1,12 +1,15 @@
 package com.trinity.ctc.domain.seat.service;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.trinity.ctc.domain.reservation.entity.ReservationTime;
-import com.trinity.ctc.domain.reservation.service.ReservationTimeService;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
-import com.trinity.ctc.domain.restaurant.service.RestaurantService;
 import com.trinity.ctc.domain.seat.entity.Seat;
 import com.trinity.ctc.domain.seat.entity.SeatType;
 import com.trinity.ctc.domain.seat.mode.DateRangeMode;
+import com.trinity.ctc.domain.seat.service.provider.SeatDataProvider;
+import com.trinity.ctc.domain.seat.strategy.DateRangeCalculator;
+import com.trinity.ctc.domain.seat.strategy.DateRangeCalculatorFactory;
+import com.trinity.ctc.global.records.DateRange;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,29 +21,24 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SeatPreparationService {
 
-    private final RestaurantService restaurantService;
-    private final ReservationTimeService reservationTimeService;
-    private final SeatTypeService seatTypeService;
+    private final SeatDataProvider seatDataProvider;
+    private final DateRangeCalculatorFactory dateRangeCalculatorFactory;
 
     public List<Seat> prepareSeatsData(DateRangeMode mode, int availableSeatCount) {
-        List<Restaurant> restaurants = restaurantService.getAllRestaurants();
-        List<ReservationTime> reservationTimes = reservationTimeService.getAllReservationTimes();
-        List<SeatType> seatTypes = seatTypeService.getAllSeatTypes();
+        DateRangeCalculator dateRangeCalculator = dateRangeCalculatorFactory.getCalculator(mode);
+        DateRange dateRange = dateRangeCalculator.calculateDateRange();
 
-        LocalDate startDate;
-        LocalDate endDate;
+        return generateSeats(dateRange, availableSeatCount);
+    }
 
-        if (mode == DateRangeMode.NEXT_MONTH) {
-            startDate = LocalDate.now().withDayOfMonth(1).plusMonths(1); // 다음 달 1일
-            endDate = startDate.plusMonths(1); // 다음 달 말일까지
-        } else {
-            startDate = LocalDate.now().withDayOfMonth(1); // 이번 달 1일
-            endDate = startDate.plusMonths(2); // 다음 달 말일까지
-        }
-
+    public List<Seat> generateSeats(DateRange dateRange, int availableSeatCount) {
         List<Seat> seats = new ArrayList<>();
 
-        for (LocalDate reservationDate = startDate; reservationDate.isBefore(endDate); reservationDate = reservationDate.plusDays(1)) {
+        List<Restaurant> restaurants = seatDataProvider.getAllRestaurants();
+        List<ReservationTime> reservationTimes = seatDataProvider.getAllReservationTimes();
+        List<SeatType> seatTypes = seatDataProvider.getAllSeatTypes();
+
+        for (LocalDate reservationDate = dateRange.startDate(); reservationDate.isBefore(dateRange.endDate()); reservationDate = reservationDate.plusDays(1)) {
             for (Restaurant restaurant : restaurants) {
                 for (ReservationTime reservationTime : reservationTimes) {
                     for (SeatType seatType : seatTypes) {
@@ -49,7 +47,6 @@ public class SeatPreparationService {
                 }
             }
         }
-
         return seats;
     }
 }
