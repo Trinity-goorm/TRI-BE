@@ -1,14 +1,12 @@
 package com.trinity.ctc.domain.user.jwt;
 
 import com.trinity.ctc.domain.user.repository.RefreshTokenRepository;
-import com.trinity.ctc.global.kakao.dto.KakaoLogoutResponse;
 import com.trinity.ctc.global.kakao.service.KakaoApiService;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -48,16 +46,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
         log.info("=======로그아웃 시작!======");
 
         // Refresh 토큰 추출
-        String refresh = null;
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookie.getName().equals("refresh")) {
-                    refresh = cookie.getValue();
-                    break;
-                }
-            }
-        }
+        String refresh = request.getHeader("refresh");
 
         // Refresh 토큰이 없을 경우
         if (refresh == null) {

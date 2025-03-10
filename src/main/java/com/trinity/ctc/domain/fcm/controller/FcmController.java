@@ -30,7 +30,7 @@ public class FcmController {
             description = "요청한 사용자 정보가 DB에 없을 경우"
     )
     public ResponseEntity<Void> registerFcmToken(HttpServletRequest request) {
-        String fcmToken = request.getHeader("fcmToken");
+        String fcmToken = request.getHeader("Fcm-Token");
 
         fcmService.registerFcmToken(fcmToken);
         return ResponseEntity.noContent().build();
@@ -46,7 +46,7 @@ public class FcmController {
             description = "삭제 성공"
     )
     public ResponseEntity<Void> deleteFcmToken(HttpServletRequest request) {
-        String fcmToken = request.getHeader("fcmToken");
+        String fcmToken = request.getHeader("Fcm-Token");
 
         fcmService.deleteFcmToken(fcmToken);
         return ResponseEntity.noContent().build();
@@ -62,7 +62,7 @@ public class FcmController {
             description = "갱신 성공"
     )
     public ResponseEntity<Void> renewFcmToken(HttpServletRequest request) {
-        String fcmToken = request.getHeader("fcmToken");
+        String fcmToken = request.getHeader("Fcm-Token");
 
         fcmService.renewFcmToken(fcmToken);
         return ResponseEntity.noContent().build();
