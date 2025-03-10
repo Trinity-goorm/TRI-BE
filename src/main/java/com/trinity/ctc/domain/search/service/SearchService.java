@@ -47,12 +47,13 @@ public class SearchService {
 
         Pageable pageable = PageRequest.of(request.getPage() - 1, 30, sort);
 
-        Page<Restaurant> restaurants = restaurantRepository.searchRestaurants(keyword, pageable);
+//        Page<Restaurant> restaurants = restaurantRepository.searchRestaurants(keyword, pageable);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
         saveSearchHistory(userId, keyword);
-        return restaurantService.convertToRestaurantDtoList(restaurants, user);
+//        return restaurantService.convertToRestaurantDtoList(restaurants, user);
+        return null;
     }
 
     public List<SearchHistoryResponse> getSearchHistory(String kakaoId) {
