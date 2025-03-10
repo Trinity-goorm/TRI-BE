@@ -1,6 +1,5 @@
 package com.trinity.ctc.domain.fcm.service;
 
-import com.trinity.ctc.domain.fcm.dto.FcmTokenRequest;
 import com.trinity.ctc.domain.fcm.entity.Fcm;
 import com.trinity.ctc.domain.fcm.repository.FcmRepository;
 import com.trinity.ctc.domain.user.entity.User;
