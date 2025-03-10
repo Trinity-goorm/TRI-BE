@@ -1,6 +1,6 @@
 package com.trinity.ctc.domain.seat.entity;
 
-import com.trinity.ctc.domain.notification.entity.SeatNotificationMessage;
+import com.trinity.ctc.domain.notification.entity.SeatNotification;
 import com.trinity.ctc.domain.reservation.entity.ReservationTime;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
 import com.trinity.ctc.domain.seat.validator.CapacityValidator;
@@ -39,7 +39,7 @@ public class Seat {
     private SeatType seatType;
 
     @OneToOne(mappedBy = "seat", cascade = CascadeType.ALL, orphanRemoval = true)
-    private SeatNotificationMessage seatNotificationMessage;
+    private SeatNotification seatNotification;
 
     /* 내부 로직 */
     public void preoccupyOneSeat() {

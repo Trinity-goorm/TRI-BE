@@ -1,16 +1,11 @@
 package com.trinity.ctc.domain.fcm.controller;
 
-import com.trinity.ctc.domain.fcm.dto.FcmTokenRequest;
 import com.trinity.ctc.domain.fcm.service.FcmService;
-import com.trinity.ctc.domain.user.jwt.JWTUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,12 +29,14 @@ public class FcmController {
             responseCode = "404",
             description = "요청한 사용자 정보가 DB에 없을 경우"
     )
-    public ResponseEntity<Void> registerFcmToken(@RequestBody FcmTokenRequest fcmTokenRequest) {
-        fcmService.registerFcmToken(fcmTokenRequest);
+    public ResponseEntity<Void> registerFcmToken(HttpServletRequest request) {
+        String fcmToken = request.getHeader("Fcm-Token");
+
+        fcmService.registerFcmToken(fcmToken);
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/delete")
+    @DeleteMapping("/delete")
     @Operation(
             summary = "fcm 토큰 삭제",
             description = "로그아웃/로그인 세션 만료 시, fcm 토큰 정보 삭제 요청"
@@ -48,13 +45,14 @@ public class FcmController {
             responseCode = "204",
             description = "삭제 성공"
     )
-    public ResponseEntity<Void> deleteFcmToken(@RequestBody FcmTokenRequest fcmTokenRequest) {
-        log.info("first fcm token: ");
-        fcmService.deleteFcmToken(fcmTokenRequest);
+    public ResponseEntity<Void> deleteFcmToken(HttpServletRequest request) {
+        String fcmToken = request.getHeader("Fcm-Token");
+
+        fcmService.deleteFcmToken(fcmToken);
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/renew")
+    @PatchMapping("/renew")
     @Operation(
             summary = "fcm 토큰 갱신",
             description = "로그인 세션이 유지되는 동안 브라우저 재접속 시, fcm 토큰 정보 갱신 요청"
@@ -63,8 +61,10 @@ public class FcmController {
             responseCode = "204",
             description = "갱신 성공"
     )
-    public ResponseEntity<Void> renewFcmToken(@RequestBody FcmTokenRequest fcmTokenRequest) {
-        fcmService.renewFcmToken(fcmTokenRequest);
+    public ResponseEntity<Void> renewFcmToken(HttpServletRequest request) {
+        String fcmToken = request.getHeader("Fcm-Token");
+
+        fcmService.renewFcmToken(fcmToken);
         return ResponseEntity.noContent().build();
     }
 }

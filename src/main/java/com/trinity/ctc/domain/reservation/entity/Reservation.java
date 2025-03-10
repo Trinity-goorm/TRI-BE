@@ -1,7 +1,6 @@
 package com.trinity.ctc.domain.reservation.entity;
 
 import com.trinity.ctc.domain.notification.entity.ReservationNotification;
-import com.trinity.ctc.domain.notification.entity.SeatNotification;
 import com.trinity.ctc.domain.reservation.status.ReservationStatus;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
 import com.trinity.ctc.domain.seat.entity.SeatType;

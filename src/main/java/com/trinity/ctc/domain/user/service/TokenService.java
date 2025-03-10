@@ -13,7 +13,6 @@ import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -113,6 +112,9 @@ public class TokenService {
         response.setHeader("access", newAccess);
         response.setHeader("refresh", newRefresh);
 
+        log.info(response.getHeader("access"));
+        log.info(response.getHeader("refresh"));
+
         // 토큰을 굳이 보낼 이유는 없다. 후에 고민
         return newAccess;
     }
@@ -135,6 +137,7 @@ public class TokenService {
         refreshTokenRepository.save(refreshToken);
     }
 
+    /*
     /**
      * 요청의 Cookie에서 refresh 토큰 추출
      * @param cookies
@@ -165,4 +168,5 @@ public class TokenService {
 
         return cookie;
     }
+
 }
