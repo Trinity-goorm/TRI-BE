@@ -61,7 +61,6 @@ public class FcmService {
      */
     @Transactional
     public void deleteFcmToken(FcmTokenRequest fcmTokenRequest) {
-        log.info("token: " + fcmTokenRequest.getFcmToken());
         fcmRepository.deleteByToken(fcmTokenRequest.getFcmToken());
     }
 

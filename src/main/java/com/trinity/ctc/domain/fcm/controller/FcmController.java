@@ -2,17 +2,15 @@ package com.trinity.ctc.domain.fcm.controller;
 
 import com.trinity.ctc.domain.fcm.dto.FcmTokenRequest;
 import com.trinity.ctc.domain.fcm.service.FcmService;
-import com.trinity.ctc.domain.user.jwt.JWTUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
@@ -49,7 +47,6 @@ public class FcmController {
             description = "삭제 성공"
     )
     public ResponseEntity<Void> deleteFcmToken(@RequestBody FcmTokenRequest fcmTokenRequest) {
-        log.info("first fcm token: ");
         fcmService.deleteFcmToken(fcmTokenRequest);
         return ResponseEntity.noContent().build();
     }
