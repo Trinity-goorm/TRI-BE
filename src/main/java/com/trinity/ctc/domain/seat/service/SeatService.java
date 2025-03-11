@@ -10,6 +10,7 @@ import com.trinity.ctc.global.util.formatter.DateTimeUtil;
 import com.trinity.ctc.global.util.helper.GroupingHelper;
 import com.trinity.ctc.global.util.validator.DateTimeValidator;
 import com.trinity.ctc.global.util.validator.SeatAvailabilityValidator;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -61,16 +62,16 @@ public class SeatService {
     @Transactional(readOnly = true)
     public List<ReservationAvailabilityResponse> getAvailabilityForNext14Days(Long restaurantId) {
         LocalDate today = LocalDate.now();
-
-        return IntStream.range(0, 14)
-                .mapToObj(i -> {
-                    LocalDate targetDate = today.plusDays(i);
-                    List<Seat> availableSeatList = fetchAvailableSeats(restaurantId, targetDate);
-                    // 예약 가능 여부 판단
-                    boolean isAvailable = SeatAvailabilityValidator.isAnySeatAvailable(availableSeatList, isToday(targetDate));
-                    return new ReservationAvailabilityResponse(targetDate, isAvailable);
-                })
-                .collect(Collectors.toList());
+        List<ReservationAvailabilityResponse> responses = IntStream.range(0, 14)
+            .mapToObj(i -> {
+                LocalDate targetDate = today.plusDays(i);
+                List<Seat> availableSeatList = fetchAvailableSeats(restaurantId, targetDate);
+                // 예약 가능 여부 판단
+                boolean isAvailable = SeatAvailabilityValidator.isAnySeatAvailable(availableSeatList, isToday(targetDate));
+                return new ReservationAvailabilityResponse(targetDate, isAvailable);
+            })
+            .collect(Collectors.toList());
+        return responses;
     }
 
     /* 내부 메서드 */

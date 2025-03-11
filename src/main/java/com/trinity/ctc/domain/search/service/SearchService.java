@@ -1,9 +1,15 @@
 package com.trinity.ctc.domain.search.service;
 
+import static com.trinity.ctc.domain.restaurant.repository.factory.RestaurantRepositoryFactory.SearchType.JDBC;
+import static com.trinity.ctc.domain.restaurant.repository.factory.RestaurantRepositoryFactory.SearchType.JPQL;
+import static com.trinity.ctc.domain.restaurant.repository.factory.RestaurantRepositoryFactory.SearchType.NATIVE_QUERY;
+import static com.trinity.ctc.domain.restaurant.repository.factory.RestaurantRepositoryFactory.SearchType.QUERY_DSL;
+
 import com.trinity.ctc.domain.restaurant.dto.RestaurantPreviewRequest;
 import com.trinity.ctc.domain.restaurant.dto.RestaurantPreviewResponse;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
 import com.trinity.ctc.domain.restaurant.repository.RestaurantRepository;
+import com.trinity.ctc.domain.restaurant.repository.factory.RestaurantRepositoryFactory;
 import com.trinity.ctc.domain.restaurant.service.RestaurantService;
 import com.trinity.ctc.domain.search.dto.SearchHistoryResponse;
 import com.trinity.ctc.domain.search.entity.SearchHistory;
@@ -31,7 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Slf4j
 public class SearchService {
-    private final RestaurantRepository restaurantRepository;
+    private final RestaurantRepositoryFactory repositoryFactory;
     private final RestaurantService restaurantService;
     private final UserRepository userRepository;
     private final SearchRepository searchRepository;
@@ -47,13 +53,17 @@ public class SearchService {
 
         Pageable pageable = PageRequest.of(request.getPage() - 1, 30, sort);
 
-//        Page<Restaurant> restaurants = restaurantRepository.searchRestaurants(keyword, pageable);
+        //# JPQL, QUERY_DSL, JDBC, NATIVE_QUERY 중 하나 선택
+//        Page<Restaurant> restaurants = repositoryFactory.searchRestaurants(JPQL, keyword, pageable);
+        Page<Restaurant> restaurants = repositoryFactory.searchRestaurants(QUERY_DSL, keyword, pageable);
+//        Page<Restaurant> restaurants = repositoryFactory.searchRestaurants(JDBC, keyword, pageable);
+//        Page<Restaurant> restaurants = repositoryFactory.searchRestaurants(NATIVE_QUERY, keyword, pageable);
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
         saveSearchHistory(userId, keyword);
-//        return restaurantService.convertToRestaurantDtoList(restaurants, user);
-        return null;
+        return restaurantService.convertToRestaurantDtoList(restaurants, user);
     }
 
     public List<SearchHistoryResponse> getSearchHistory(String kakaoId) {
