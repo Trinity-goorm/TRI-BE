@@ -4,7 +4,7 @@ import com.trinity.ctc.domain.fcm.entity.Fcm;
 import com.trinity.ctc.domain.like.entity.Likes;
 import com.trinity.ctc.domain.notification.entity.NotificationHistory;
 import com.trinity.ctc.domain.notification.entity.ReservationNotification;
-import com.trinity.ctc.domain.notification.entity.SeatNotification;
+import com.trinity.ctc.domain.notification.entity.SeatNotificationSubscription;
 import com.trinity.ctc.domain.payment.entity.PaymentHistory;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.search.entity.SearchHistory;
@@ -74,7 +74,7 @@ public class User {
     private List<ReservationNotification> reservationNotificationList = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SeatNotification> seatNotificationList = new ArrayList<>();
+    private List<SeatNotificationSubscription> seatNotificationSubscriptionList = new ArrayList<>();
 
     @Builder
     public User(Long kakaoId, Integer normalTicketCount, Integer emptyTicket, UserStatus status) {

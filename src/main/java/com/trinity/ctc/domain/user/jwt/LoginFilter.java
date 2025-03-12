@@ -12,7 +12,6 @@ import com.trinity.ctc.global.kakao.dto.KakaoUserInfoResponse;
 import com.trinity.ctc.global.kakao.service.AuthService;
 import com.trinity.ctc.global.kakao.service.KakaoApiService;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -162,23 +161,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         log.debug("Unsuccessful authentication");
         response.setStatus(401);
-    }
-
-    private Cookie createCookie(String key, String value) {
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(24*64*80);
-
-        // https 적용 시 활성화
-        //cookie.setSecure(true);
-
-        // 쿠키 적용 범위 설정 가능
-        // cookie.setPath("/");
-
-        // JS 접근 차단
-        cookie.setHttpOnly(true);
-
-        return cookie;
-
     }
 
     private void addRefreshToken(String username, String refreshToken, Long expiredMs) {
