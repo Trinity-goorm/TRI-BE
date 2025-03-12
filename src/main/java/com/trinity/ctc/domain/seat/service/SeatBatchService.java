@@ -18,21 +18,25 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class SeatBatchService {
 
     private final SeatPreparationService seatPreparationService;
-
-    @Qualifier(value = "jpaSeatBatchRepository")
     private final SeatBatchRepository seatBatchRepository;
 
-    @Value("${batch.insert.size:1000}")
+    public SeatBatchService(SeatPreparationService seatPreparationService, @Qualifier("jdbcSeatBatchRepository") SeatBatchRepository seatBatchRepository) {
+        this.seatPreparationService = seatPreparationService;
+        this.seatBatchRepository = seatBatchRepository;
+    }
+
+    @Value("${spring.jpa.properties.hibernate.jdbc.batch_size:500}")
     private int batchSize;
     @Value("${common.seat.available.count:1}")
     private int availableSeatCount;
@@ -48,18 +52,17 @@ public class SeatBatchService {
     }
 
     private void executeBatchInsert(DateRangeMode mode) {
-        long startTime = System.nanoTime();
+        Instant start = Instant.now();
 
         List<Seat> seats = seatPreparationService.prepareSeatsData(mode, availableSeatCount);
         log.info("🚀 INSERT 할 Seat 데이터 개수: {}", seats.size());
 
         seatBatchRepository.batchInsertSeats(seats, batchSize);
 
-        long endTime = System.nanoTime();
-        double elapsedTimeMs = (endTime - startTime) / 1_000_000.0; // ms 단위로 변환
+        Instant end = Instant.now();
+        long elapsedTimeMs = Duration.between(start, end).toMillis();
+        double throughput = ((double) seats.size() / ((double) elapsedTimeMs / 1000));
 
-        // ✅ Throughput (초당 처리량)
-        double throughput = (seats.size() / (elapsedTimeMs / 1000));
-        log.info("✅ 배치 INSERT 완료! 실행 시간: {} ms, 초당 처리량: {} Seats/s", elapsedTimeMs, throughput);
+        log.info("✅ 배치 INSERT 완료! 실행 시간: {} ms, 초당 처리량: {}", elapsedTimeMs, throughput);
     }
 }
