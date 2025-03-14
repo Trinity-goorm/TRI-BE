@@ -54,11 +54,15 @@ public class SearchService {
         Pageable pageable = PageRequest.of(request.getPage() - 1, 30, sort);
 
         //# JPQL, QUERY_DSL, JDBC, NATIVE_QUERY 중 하나 선택
+        log.info("검색 쿼리 시작");
+        long startTime = System.nanoTime();
 //        Page<Restaurant> restaurants = repositoryFactory.searchRestaurants(JPQL, keyword, pageable);
-        Page<Restaurant> restaurants = repositoryFactory.searchRestaurants(QUERY_DSL, keyword, pageable);
-//        Page<Restaurant> restaurants = repositoryFactory.searchRestaurants(JDBC, keyword, pageable);
+//        Page<Restaurant> restaurants = repositoryFactory.searchRestaurants(QUERY_DSL, keyword, pageable);
+        Page<Restaurant> restaurants = repositoryFactory.searchRestaurants(JDBC, keyword, pageable);
 //        Page<Restaurant> restaurants = repositoryFactory.searchRestaurants(NATIVE_QUERY, keyword, pageable);
-
+        long endTime = System.nanoTime();
+        log.info("검색 쿼리 소요 시간: {}ms", (endTime - startTime) / 1_000_000);
+        log.info("검색 쿼리 종료");
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 

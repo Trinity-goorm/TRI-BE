@@ -24,7 +24,7 @@ spring:
         order_inserts: true
         jdbc:
           fetch_size: 1000 # 데이터 패치 크기
-          batch_size: 2000 # 배치 크기
+          batch_size: 1000 # 배치 크기
     open-in-view: false  # OSIV 끄기 (가능하면 끄는 것이 성능적으로 유리)
 
 ---
