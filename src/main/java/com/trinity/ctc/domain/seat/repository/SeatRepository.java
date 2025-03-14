@@ -26,7 +26,6 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
     @Query("SELECT new com.trinity.ctc.domain.seat.dto.AvailableSeatPerDay( " +
         "sa.restaurant.id, sa.reservationDate, sa.availableSeats, sa.reservationTime.timeSlot) " +
         "FROM Seat sa " +
-        "JOIN sa.reservationTime rt " +
         "WHERE sa.restaurant.id = :restaurantId " +
         "AND sa.reservationDate = :selectedDate")
     List<AvailableSeatPerDay> findAvailableSeatsForDate(@Param("restaurantId") Long restaurantId,

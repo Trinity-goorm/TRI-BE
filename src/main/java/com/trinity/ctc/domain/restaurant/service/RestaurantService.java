@@ -86,11 +86,11 @@ public class RestaurantService {
     public List<RestaurantPreviewResponse> convertToRestaurantDtoList(Page<Restaurant> restaurants, User user) {
         List<RestaurantPreviewResponse> result = restaurants.stream()
             .map(restaurant -> {
-                boolean isWishlisted = likeRepository.existsByUserAndRestaurant(user, restaurant);
+                boolean isWishlisted = likeRepository.existsByUserAndRestaurant(user, restaurant); // -> id값만으로 가능
 
                 // 14일간 날짜별 예약 가능 여부 조회
                 List<ReservationAvailabilityResponse> reservation = seatService
-                    .getAvailabilityForNext14Days(restaurant.getId());
+                    .getAvailabilityForNext14Days(restaurant.getId()); // -> id값만으로 가능
 
                 log.info("reservation 사이즈: {}", reservation.size());
                 return RestaurantPreviewResponse.fromEntity(user,restaurant, isWishlisted, reservation);
