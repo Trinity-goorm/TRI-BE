@@ -16,13 +16,14 @@ import com.trinity.ctc.domain.seat.entity.SeatType;
 import com.trinity.ctc.domain.seat.repository.SeatRepository;
 import com.trinity.ctc.domain.seat.repository.SeatTypeRepository;
 import com.trinity.ctc.domain.user.entity.User;
-import com.trinity.ctc.event.PreOccupancyCanceledEvent;
-import com.trinity.ctc.event.ReservationCanceledEvent;
-import com.trinity.ctc.event.ReservationCompleteEvent;
+import com.trinity.ctc.domain.reservation.event.PreOccupancyCanceledEvent;
+import com.trinity.ctc.domain.reservation.event.ReservationCanceledEvent;
+import com.trinity.ctc.domain.reservation.event.ReservationCompleteEvent;
 import com.trinity.ctc.domain.user.repository.UserRepository;
-import com.trinity.ctc.util.exception.CustomException;
-import com.trinity.ctc.util.exception.error_code.*;
-import com.trinity.ctc.util.validator.SeatAvailabilityValidator;
+import com.trinity.ctc.global.exception.CustomException;
+import com.trinity.ctc.global.exception.error_code.*;
+import com.trinity.ctc.global.kakao.service.AuthService;
+import com.trinity.ctc.global.util.validator.SeatAvailabilityValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -43,6 +44,7 @@ public class ReservationService {
     //  이벤트 발행하는 인터페이스
     private final ApplicationEventPublisher eventPublisher;
     private final ReservationValidator reservationValidator;
+    private final AuthService authService;
 
     /**
      * 선점하기
@@ -52,12 +54,15 @@ public class ReservationService {
      */
     @Transactional
     public PreoccupyResponse occupyInAdvance(ReservationRequest reservationRequest) {
-        log.info("[예약 요청] 날짜: {}, 시간: {}, 레스토랑 ID: {}, 사용자 ID: {}, 좌석 타입 ID: {}",
+        log.info("[예약 요청] 날짜: {}, 시간: {}, 레스토랑 ID: {}, 좌석 타입 ID: {}",
                 reservationRequest.getSelectedDate(), reservationRequest.getReservationTime(),
-                reservationRequest.getRestaurantId(), reservationRequest.getUserId(), reservationRequest.getSeatTypeId());
+                reservationRequest.getRestaurantId(), reservationRequest.getSeatTypeId());
+
+        // 사용자 KakaoID 획득
+        Long kakaoId = Long.parseLong(authService.getAuthenticatedKakaoId());
 
         // 사용자 예약이력 검증
-        reservationValidator.validateUserReservation(reservationRequest);
+        reservationValidator.validateUserReservation(reservationRequest, kakaoId);
 
         // 검증 (좌석 남은 자리 확인)
         Seat seat = validateSeatAvailability(reservationRequest);
@@ -68,7 +73,7 @@ public class ReservationService {
         log.info("[좌석 선점 완료] 남은 좌석 수: {}", seat.getAvailableSeats());
 
         // 예약정보 생성 -> 저장
-        Reservation reservation = createReservation(reservationRequest);
+        Reservation reservation = createReservation(reservationRequest, kakaoId);
         reservationRepository.save(reservation);
 
         log.info("[예약 성공] 예약 ID: {}", reservation.getId());
@@ -78,22 +83,25 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResultResponse complete(long reservationId, long userId) {
+    public ReservationResultResponse complete(long reservationId) {
 
-        log.info("[예약 정보] 예약정보 ID: {}, 예약자 ID: {}", reservationId, userId);
+        log.info("[예약 정보] 예약정보 ID: {}", reservationId);
+
+        // 사용자 정보 획득
+        Long kakaoId = Long.parseLong(authService.getAuthenticatedKakaoId());
 
         // 예약정보 가져오기
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new CustomException(ReservationErrorCode.NOT_FOUND));
 
         // 예약정보의 사용자 검증
-        ReservationValidator.validateReservationUserMatched(reservation.getUser().getId(), userId);
+        ReservationValidator.validateReservationUserMatched(reservation.getUser().getKakaoId(), kakaoId);
 
         // 예약정보 선점여부 검증
         ReservationValidator.isPreoccupied(reservation.getStatus());
 
         // 티켓 차감
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByKakaoId(kakaoId)
                 .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
         user.payNormalTickets();
 
@@ -108,8 +116,8 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResultResponse cancelPreoccupy(long reservationId, long userId) {
-        log.info("[예약 정보] 예약정보 ID: {}, 예약자 ID: {}", reservationId, userId);
+    public ReservationResultResponse cancelPreoccupy(long reservationId) {
+        log.info("[예약 정보] 예약정보 ID: {}", reservationId);
 
         // 예약정보 가져오기
         Reservation reservation = reservationRepository.findById(reservationId)
@@ -119,7 +127,7 @@ public class ReservationService {
         ReservationValidator.isPreoccupied(reservation.getStatus());
 
         // 예약정보 취소 상태로 변경
-        reservation.cancelReservation();
+        reservation.failReservation();
 
         // 가용좌석 증가 (더티체킹)
         Seat seat = seatRepository.findByReservationData(reservation.getRestaurant().getId(), reservation.getReservationDate(), reservation.getReservationTime().getTimeSlot(), reservation.getSeatType().getId());
@@ -202,8 +210,8 @@ public class ReservationService {
      * @param reservationRequest
      * @return 예약정보
      */
-    private Reservation createReservation(ReservationRequest reservationRequest) {
-        User user = userRepository.findById(reservationRequest.getUserId())
+    private Reservation createReservation(ReservationRequest reservationRequest, Long kakaoId) {
+        User user = userRepository.findByKakaoId(kakaoId)
                 .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
         Restaurant restaurant = restaurantRepository.findById(reservationRequest.getRestaurantId())

@@ -4,9 +4,9 @@ import com.trinity.ctc.domain.reservation.dto.ReservationRequest;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
 import com.trinity.ctc.domain.reservation.status.ReservationStatus;
-import com.trinity.ctc.util.exception.CustomException;
-import com.trinity.ctc.util.exception.error_code.ReservationErrorCode;
-import com.trinity.ctc.util.validator.DateTimeValidator;
+import com.trinity.ctc.global.exception.CustomException;
+import com.trinity.ctc.global.exception.error_code.ReservationErrorCode;
+import com.trinity.ctc.global.util.validator.DateTimeValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -19,8 +19,8 @@ public class ReservationValidator {
 
     private final ReservationRepository reservationRepository;
 
-    public static void validateReservationUserMatched(long reservationUserId, long requestUserid) {
-        if (reservationUserId != requestUserid) {
+    public static void validateReservationUserMatched(long reservationKakaoId, long requestKakaoId) {
+        if (reservationKakaoId != requestKakaoId) {
             throw new CustomException(ReservationErrorCode.RESERVATION_USER_MISMATCH);
         }
     }
@@ -41,20 +41,21 @@ public class ReservationValidator {
         return DateTimeValidator.isMoreThanOneDayAway(reservationDate);
     }
 
-    public void validateUserReservation(ReservationRequest request) {
-        if (hasExistingReservation(request)) {
+    public void validateUserReservation(ReservationRequest request, Long kakaoId) {
+        if (hasExistingReservation(request, kakaoId)) {
             throw new CustomException(ReservationErrorCode.ALREADY_RESERVED_BY_USER);
         }
     }
 
     /**
      * 사용자 예약정보 검증 v1 (사용자 필터링 후 예약정보로 확인)
+     *
      * @param request
      * @return
      */
-    private boolean hasExistingReservation(ReservationRequest request) {
-        List<Reservation> userReservations = reservationRepository.findByUserIdAndStatusIn(
-                request.getUserId(),
+    private boolean hasExistingReservation(ReservationRequest request, Long kakaoId) {
+        List<Reservation> userReservations = reservationRepository.findByKakaoIdAndStatusIn(
+                kakaoId,
                 List.of(ReservationStatus.IN_PROGRESS, ReservationStatus.COMPLETED)
         );
 

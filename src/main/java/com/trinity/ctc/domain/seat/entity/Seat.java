@@ -1,9 +1,9 @@
 package com.trinity.ctc.domain.seat.entity;
 
-import com.trinity.ctc.domain.notification.entity.SeatNotificationMessage;
+import com.trinity.ctc.domain.notification.entity.SeatNotification;
 import com.trinity.ctc.domain.reservation.entity.ReservationTime;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
-import com.trinity.ctc.util.validator.CapacityValidator;
+import com.trinity.ctc.domain.seat.validator.CapacityValidator;
 import jakarta.persistence.*;
 import lombok.Getter;
 
@@ -15,12 +15,13 @@ public class Seat {
 
     @Id
     @Column
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seat_availability_seq_generator")
-    @SequenceGenerator(
-            name = "seat_availability_seq_generator",
-            sequenceName = "seat_availability_seq",
-            allocationSize = 1000
-    )
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seat_availability_seq_generator")
+//    @SequenceGenerator(
+//            name = "seat_availability_seq_generator",
+//            sequenceName = "seat_availability_seq",
+//            allocationSize = 1000
+//    )
     private long id;
 
     private LocalDate reservationDate;
@@ -39,7 +40,7 @@ public class Seat {
     private SeatType seatType;
 
     @OneToOne(mappedBy = "seat", cascade = CascadeType.ALL, orphanRemoval = true)
-    private SeatNotificationMessage seatNotificationMessage;
+    private SeatNotification seatNotification;
 
     /* 내부 로직 */
     public void preoccupyOneSeat() {

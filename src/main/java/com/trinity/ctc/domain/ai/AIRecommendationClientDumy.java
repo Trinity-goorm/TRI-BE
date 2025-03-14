@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trinity.ctc.domain.ai.dto.AIRecommendationRequest;
 import com.trinity.ctc.domain.ai.dto.AIRecommendationResponse;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
@@ -25,18 +27,18 @@ public class AIRecommendationClientDumy {
             List<AIRecommendationResponse.Recommendation> recommendations = new ArrayList<>();
 
             node.get("recommendations").forEach(recommendationNode -> {
-                    AIRecommendationResponse.Recommendation recommendation
+                AIRecommendationResponse.Recommendation recommendation
                         = new AIRecommendationResponse.Recommendation(
-                            recommendationNode.get("category_id").asLong(),
-                            recommendationNode.get("restaurant_id").asLong(),
-                            recommendationNode.get("composite_score").asDouble());
-                    recommendations.add(recommendation);
+                        recommendationNode.get("category_id").asLong(),
+                        recommendationNode.get("restaurant_id").asLong(),
+                        recommendationNode.get("composite_score").asDouble());
+                recommendations.add(recommendation);
             });
 
+            Long userId = 1L;
+            recommendationResponse = new AIRecommendationResponse(userId, recommendations);
 
-            recommendationResponse = new AIRecommendationResponse(request.getUserId(), recommendations);
-
-        }catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return recommendationResponse;

@@ -41,8 +41,8 @@ public class NotificationController {
             responseCode = "509",
             description = "빈자리 알림 신청 티켓이 부족한 경우"
     )
-    public ResponseEntity<Void> subscribeSeatNotification(@RequestParam long seatId, @RequestParam long userId) {
-        notificationService.subscribeSeatNotification(seatId, userId);
+    public ResponseEntity<Void> subscribeSeatNotification(@RequestParam long seatId) {
+        notificationService.subscribeSeatNotification(seatId);
         return ResponseEntity.noContent().build();
     }
 
@@ -55,12 +55,12 @@ public class NotificationController {
             responseCode = "200",
             description = "신청 성공",
             content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = SubscriptionListResponse.class)
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = SubscriptionListResponse.class)
             )
     )
-    public ResponseEntity<SubscriptionListResponse> getSeatNotifications(@RequestParam long userId) {
-        SubscriptionListResponse subscriptionList = notificationService.getSeatNotifications(userId);
+    public ResponseEntity<SubscriptionListResponse> getSeatNotifications() {
+        SubscriptionListResponse subscriptionList = notificationService.getSeatNotifications();
         return ResponseEntity.ok(subscriptionList);
     }
 

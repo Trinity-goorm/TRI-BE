@@ -4,7 +4,7 @@ import com.google.firebase.messaging.MessagingErrorCode;
 import com.trinity.ctc.domain.notification.result.SentResult;
 import com.trinity.ctc.domain.notification.type.NotificationType;
 import com.trinity.ctc.domain.user.entity.User;
-import com.trinity.ctc.util.formatter.JsonUtil;
+import com.trinity.ctc.global.util.formatter.JsonUtil;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;

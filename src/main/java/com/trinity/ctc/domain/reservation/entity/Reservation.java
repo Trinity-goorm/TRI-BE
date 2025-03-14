@@ -1,7 +1,6 @@
 package com.trinity.ctc.domain.reservation.entity;
 
 import com.trinity.ctc.domain.notification.entity.ReservationNotification;
-import com.trinity.ctc.domain.notification.entity.SeatNotification;
 import com.trinity.ctc.domain.reservation.status.ReservationStatus;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
 import com.trinity.ctc.domain.seat.entity.SeatType;
@@ -59,7 +58,7 @@ public class Reservation {
     private List<ReservationNotification> reservationNotificationList = new ArrayList<>();
 
     @Builder
-    public Reservation(LocalDate reservationDate, ReservationStatus status, Restaurant restaurant, User user, ReservationTime reservationTime ,SeatType seatType) {
+    public Reservation(LocalDate reservationDate, ReservationStatus status, Restaurant restaurant, User user, ReservationTime reservationTime, SeatType seatType) {
         this.reservationDate = reservationDate;
         this.status = status;
         this.restaurant = restaurant;
@@ -75,5 +74,9 @@ public class Reservation {
 
     public void cancelReservation() {
         this.status = ReservationStatus.CANCELLED;
+    }
+
+    public void failReservation() {
+        this.status = ReservationStatus.FAILED;
     }
 }

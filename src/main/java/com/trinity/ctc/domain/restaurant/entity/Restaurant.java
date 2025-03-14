@@ -10,8 +10,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -58,7 +60,7 @@ public class Restaurant {
     private List<Menu> menus = new ArrayList<>();
 
     @Builder
-    public Restaurant(String name, String address, String phoneNumber, String convenience, String operatingHour, String expandedDays, String timeRange,String caution, boolean isDeleted, int reviewCount, double rating, int averagePrice, List<RestaurantImage> imageUrls, List<Menu> menus) {
+    public Restaurant(String name, String address, String phoneNumber, String convenience, String operatingHour, String expandedDays, String timeRange, String caution, boolean isDeleted, int reviewCount, double rating, int averagePrice, List<RestaurantImage> imageUrls, List<Menu> menus) {
         this.name = name;
         this.address = address;
         this.phoneNumber = phoneNumber;
@@ -105,8 +107,8 @@ public class Restaurant {
 
     public List<String> getRestaurantImageUrls() {
         List<String> images = new ArrayList<>();
-        for (RestaurantImage restaurantImage  : this.imageUrls) {
-               images.add(restaurantImage.getUrl());
+        for (RestaurantImage restaurantImage : this.imageUrls) {
+            images.add(restaurantImage.getUrl());
         }
         return images;
     }

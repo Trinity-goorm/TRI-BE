@@ -38,8 +38,8 @@ public class ReservationNotification {
     private Reservation reservation;
 
     @Builder
-    public ReservationNotification (NotificationType type, String title, String body, String url,
-                                    LocalDateTime scheduledTime, User user, Reservation reservation) {
+    public ReservationNotification(NotificationType type, String title, String body, String url,
+                                   LocalDateTime scheduledTime, User user, Reservation reservation) {
         this.type = type;
         this.title = title;
         this.body = body;

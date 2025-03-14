@@ -5,6 +5,7 @@ import com.trinity.ctc.domain.category.repository.CategoryRepository;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
 import com.trinity.ctc.domain.user.dto.OnboardingRequest;
+import com.trinity.ctc.domain.user.dto.ReissueTokenRequest;
 import com.trinity.ctc.domain.user.dto.UserDetailResponse;
 import com.trinity.ctc.domain.user.dto.UserReservationListResponse;
 import com.trinity.ctc.domain.user.entity.User;
@@ -12,9 +13,12 @@ import com.trinity.ctc.domain.user.entity.UserPreference;
 import com.trinity.ctc.domain.user.entity.UserPreferenceCategory;
 import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.domain.user.validator.UserValidator;
-import com.trinity.ctc.util.common.SortOrder;
-import com.trinity.ctc.util.exception.CustomException;
-import com.trinity.ctc.util.exception.error_code.UserErrorCode;
+import com.trinity.ctc.global.exception.CustomException;
+import com.trinity.ctc.global.exception.error_code.UserErrorCode;
+import com.trinity.ctc.global.kakao.service.AuthService;
+import com.trinity.ctc.global.util.common.SortOrder;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -33,15 +37,25 @@ public class UserService {
     private final CategoryRepository categoryRepository;
     private final UserValidator userValidator;
     private final ReservationRepository reservationRepository;
+    private final AuthService authService;
+    private final TokenService tokenService;
 
     /**
      * 온보딩 요청 DTO의 정보로 user entity를 build 후 저장하는 메서드
+     *
      * @param onboardingRequest
      */
     @Transactional
-    public void saveOnboardingInformation(OnboardingRequest onboardingRequest) {
+
+    public void saveOnboardingInformation(OnboardingRequest onboardingRequest, HttpServletRequest request, HttpServletResponse response) {
+        String refreshToken = request.getHeader("refresh");
+
+        ReissueTokenRequest reissueTokenRequest = new ReissueTokenRequest(refreshToken);
+
+        String kakaoId = authService.getAuthenticatedKakaoId();
+
         // update 할 사용자 entity select
-        User user = userRepository.findById(onboardingRequest.getUserId())
+        User user = userRepository.findByKakaoId(Long.valueOf(kakaoId))
                 .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
         // 사용자가 온보딩 중인 사용자인지(status = TEMPORARILY_UNAVAILABLE) 검증, 아닐 경우 403 반환
@@ -68,31 +82,41 @@ public class UserService {
 
         // user entity 내 update 메서드로 user와 영속화된 entity 모두 DB에 반영
         user.updateOnboardingInformation(onboardingRequest, userPreference);
+
+        tokenService.reissueToken(reissueTokenRequest, request, response);
     }
 
     /**
      * 사용자 프로필 정보 반환
-     * @param userId
      * @return 사용자 프로필 정보
      */
     @Transactional(readOnly = true)
-    public UserDetailResponse getUserDetail(long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
-        return UserDetailResponse.of(user.getId(), user.getNickname(),user.getPhoneNumber() , user.getNormalTicketCount(), user.getEmptyTicketCount());
+    public UserDetailResponse getUserDetail() {
+        Long kakaoId = Long.parseLong(authService.getAuthenticatedKakaoId());
+        User user = userRepository.findByKakaoId(kakaoId).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
+        return UserDetailResponse.of(user.getId(), user.getNickname(), user.getPhoneNumber(), user.getNormalTicketCount(), user.getEmptyTicketCount());
+    }
+
+
+    @Transactional(readOnly = true)
+    public UserDetailResponse getUserDetailV2(long kakaoId) {
+        User user = userRepository.findByKakaoId(kakaoId).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
+        return UserDetailResponse.of(user.getId(), user.getNickname(), user.getPhoneNumber(), user.getNormalTicketCount(), user.getEmptyTicketCount());
     }
 
 
     /**
      * 사용자 예약리스트 반환
-     * @param userId
      * @return 예약정보 리스트 및 개수
      */
     @Transactional(readOnly = true)
-    public UserReservationListResponse getUserReservations(long userId, int page, int size, String sortBy) {
+    public UserReservationListResponse getUserReservations(int page, int size, String sortBy) {
         SortOrder sortOrder = SortOrder.fromString(sortBy);
         PageRequest pageRequest = PageRequest.of(page - 1, size, sortOrder.getSort());
 
-        Slice<Reservation> reservations = reservationRepository.findAllByUserId(userId, pageRequest);
+        Long kakaoId = Long.parseLong(authService.getAuthenticatedKakaoId());
+
+        Slice<Reservation> reservations = reservationRepository.findAllByKakaoId(kakaoId, pageRequest);
         return UserReservationListResponse.from(reservations);
     }
 

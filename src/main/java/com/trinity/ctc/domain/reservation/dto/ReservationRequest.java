@@ -11,9 +11,6 @@ import java.time.LocalTime;
 @Schema(description = "예약정보 전달")
 public class ReservationRequest {
 
-    @Schema(description = "예약자 ID", example = "1")
-    private long userId;
-
     @Schema(description = "대상 식당 ID", example = "2")
     private long restaurantId;
 

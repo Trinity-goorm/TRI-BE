@@ -4,27 +4,28 @@ import com.trinity.ctc.domain.fcm.entity.Fcm;
 import com.trinity.ctc.domain.like.entity.Likes;
 import com.trinity.ctc.domain.notification.entity.NotificationHistory;
 import com.trinity.ctc.domain.notification.entity.ReservationNotification;
-import com.trinity.ctc.domain.notification.entity.SeatNotification;
+import com.trinity.ctc.domain.notification.entity.SeatNotificationSubscription;
 import com.trinity.ctc.domain.payment.entity.PaymentHistory;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.search.entity.SearchHistory;
 import com.trinity.ctc.domain.user.dto.OnboardingRequest;
 import com.trinity.ctc.domain.user.status.Sex;
 import com.trinity.ctc.domain.user.status.UserStatus;
-import com.trinity.ctc.util.validator.TicketValidator;
+import com.trinity.ctc.domain.user.validator.NormalTicketValidator;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Entity
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Setter
+@NoArgsConstructor
 public class User {
 
     @Id
@@ -73,7 +74,7 @@ public class User {
     private List<ReservationNotification> reservationNotificationList = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SeatNotification> seatNotificationList = new ArrayList<>();
+    private List<SeatNotificationSubscription> seatNotificationSubscriptionList = new ArrayList<>();
 
     @Builder
     public User(Long kakaoId, Integer normalTicketCount, Integer emptyTicket, UserStatus status) {
@@ -89,7 +90,7 @@ public class User {
     }
 
     public void payNormalTickets() {
-        TicketValidator.validateTicketCount(this.normalTicketCount, 10);
+        NormalTicketValidator.validateTicketCount(this.normalTicketCount, 10);
         this.normalTicketCount -= 10;
     }
 
@@ -104,5 +105,9 @@ public class User {
         this.phoneNumber = onboardingRequest.getPhoneNumber();
         this.userPreference = userPreference;
         this.status = UserStatus.AVAILABLE;
+    }
+
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_" + status.name()));
     }
 }

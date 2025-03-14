@@ -24,10 +24,9 @@ public class RestaurantImage {
 
     @Builder
     public RestaurantImage(String url) {
-        if (url.equals("이미지 정보 없음")){
+        if (url.equals("이미지 정보 없음")) {
             this.url = null;
-        }
-        else{
+        } else {
             this.url = url;
         }
     }
