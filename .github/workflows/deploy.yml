@@ -1,4 +1,4 @@
-name: Build and Deploy to ECR - BE
+name: Build and Deploy to ECR - BE v2
 
 on:
   push:
