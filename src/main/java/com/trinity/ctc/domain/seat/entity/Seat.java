@@ -15,12 +15,13 @@ public class Seat {
 
     @Id
     @Column
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seat_availability_seq_generator")
-    @SequenceGenerator(
-            name = "seat_availability_seq_generator",
-            sequenceName = "seat_availability_seq",
-            allocationSize = 1000
-    )
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seat_availability_seq_generator")
+//    @SequenceGenerator(
+//            name = "seat_availability_seq_generator",
+//            sequenceName = "seat_availability_seq",
+//            allocationSize = 1000
+//    )
     private long id;
 
     private LocalDate reservationDate;

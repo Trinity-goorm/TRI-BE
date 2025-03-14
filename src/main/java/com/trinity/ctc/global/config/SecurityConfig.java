@@ -7,7 +7,7 @@ import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.global.exception.CustomAccessDeniedHandler;
 import com.trinity.ctc.global.kakao.service.AuthService;
 import com.trinity.ctc.global.kakao.service.KakaoApiService;
-import com.trinity.ctc.util.exception.CustomAuthenticationEntryPoint;
+import com.trinity.ctc.global.exception.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -59,7 +59,7 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)  // POST 테스트 시 CSRF 비활성화
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // CORS 설정
             .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/login", "/token", "/token/reissue", "/users/kakao/login", "/api/fcmTokens/register", "/api/fcmTokens/delete").permitAll()
+                    .requestMatchers("/login", "/token/reissue", "/users/kakao/login", "/api/fcmTokens/register", "/api/fcmTokens/delete", "/api/notifications/seats/test").permitAll()
                     .requestMatchers("/api/users/onboarding/**").hasRole("TEMPORARILY_UNAVAILABLE")
                     .requestMatchers("/api/**", "/logout", "/users/kakao/logout").hasRole("AVAILABLE")
                     .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/v3/api-docs/**").permitAll()

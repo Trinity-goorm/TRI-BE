@@ -6,15 +6,15 @@ import com.trinity.ctc.domain.fcm.repository.FcmRepository;
 import com.trinity.ctc.domain.notification.dto.*;
 import com.trinity.ctc.domain.notification.entity.NotificationHistory;
 import com.trinity.ctc.domain.notification.entity.ReservationNotification;
-import com.trinity.ctc.domain.notification.entity.SeatNotificationSubscription;
 import com.trinity.ctc.domain.notification.entity.SeatNotification;
+import com.trinity.ctc.domain.notification.entity.SeatNotificationSubscription;
+import com.trinity.ctc.domain.notification.fomatter.NotificationMessageUtil;
 import com.trinity.ctc.domain.notification.repository.NotificationHistoryRepository;
 import com.trinity.ctc.domain.notification.repository.ReservationNotificationRepository;
 import com.trinity.ctc.domain.notification.repository.SeatNotificationRepository;
 import com.trinity.ctc.domain.notification.repository.SeatNotificationSubscriptionRepository;
 import com.trinity.ctc.domain.notification.result.SentResult;
 import com.trinity.ctc.domain.notification.type.NotificationType;
-import com.trinity.ctc.domain.notification.fomatter.NotificationMessageUtil;
 import com.trinity.ctc.domain.notification.validator.EmptyTicketValidator;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
@@ -464,6 +464,8 @@ public class NotificationService {
      */
     @Transactional
     public void sendSeatNotification(long seatId) {
+        long startTime = System.nanoTime();  // 시작 시간 측정
+
         // 빈자리 알림 정보 가져오기(구독자 정보)
         List<SeatNotificationSubscription> seatNotificationSubscriptionList = seatNotificationSubscriptionRepository.findAllBySeatId(seatId);
 
@@ -479,10 +481,14 @@ public class NotificationService {
 
         List<FcmSendingResultDto> resultList = handleMulticastNotification(seatNotification, seatNotificationSubscriptionList);
 
+        long endTime = System.nanoTime();  // 종료 시간 측정
+        long elapsedTime = endTime - startTime;  // 경과 시간 (나노초 단위)
+
         List<NotificationHistory> notificationHistoryList = buildMulticastNotificationHistory(seatNotificationSubscriptionList, seatNotification, type, resultList);
 
         // 전송된 알림 히스토리를 전부 history 테이블에 저장하는 메서드
         saveNotificationHistory(notificationHistoryList);
+        log.info("sendSeatNotification, 실행 시간: {} ms", elapsedTime / 1_000_000);
     }
 
     /**
@@ -535,7 +541,7 @@ public class NotificationService {
 
         try {
             // FCM 서버에 메세지 전송
-            List<SendResponse> sendResponseList = FirebaseMessaging.getInstance().sendEachForMulticast(message).getResponses();
+            List<SendResponse> sendResponseList = FirebaseMessaging.getInstance().sendEachForMulticast(message, true).getResponses();
             // 전송 결과(전송 시간, 전송 상태)
             for (SendResponse sendResponse : sendResponseList) {
                 LocalDateTime time = LocalDateTime.now();

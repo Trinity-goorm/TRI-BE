@@ -2,6 +2,8 @@ package com.trinity.ctc.domain.notification.controller;
 
 import com.trinity.ctc.domain.notification.dto.SubscriptionListResponse;
 import com.trinity.ctc.domain.notification.service.NotificationService;
+import com.trinity.ctc.domain.reservation.dto.ReservationResultResponse;
+import com.trinity.ctc.domain.reservation.service.ReservationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Notification", description = "알림 관련 API")
 public class NotificationController {
     private final NotificationService notificationService;
+    private final ReservationService reservationService;
 
     @PostMapping("/seats/subscribe")
     @Operation(
@@ -76,5 +79,12 @@ public class NotificationController {
     public ResponseEntity<Void> cancelSubscribeSeatNotification(@RequestParam long seatNotificationId) {
         notificationService.cancelSubscribeSeatNotification(seatNotificationId);
         return ResponseEntity.noContent().build();
+    }
+
+
+    @PostMapping("/seats/test")
+    public ResponseEntity<ReservationResultResponse> testCancelReservation(@RequestParam long reservationId) {
+        ReservationResultResponse result = reservationService.cancelReservation(reservationId);
+        return ResponseEntity.ok(result);
     }
 }
