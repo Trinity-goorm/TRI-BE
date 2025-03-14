@@ -53,7 +53,7 @@ jobs:
             IdentityFile ~/.ssh/toby-instance-key.pem" > ~/.ssh/config
           
           # 프라이빗 인스턴스(be) 설정
-          echo "Host be
+          echo "Host ml
             HostName 10.0.133.177
             User ec2-user
             ProxyJump bastion
@@ -92,7 +92,10 @@ jobs:
             
             # Kakao
             KAKAO_API_KEY=${{ secrets.KAKAO_API_KEY }}
-            KAKAO_REDIRECT_URI=${{ secrets.KAKAO_REDIRECT_URI }}" > .env
+            KAKAO_REDIRECT_URI=${{ secrets.KAKAO_REDIRECT_URI }}
+            
+            # JWT
+            JWT_SECRET=${{ secrets.JWT_SECRET }}" > .env
             
             # docker-compose.yml 업데이트
             echo "services:
@@ -134,7 +137,6 @@ jobs:
             배포가 성공적으로 완료되었습니다.
           color: 0x28A745 
 
-      # 배포 실패 시 알림
       - name: Send Discord Notification on Failure
         if: failure()
         uses: sarisia/actions-status-discord@v1
@@ -146,4 +148,4 @@ jobs:
             Branch: ${{ github.ref_name }}
             Commit: ${{ github.event.head_commit.message }}
             배포 중 오류가 발생했습니다.
-          color: 0xE01E5A  # 빨간색
+          color: 0xE01E5A
