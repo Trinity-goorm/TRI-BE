@@ -1,6 +1,7 @@
 package com.trinity.ctc.domain.notification.service;
 
-import com.google.firebase.messaging.*;
+import com.google.firebase.messaging.Message;
+import com.google.firebase.messaging.MulticastMessage;
 import com.trinity.ctc.domain.fcm.entity.Fcm;
 import com.trinity.ctc.domain.fcm.repository.FcmRepository;
 import com.trinity.ctc.domain.notification.dto.*;
@@ -13,7 +14,7 @@ import com.trinity.ctc.domain.notification.repository.NotificationHistoryReposit
 import com.trinity.ctc.domain.notification.repository.ReservationNotificationRepository;
 import com.trinity.ctc.domain.notification.repository.SeatNotificationRepository;
 import com.trinity.ctc.domain.notification.repository.SeatNotificationSubscriptionRepository;
-import com.trinity.ctc.domain.notification.result.SentResult;
+import com.trinity.ctc.domain.notification.sender.NotificationSender;
 import com.trinity.ctc.domain.notification.type.NotificationType;
 import com.trinity.ctc.domain.notification.validator.EmptyTicketValidator;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
@@ -46,6 +47,7 @@ import static com.trinity.ctc.domain.notification.entity.NotificationHistory.cre
 import static com.trinity.ctc.domain.notification.entity.ReservationNotification.createReservationNotification;
 import static com.trinity.ctc.domain.notification.entity.SeatNotification.createSeatNotification;
 import static com.trinity.ctc.domain.notification.entity.SeatNotificationSubscription.createSeatNotificationSubscription;
+import static com.trinity.ctc.domain.notification.fomatter.NotificationContentUtil.*;
 import static com.trinity.ctc.domain.notification.fomatter.NotificationMessageUtil.createMessageWithUrl;
 import static com.trinity.ctc.domain.notification.fomatter.NotificationMessageUtil.createMulticastMessageWithUrl;
 import static com.trinity.ctc.domain.notification.type.NotificationType.BEFORE_ONE_HOUR_NOTIFICATION;
@@ -66,6 +68,7 @@ public class NotificationService {
     private final SeatNotificationRepository seatNotificationRepository;
     private final SeatNotificationSubscriptionRepository seatNotificationSubscriptionRepository;
     private final AuthService authService;
+    private final NotificationSender notificationSender;
 
     /**
      * 예약 이벤트를 통해 예약 알림에 필요한 entity(user, reservation)를 받아오고, 예약 알림 entity을 DB에 저장하는 메서드
@@ -222,7 +225,7 @@ public class NotificationService {
         // 보낼 FCM 메세지 빌드
         GroupFcmInformationDto fcmInformationDto = buildReservationNotification(notification);
         // FCM 메세지 전송 및 전송 결과 반환
-        List<FcmSendingResultDto> resultList = sendEachNotification(fcmInformationDto.getMessageList());
+        List<FcmSendingResultDto> resultList = notificationSender.sendEachNotification(fcmInformationDto.getMessageList());
         return buildNotificationHistory(fcmInformationDto.getMessageDtoList(), resultList, type);
     }
 
@@ -250,32 +253,7 @@ public class NotificationService {
         return new GroupFcmInformationDto(messageDtoList, messageList);
     }
 
-    /**
-     * 알림 전송 로직 중 FCM 메세지를 발송하는 내부 메서드
-     *
-     * @param messageList FCM 메세지 객체 리스트
-     * @return
-     */
-    private List<FcmSendingResultDto> sendEachNotification(List<Message> messageList) {
-        // FCM 메세지 전송 결과를 담는 DTO
-        FcmSendingResultDto result;
-        List<FcmSendingResultDto> resultList = new ArrayList<>();
 
-        for (Message message : messageList) {
-            try {
-                // FCM 서버에 메세지 전송
-                FirebaseMessaging.getInstance().send(message);
-                // 전송 결과(전송 시간, 전송 상태)
-                result = new FcmSendingResultDto(LocalDateTime.now(), SentResult.SUCCESS);
-            } catch (FirebaseMessagingException e) {
-                // 전송 결과(전송 시간, 전송 상태, 에러 코드)
-                result = new FcmSendingResultDto(LocalDateTime.now(), SentResult.FAILED, e.getMessagingErrorCode());
-            }
-            resultList.add(result);
-        }
-
-        return resultList;
-    }
 
     /**
      * 알림 전송 로직 중 전송된 알림에 대한 히스토리를 빌드하는 내부 메서드
@@ -503,7 +481,7 @@ public class NotificationService {
         MulticastMessage multicastMessage = buildSeatNotifications(seatNotification, seatNotificationSubscriptionList);
 
         // FCM 메세지 전송 및 전송 결과 반환
-        return sendMulticastNotification(multicastMessage);
+        return notificationSender.sendMulticastNotification(multicastMessage);
     }
 
     /**
@@ -523,37 +501,6 @@ public class NotificationService {
 
         // FCM 메시지 빌드 후 반환
         return createMulticastMessageWithUrl(seatNotification.getTitle(), seatNotification.getBody(), seatNotification.getUrl(), tokenList);
-    }
-
-    /**
-     * MulticastMessage를 발송하는 내부 메서드
-     *
-     * @param message
-     * @return
-     */
-    private List<FcmSendingResultDto> sendMulticastNotification(MulticastMessage message) {
-        // FCM 메세지 전송 결과를 담는 DTO
-        List<FcmSendingResultDto> resultList = new ArrayList<>();
-
-        try {
-            // FCM 서버에 메세지 전송
-            List<SendResponse> sendResponseList = FirebaseMessaging.getInstance().sendEachForMulticast(message, true).getResponses();
-            // 전송 결과(전송 시간, 전송 상태)
-            for (SendResponse sendResponse : sendResponseList) {
-                LocalDateTime time = LocalDateTime.now();
-
-                if (sendResponse.isSuccessful()) {
-                    resultList.add(new FcmSendingResultDto(time, SentResult.SUCCESS));
-                } else {
-                    resultList.add(new FcmSendingResultDto(time, SentResult.FAILED, sendResponse.getException().getMessagingErrorCode()));
-                }
-            }
-        } catch (FirebaseMessagingException e) {
-            // 전송 결과(전송 시간, 전송 상태, 에러 코드
-            throw new CustomException(FcmErrorCode.SENDING_REQUEST_FAILED);
-        }
-
-        return resultList;
     }
 
     /**
@@ -689,7 +636,7 @@ public class NotificationService {
      */
     private List<NotificationHistory> sendSingleNotification(List<Message> messageList, NotificationType type, List<FcmMessageDto> fcmMessageDtoList) {
         // FCM 메세지 전송 및 전송 결과 반환
-        List<FcmSendingResultDto> resultList = sendEachNotification(messageList);
+        List<FcmSendingResultDto> resultList = notificationSender.sendEachNotification(messageList);
         return buildNotificationHistory(fcmMessageDtoList, resultList, type);
     }
 
@@ -739,14 +686,14 @@ public class NotificationService {
 
         // 알림 메세지 data 별 포멧팅
         if (isCODPassed) {
-            title = NotificationContentUtil.formatReservationFullCanceledNotificationTitle(restaurantName);
-            body = NotificationContentUtil.formatReservationFullCanceledNotificationBody(reservedDate, reservedTime, user.getNormalTicketCount());
+            title = formatReservationFullCanceledNotificationTitle(restaurantName);
+            body = formatReservationFullCanceledNotificationBody(reservedDate, reservedTime, user.getNormalTicketCount());
         } else {
-            title = NotificationContentUtil.formatReservationNullCanceledNotificationTitle(restaurantName);
-            body = NotificationContentUtil.formatReservationNullCanceledNotificationBody(reservedDate, reservedTime, user.getNormalTicketCount());
+            title = formatReservationNullCanceledNotificationTitle(restaurantName);
+            body = formatReservationNullCanceledNotificationBody(reservedDate, reservedTime, user.getNormalTicketCount());
         }
 
-        String url = NotificationContentUtil.formatReservationNotificationUrl();
+        String url = formatReservationNotificationUrl();
 
         return new FcmMessageDto(title, body, url);
     }
