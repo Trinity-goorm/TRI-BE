@@ -49,7 +49,7 @@ public class SwaggerConfig {
     @Value("${swagger.group.search.paths}")
     private String[] searchPaths;
 
-    @Value("/api/data/**")
+    @Value("${swagger.group.data.paths}")
     private String[] dataPaths;
 
     @Bean
