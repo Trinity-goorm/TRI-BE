@@ -48,4 +48,16 @@ public class ReservationNotification {
         this.user = user;
         this.reservation = reservation;
     }
+
+    public static ReservationNotification createReservationNotification(NotificationType type, User user, Reservation reservation, String title, String body, String url, LocalDateTime scheduledTime) {
+        return ReservationNotification.builder()
+                .type(type)
+                .title(title)
+                .body(body)
+                .url(url)
+                .user(user)
+                .scheduledTime(scheduledTime)
+                .reservation(reservation)
+                .build();
+    }
 }

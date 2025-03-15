@@ -8,7 +8,7 @@ import com.trinity.ctc.domain.notification.entity.NotificationHistory;
 import com.trinity.ctc.domain.notification.entity.ReservationNotification;
 import com.trinity.ctc.domain.notification.entity.SeatNotification;
 import com.trinity.ctc.domain.notification.entity.SeatNotificationSubscription;
-import com.trinity.ctc.domain.notification.fomatter.NotificationMessageUtil;
+import com.trinity.ctc.domain.notification.fomatter.NotificationContentUtil;
 import com.trinity.ctc.domain.notification.repository.NotificationHistoryRepository;
 import com.trinity.ctc.domain.notification.repository.ReservationNotificationRepository;
 import com.trinity.ctc.domain.notification.repository.SeatNotificationRepository;
@@ -29,6 +29,10 @@ import com.trinity.ctc.global.kakao.service.AuthService;
 import com.trinity.ctc.global.util.formatter.DateTimeUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +42,14 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 
+import static com.trinity.ctc.domain.notification.entity.NotificationHistory.createNotificationHistory;
+import static com.trinity.ctc.domain.notification.entity.ReservationNotification.createReservationNotification;
+import static com.trinity.ctc.domain.notification.entity.SeatNotification.createSeatNotification;
+import static com.trinity.ctc.domain.notification.entity.SeatNotificationSubscription.createSeatNotificationSubscription;
+import static com.trinity.ctc.domain.notification.fomatter.NotificationMessageUtil.createMessageWithUrl;
+import static com.trinity.ctc.domain.notification.fomatter.NotificationMessageUtil.createMulticastMessageWithUrl;
+import static com.trinity.ctc.domain.notification.type.NotificationType.BEFORE_ONE_HOUR_NOTIFICATION;
+import static com.trinity.ctc.domain.notification.type.NotificationType.DAILY_NOTIFICATION;
 import static com.trinity.ctc.global.util.formatter.DateTimeUtil.combineWithDate;
 
 @Slf4j
@@ -95,21 +107,12 @@ public class NotificationService {
         LocalDateTime scheduledTime = combineWithDate(reservedDate, LocalTime.of(8, 0));
 
         // 알림 메세지 data 별 포멧팅
-        String title = NotificationMessageUtil.formatDailyNotificationTitle(userName, restaurantName);
-        String body = NotificationMessageUtil.formatDailyNotificationBody(restaurantName, reservedDate, reservedTime);
-        String url = NotificationMessageUtil.formatReservationNotificationUrl();
+        String title = NotificationContentUtil.formatDailyNotificationTitle(userName, restaurantName);
+        String body = NotificationContentUtil.formatDailyNotificationBody(restaurantName, reservedDate, reservedTime);
+        String url = NotificationContentUtil.formatReservationNotificationUrl();
 
         // 알림 메세지 빌드
-
-        return ReservationNotification.builder()
-                .type(NotificationType.DAILY_NOTIFICATION)
-                .title(title)
-                .body(body)
-                .url(url)
-                .user(user)
-                .scheduledTime(scheduledTime)
-                .reservation(reservation)
-                .build();
+        return createReservationNotification(DAILY_NOTIFICATION, user, reservation, title, body, url, scheduledTime);
     }
 
     /**
@@ -129,21 +132,13 @@ public class NotificationService {
         LocalDateTime scheduledTime = DateTimeUtil.combineWithDate(reservedDate, reservedTime).minusHours(1);
 
         // 알림 메세지 data 별 포멧팅    
-        String title = NotificationMessageUtil.formatHourBeforeNotificationTitle(userName, restaurantName);
-        String body = NotificationMessageUtil.formatHourBeforeNotificationBody(restaurantName, reservedDate, reservedTime);
-        String url = NotificationMessageUtil.formatReservationNotificationUrl();
+        String title = NotificationContentUtil.formatHourBeforeNotificationTitle(userName, restaurantName);
+        String body = NotificationContentUtil.formatHourBeforeNotificationBody(restaurantName, reservedDate, reservedTime);
+        String url = NotificationContentUtil.formatReservationNotificationUrl();
 
         // 알림 메세지 빌드
 
-        return ReservationNotification.builder()
-                .type(NotificationType.BEFORE_ONE_HOUR_NOTIFICATION)
-                .title(title)
-                .body(body)
-                .url(url)
-                .user(user)
-                .scheduledTime(scheduledTime)
-                .reservation(reservation)
-                .build();
+        return createReservationNotification(BEFORE_ONE_HOUR_NOTIFICATION, user, reservation, title, body, url, scheduledTime);
     }
 
     /**
@@ -164,7 +159,7 @@ public class NotificationService {
 
         // 알림 타입과 오늘 날짜로 당일 예약 알림 정보 가져오기
         List<ReservationNotification> reservationNotificationList = reservationNotificationRepository
-                .findAllByTypeAndDate(NotificationType.DAILY_NOTIFICATION, today);
+                .findAllByTypeAndDate(DAILY_NOTIFICATION, today);
         if (reservationNotificationList.isEmpty()) return;
 
         // history 테이블과 알림 발송 후 알림 메세지 삭제를 위한 알림 ID 담을 list 세팅
@@ -172,7 +167,7 @@ public class NotificationService {
         List<Long> reservationNotificationIdList = new ArrayList<>();
 
         // 알림 타입 세팅
-        NotificationType type = NotificationType.DAILY_NOTIFICATION;
+        NotificationType type = DAILY_NOTIFICATION;
 
         // 전송할 알림 리스트를 전부 도는 알림 발송 로직(현재 동기 처리 중)
         for (ReservationNotification notification : reservationNotificationList) {
@@ -195,14 +190,14 @@ public class NotificationService {
 
         // 알림 타입과 현재 시간으로 보낼 예약 1시간 전 알림 정보 가져오기
         List<ReservationNotification> reservationNotificationList = reservationNotificationRepository
-                .findAllByTypeAndDateTime(NotificationType.BEFORE_ONE_HOUR_NOTIFICATION, now);
+                .findAllByTypeAndDateTime(BEFORE_ONE_HOUR_NOTIFICATION, now);
 
         // history 테이블과 알림 발송 후 알림 메세지 삭제를 위한 알림 ID 담을 list 세팅
         List<NotificationHistory> notificationHistoryList = new ArrayList<>();
         List<Long> reservationNotificationIdList = new ArrayList<>();
 
         // 알림 타입 세팅
-        NotificationType type = NotificationType.BEFORE_ONE_HOUR_NOTIFICATION;
+        NotificationType type = BEFORE_ONE_HOUR_NOTIFICATION;
 
         // 전송할 알림 리스트를 전부 도는 알림 발송 로직(현재 동기 처리 중)
         for (ReservationNotification notification : reservationNotificationList) {
@@ -247,12 +242,7 @@ public class NotificationService {
         // FCM 메시지 빌드
 
         for (String token : tokenList) {
-            messageList.add(Message.builder()
-                    .putData("title", notification.getTitle())
-                    .putData("body", notification.getBody())
-                    .putData("url", notification.getUrl())
-                    .setToken(token)
-                    .build());
+            messageList.add(createMessageWithUrl(notification.getTitle(), notification.getBody(), notification.getUrl(), token));
 
             messageDtoList.add(new FcmMessageDto(token, notification.getTitle(), notification.getBody(), notification.getUrl(), notification.getUser()));
         }
@@ -307,15 +297,8 @@ public class NotificationService {
             messageHistory.put("url", messageDtoList.get(i).getUrl());
 
             // 알림 history 빌드
-            notificationHistoryList.add(NotificationHistory.builder()
-                    .type(type)
-                    .message(messageHistory)
-                    .sentAt(resultList.get(i).getSentAt())
-                    .sentResult(resultList.get(i).getSentResult())
-                    .errorCode(resultList.get(i).getErrorCode())
-                    .fcmToken(messageDtoList.get(i).getFcmToken())
-                    .user(messageDtoList.get(i).getUser())
-                    .build());
+            notificationHistoryList.add(createNotificationHistory(type, messageHistory, resultList.get(i).getSentAt(), resultList.get(i).getSentResult(),
+                    resultList.get(i).getErrorCode(), messageDtoList.get(i).getFcmToken(), messageDtoList.get(i).getUser()));
         }
 
         return notificationHistoryList;
@@ -352,7 +335,7 @@ public class NotificationService {
                 .orElseGet(() -> registerSeatNotificationMessage(seatId));
 
         // 이미 신청 내역이 있을 시, 409 반환
-        seatNotificationSubscriptionRepository.findByUserId(user.getId(), seatNotification)
+        seatNotificationSubscriptionRepository.findByUserIdAndSubscription(user.getId(), seatNotification)
                 .ifPresent(notification -> {
                     log.info("이미 신청 내역이 존재합니다. userId: {}", user.getId());
                     throw new CustomException(NotificationErrorCode.ALREADY_SUBSCRIBED);
@@ -361,7 +344,7 @@ public class NotificationService {
         // 이미 해당 자리에 예약이 되어 있을 경우, 422 반환
         Seat seat = seatRepository.findById(seatId).orElseThrow(() -> new CustomException(SeatErrorCode.NOT_FOUND));
         List<ReservationStatus> statusList = Arrays.asList(ReservationStatus.COMPLETED, ReservationStatus.IN_PROGRESS);
-        if(reservationRepository.existsByReservationDataV1(user.getId(),
+        if (reservationRepository.existsByReservationDataV1(user.getId(),
                 seat.getRestaurant().getId(),
                 seat.getReservationDate(),
                 seat.getReservationTime().getTimeSlot(),
@@ -369,10 +352,7 @@ public class NotificationService {
                 statusList)) throw new CustomException(NotificationErrorCode.ALREADY_RESERVED);
 
         // 빈자리 알림 신청 내역 build
-        SeatNotificationSubscription seatNotificationSubscription = SeatNotificationSubscription.builder()
-                .user(user)
-                .seatNotification(seatNotification)
-                .build();
+        SeatNotificationSubscription seatNotificationSubscription = createSeatNotificationSubscription(user, seatNotification);
 
         // 빈자리 알림 신청 시, 빈자리 알림 티켓 -1
         user.useEmptyTicket();
@@ -399,19 +379,14 @@ public class NotificationService {
         int maxCapacity = seat.getSeatType().getMaxCapacity();
 
         // 알림 메세지 data 별 포멧팅
-        String title = NotificationMessageUtil.formatSeatNotificationTitle(restaurantName);
-        String body = NotificationMessageUtil.formatSeatNotificationBody(date, time, minCapacity, maxCapacity);
-        String url = NotificationMessageUtil.formatSeatNotificationUrl(restaurantId);
+        String title = NotificationContentUtil.formatSeatNotificationTitle(restaurantName);
+        String body = NotificationContentUtil.formatSeatNotificationBody(date, time, minCapacity, maxCapacity);
+        String url = NotificationContentUtil.formatSeatNotificationUrl(restaurantId);
 
         // 알림 메세지 빌드
-        SeatNotification message = SeatNotification.builder()
-                .title(title)
-                .body(body)
-                .url(url)
-                .seat(seat)
-                .build();
+        SeatNotification seatNotification = createSeatNotification(title, body, url, seat);
 
-        return seatNotificationRepository.save(message);
+        return seatNotificationRepository.save(seatNotification);
     }
 
     /**
@@ -432,25 +407,37 @@ public class NotificationService {
     @Transactional
     public SubscriptionListResponse getSeatNotifications() {
         String kakaoId = authService.getAuthenticatedKakaoId();
-        User user = userRepository.findByKakaoId(Long.valueOf(kakaoId)).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
+        User user = userRepository.findByKakaoId(Long.valueOf(kakaoId))
+                .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
-        List<SeatNotificationSubscription> seatNotificationSubscriptionList = seatNotificationSubscriptionRepository.findAllByUserId(user.getId());
+        int pageNumber = 0;
+        int pageSize = 500;
         List<SubscriptionResponse> subscriptionResponseList = new ArrayList<>();
-        log.info("조회된 SeatNotification 개수: {}", seatNotificationSubscriptionList.size());
 
+        Page<SeatNotificationSubscription> page;
 
-        for (SeatNotificationSubscription notification : seatNotificationSubscriptionList) {
-            int subscriberCount = seatNotificationSubscriptionRepository.countBySeatNotificationMessage(notification.getSeatNotification());
+        do {
+            Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("id").ascending());
+            page = seatNotificationSubscriptionRepository.findAllByUserId(user.getId(), pageable);
+            List<SeatNotificationSubscription> seatNotificationSubscriptionList = page.getContent();
 
-            log.info("SeatNotification ID: {}, 관련 Seat ID: {}, 구독자 수: {}",
-                    notification.getId(),
-                    notification.getSeatNotification().getSeat().getId(),
-                    subscriberCount);
+            log.info("조회된 SeatNotification 개수 (페이지 {}): {}", pageNumber, seatNotificationSubscriptionList.size());
 
-            SubscriptionResponse subscriptionResponse = SubscriptionResponse.of(notification.getId(), notification.getSeatNotification().getSeat(), subscriberCount);
-            subscriptionResponseList.add(subscriptionResponse);
-            log.info("response: " + subscriptionResponse.getSeatNotificationId());
-        }
+            for (SeatNotificationSubscription notification : seatNotificationSubscriptionList) {
+                int subscriberCount = seatNotificationSubscriptionRepository.countBySeatNotificationMessage(notification.getSeatNotification());
+
+                log.info("SeatNotification ID: {}, 관련 Seat ID: {}, 구독자 수: {}",
+                        notification.getId(),
+                        notification.getSeatNotification().getSeat().getId(),
+                        subscriberCount);
+
+                SubscriptionResponse subscriptionResponse = SubscriptionResponse.of(notification.getId(), notification.getSeatNotification().getSeat(), subscriberCount);
+                subscriptionResponseList.add(subscriptionResponse);
+                log.info("response: " + subscriptionResponse.getSeatNotificationId());
+            }
+
+            pageNumber++; // 다음 페이지로 이동
+        } while (page.hasNext()); // 다음 페이지가 있으면 반복
 
         return new SubscriptionListResponse(subscriptionResponseList.size(), subscriptionResponseList);
     }
@@ -464,31 +451,45 @@ public class NotificationService {
      */
     @Transactional
     public void sendSeatNotification(long seatId) {
-        long startTime = System.nanoTime();  // 시작 시간 측정
+        log.info("✅ 빈자리 알림 발송 로직 시작!");
 
-        // 빈자리 알림 정보 가져오기(구독자 정보)
-        List<SeatNotificationSubscription> seatNotificationSubscriptionList = seatNotificationSubscriptionRepository.findAllBySeatId(seatId);
+        long startTime = System.nanoTime(); // 시작 시간 측정
 
-        // 빈자리 알림 구독자
-        if (seatNotificationSubscriptionList.isEmpty()) return;
+        int pageNumber = 0;
+        int pageSize = 500;
+        Page<SeatNotificationSubscription> page;
 
-        // 빈자리 알림 메세지 정보(구독한 빈자리 알림)
+        // 빈자리 알림 메세지 정보 (구독한 빈자리 알림)
         SeatNotification seatNotification = seatNotificationRepository.findBySeatId(seatId)
                 .orElseThrow(() -> new CustomException(NotificationErrorCode.NOT_FOUND));
 
-        // 알림 타입 세팅
         NotificationType type = NotificationType.SEAT_NOTIFICATION;
 
-        List<FcmSendingResultDto> resultList = handleMulticastNotification(seatNotification, seatNotificationSubscriptionList);
+        do {
+            Pageable pageable = PageRequest.of(pageNumber, pageSize);
+            page = seatNotificationSubscriptionRepository.findAllBySeatId(seatId, pageable);
+            List<SeatNotificationSubscription> seatNotificationSubscriptionList = page.getContent();
 
-        long endTime = System.nanoTime();  // 종료 시간 측정
-        long elapsedTime = endTime - startTime;  // 경과 시간 (나노초 단위)
+            if (seatNotificationSubscriptionList.isEmpty()) {
+                log.info("❌ 구독자가 없습니다. 알림 발송을 중단합니다.");
+                return;
+            }
 
-        List<NotificationHistory> notificationHistoryList = buildMulticastNotificationHistory(seatNotificationSubscriptionList, seatNotification, type, resultList);
+            // 알림 전송
+            List<FcmSendingResultDto> resultList = handleMulticastNotification(seatNotification, seatNotificationSubscriptionList);
 
-        // 전송된 알림 히스토리를 전부 history 테이블에 저장하는 메서드
-        saveNotificationHistory(notificationHistoryList);
-        log.info("sendSeatNotification, 실행 시간: {} ms", elapsedTime / 1_000_000);
+            log.info("✅ 빈자리 알림 발송 완료 (Batch {}): {} 개", pageNumber, seatNotificationSubscriptionList.size());
+
+            // 전송된 알림 히스토리를 배치로 저장
+            List<NotificationHistory> notificationHistoryList = buildMulticastNotificationHistory(seatNotificationSubscriptionList, seatNotification, type, resultList);
+            saveNotificationHistory(notificationHistoryList);
+
+            pageNumber++; // 다음 페이지로 이동
+        } while (page.hasNext()); // 다음 페이지가 있으면 계속 반복
+
+        long endTime = System.nanoTime(); // 종료 시간 측정
+        long elapsedTime = endTime - startTime; // 경과 시간 (나노초 단위)
+        log.info("sendSeatNotification 실행 시간: {} ms", elapsedTime / 1_000_000);
     }
 
     /**
@@ -521,12 +522,7 @@ public class NotificationService {
         if (tokenList.isEmpty()) throw new CustomException(FcmErrorCode.NO_FCM_TOKEN_REGISTERED);
 
         // FCM 메시지 빌드 후 반환
-        return MulticastMessage.builder()
-                .putData("title", seatNotification.getTitle())
-                .putData("body", seatNotification.getBody())
-                .putData("url", seatNotification.getUrl())
-                .addAllTokens(tokenList)
-                .build();
+        return createMulticastMessageWithUrl(seatNotification.getTitle(), seatNotification.getBody(), seatNotification.getUrl(), tokenList);
     }
 
     /**
@@ -581,16 +577,9 @@ public class NotificationService {
         messageHistory.put("url", seatNotification.getUrl());
 
         for (int i = 0; i < seatNotificationSubscriptionList.size(); i++) {
-            NotificationHistory notificationHistory = NotificationHistory.builder()
-                    .type(type)
-                    .message(messageHistory)
-                    .sentAt(resultList.get(i).getSentAt())
-                    .sentResult(resultList.get(i).getSentResult())
-                    .errorCode(resultList.get(i).getErrorCode())
-//                    .fcmToken(messageDtoList.get(i).getFcmToken())
-                    // FCM 토큰 저장 필요!!!
-                    .user(seatNotificationSubscriptionList.get(i).getUser())
-                    .build();
+            NotificationHistory notificationHistory = createNotificationHistory(type, messageHistory, resultList.get(i).getSentAt(),
+                    resultList.get(i).getSentResult(), resultList.get(i).getErrorCode(), null, seatNotificationSubscriptionList.get(i).getUser());
+            // fcm 토큰 저장 로직 구현 필요
 
             notificationHistoryList.add(notificationHistory);
         }
@@ -656,10 +645,10 @@ public class NotificationService {
         int maxCapacity = reservation.getSeatType().getMaxCapacity();
 
         // 알림 메세지 data 별 포멧팅
-        String title = NotificationMessageUtil.formatReservationCompleteNotificationTitle(restaurantName);
-        String body = NotificationMessageUtil.formatReservationCompleteNotificationBody(reservedDate, reservedTime, minCapacity,
+        String title = NotificationContentUtil.formatReservationCompleteNotificationTitle(restaurantName);
+        String body = NotificationContentUtil.formatReservationCompleteNotificationBody(reservedDate, reservedTime, minCapacity,
                 maxCapacity);
-        String url = NotificationMessageUtil.formatReservationNotificationUrl();
+        String url = NotificationContentUtil.formatReservationNotificationUrl();
 
         return new FcmMessageDto(title, body, url);
     }
@@ -680,13 +669,7 @@ public class NotificationService {
         Message message;
 
         for (Fcm token : tokenList) {
-            message = Message.builder()
-                    .putData("title", fcmMessageDto.getTitle())
-                    .putData("body", fcmMessageDto.getBody())
-                    .putData("url", fcmMessageDto.getUrl())
-                    .setToken(token.getToken())
-                    .build();
-
+            message = createMessageWithUrl(fcmMessageDto.getTitle(), fcmMessageDto.getBody(), fcmMessageDto.getUrl(), token.getToken());
             messageList.add(message);
 
             fcmMessageDtoList.add(FcmMessageDto.of(fcmMessageDto, token.getToken(), user));
@@ -756,14 +739,14 @@ public class NotificationService {
 
         // 알림 메세지 data 별 포멧팅
         if (isCODPassed) {
-            title = NotificationMessageUtil.formatReservationFullCanceledNotificationTitle(restaurantName);
-            body = NotificationMessageUtil.formatReservationFullCanceledNotificationBody(reservedDate, reservedTime, user.getNormalTicketCount());
+            title = NotificationContentUtil.formatReservationFullCanceledNotificationTitle(restaurantName);
+            body = NotificationContentUtil.formatReservationFullCanceledNotificationBody(reservedDate, reservedTime, user.getNormalTicketCount());
         } else {
-            title = NotificationMessageUtil.formatReservationNullCanceledNotificationTitle(restaurantName);
-            body = NotificationMessageUtil.formatReservationNullCanceledNotificationBody(reservedDate, reservedTime, user.getNormalTicketCount());
+            title = NotificationContentUtil.formatReservationNullCanceledNotificationTitle(restaurantName);
+            body = NotificationContentUtil.formatReservationNullCanceledNotificationBody(reservedDate, reservedTime, user.getNormalTicketCount());
         }
 
-        String url = NotificationMessageUtil.formatReservationNotificationUrl();
+        String url = NotificationContentUtil.formatReservationNotificationUrl();
 
         return new FcmMessageDto(title, body, url);
     }

@@ -1,6 +1,7 @@
 package com.trinity.ctc.domain.notification.entity;
 
 import com.trinity.ctc.domain.seat.entity.Seat;
+import com.trinity.ctc.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -36,5 +37,14 @@ public class SeatNotification {
         this.body = body;
         this.url = url;
         this.seat = seat;
+    }
+
+    public static SeatNotification createSeatNotification(String title, String body, String url, Seat seat) {
+        return SeatNotification.builder()
+                .title(title)
+                .body(body)
+                .url(url)
+                .seat(seat)
+                .build();
     }
 }
