@@ -1,6 +1,8 @@
 package com.trinity.ctc.domain.notification.listener;
 
-import com.trinity.ctc.domain.notification.service.NotificationService;
+import com.trinity.ctc.domain.notification.service.ConfirmationNotificationService;
+import com.trinity.ctc.domain.notification.service.ReservationNotificationService;
+import com.trinity.ctc.domain.notification.service.SeatNotificationService;
 import com.trinity.ctc.domain.reservation.event.PreOccupancyCanceledEvent;
 import com.trinity.ctc.domain.reservation.event.ReservationCanceledEvent;
 import com.trinity.ctc.domain.reservation.event.ReservationCompleteEvent;
@@ -14,23 +16,25 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class ReservationEventListener {
-    private final NotificationService notificationService;
+    private final ReservationNotificationService reservationNotificationService;
+    private final SeatNotificationService seatNotificationService;
+    private final ConfirmationNotificationService confirmationNotificationService;
 
     @Async
     @EventListener
     public void handleReservationSuccessEvent(ReservationCompleteEvent reservationEvent) {
-        notificationService.registerReservationNotification(reservationEvent.getUserId(), reservationEvent.getReservationId());
-        notificationService.sendReservationSuccessNotification(reservationEvent.getUserId(), reservationEvent.getReservationId());
+        reservationNotificationService.registerReservationNotification(reservationEvent.getUserId(), reservationEvent.getReservationId());
+        confirmationNotificationService.sendReservationSuccessNotification(reservationEvent.getUserId(), reservationEvent.getReservationId());
     }
 
     @Async
     @EventListener
     public void handleReservationCanceledEvent(ReservationCanceledEvent reservationEvent) {
         if (reservationEvent.getAvailableSeats() == 1)
-            notificationService.sendSeatNotification(reservationEvent.getSeatId());
-        notificationService.sendReservationCanceledNotification(reservationEvent.getUserId(),
+            seatNotificationService.sendSeatNotification(reservationEvent.getSeatId());
+        confirmationNotificationService.sendReservationCanceledNotification(reservationEvent.getUserId(),
                 reservationEvent.getReservationId(), reservationEvent.isCODPassed());
-        notificationService.deleteReservationNotification(reservationEvent.getReservationId());
+        reservationNotificationService.deleteReservationNotification(reservationEvent.getReservationId());
     }
 
     @Async
@@ -38,7 +42,7 @@ public class ReservationEventListener {
     public void handlePreOccupancyCanceledEvent(PreOccupancyCanceledEvent preOccupancyCanceledEvent) {
 //        빈자리 알림 발송
         if (preOccupancyCanceledEvent.getAvailableSeats() == 1)
-            notificationService.sendSeatNotification(preOccupancyCanceledEvent.getSeatId());
+            seatNotificationService.sendSeatNotification(preOccupancyCanceledEvent.getSeatId());
     }
 }
 

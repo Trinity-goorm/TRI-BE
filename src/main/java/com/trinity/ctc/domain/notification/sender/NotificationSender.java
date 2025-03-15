@@ -70,4 +70,8 @@ public class NotificationSender {
 
         return resultList;
     }
+
+    /**
+     * 재발송 로직 구현!!!
+     */
 }

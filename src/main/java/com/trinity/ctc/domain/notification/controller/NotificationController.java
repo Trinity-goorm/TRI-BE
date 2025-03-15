@@ -1,7 +1,7 @@
 package com.trinity.ctc.domain.notification.controller;
 
 import com.trinity.ctc.domain.notification.dto.SubscriptionListResponse;
-import com.trinity.ctc.domain.notification.service.NotificationService;
+import com.trinity.ctc.domain.notification.service.SeatNotificationService;
 import com.trinity.ctc.domain.reservation.dto.ReservationResultResponse;
 import com.trinity.ctc.domain.reservation.service.ReservationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/notifications")
 @Tag(name = "Notification", description = "알림 관련 API")
 public class NotificationController {
-    private final NotificationService notificationService;
+    private final SeatNotificationService seatNotificationService;
     private final ReservationService reservationService;
 
     @PostMapping("/seats/subscribe")
@@ -45,7 +45,7 @@ public class NotificationController {
             description = "빈자리 알림 신청 티켓이 부족한 경우"
     )
     public ResponseEntity<Void> subscribeSeatNotification(@RequestParam long seatId) {
-        notificationService.subscribeSeatNotification(seatId);
+        seatNotificationService.subscribeSeatNotification(seatId);
         return ResponseEntity.noContent().build();
     }
 
@@ -63,7 +63,7 @@ public class NotificationController {
             )
     )
     public ResponseEntity<SubscriptionListResponse> getSeatNotifications() {
-        SubscriptionListResponse subscriptionList = notificationService.getSeatNotifications();
+        SubscriptionListResponse subscriptionList = seatNotificationService.getSeatNotifications();
         return ResponseEntity.ok(subscriptionList);
     }
 
@@ -77,7 +77,7 @@ public class NotificationController {
             description = "취소 성공"
     )
     public ResponseEntity<Void> cancelSubscribeSeatNotification(@RequestParam long seatNotificationId) {
-        notificationService.cancelSubscribeSeatNotification(seatNotificationId);
+        seatNotificationService.cancelSubscribeSeatNotification(seatNotificationId);
         return ResponseEntity.noContent().build();
     }
 

@@ -1,6 +1,7 @@
 package com.trinity.ctc.domain.notification.scheduler;
 
-import com.trinity.ctc.domain.notification.service.NotificationService;
+import com.trinity.ctc.domain.notification.service.ReservationNotificationService;
+import com.trinity.ctc.domain.notification.service.SeatNotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -8,14 +9,15 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class NotificationScheduler {
-    private final NotificationService notificationService;
+    private final ReservationNotificationService reservationNotificationService;
+    private final SeatNotificationService seatNotificationService;
 
     /**
      * 매일 8시에 당일 예약 알림을 보내는 메서드 호출(매일 8시에 실행되도록 스케줄링)
      */
     @Scheduled(cron = "0 0 8 * * ?") // 매일 8시에 실행
     public void sendDailyNotification() {
-        notificationService.sendDailyNotification();
+        reservationNotificationService.sendDailyNotification();
     }
 
     /**
@@ -23,12 +25,12 @@ public class NotificationScheduler {
      */
     @Scheduled(cron = "0 0 8-18/1 * * ?") // 8 ~ 18시 내에서 1시간 단위로 실행
     public void sendHourBeforeNotification() {
-        notificationService.sendHourBeforeNotification();
+        reservationNotificationService.sendHourBeforeNotification();
     }
 
     @Scheduled(cron = "0 0 9-19/1 * * ?")
     public void deleteSeatNotificationMessages() {
-        notificationService.deleteSeatNotificationMessages();
+        seatNotificationService.deleteSeatNotificationMessages();
     }
 
 }
