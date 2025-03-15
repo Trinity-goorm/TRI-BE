@@ -3,7 +3,7 @@ package com.trinity.ctc.domain.search.service;
 import com.trinity.ctc.domain.restaurant.dto.RestaurantPreviewRequest;
 import com.trinity.ctc.domain.restaurant.dto.RestaurantPreviewResponse;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
-import com.trinity.ctc.domain.restaurant.repository.RestaurantRepository;
+import com.trinity.ctc.domain.restaurant.repository.JpqlRestaurantRepository;
 import com.trinity.ctc.domain.restaurant.service.RestaurantService;
 import com.trinity.ctc.domain.search.dto.SearchHistoryResponse;
 import com.trinity.ctc.domain.search.entity.SearchHistory;
@@ -31,10 +31,10 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Slf4j
 public class SearchService {
-    private final RestaurantRepository restaurantRepository;
     private final RestaurantService restaurantService;
     private final UserRepository userRepository;
     private final SearchRepository searchRepository;
+    private final JpqlRestaurantRepository JpqlRestaurantRepository;
 
     @Transactional
     public List<RestaurantPreviewResponse> search(String kakaoId, RestaurantPreviewRequest request, String keyword) {
@@ -47,7 +47,16 @@ public class SearchService {
 
         Pageable pageable = PageRequest.of(request.getPage() - 1, 30, sort);
 
-        Page<Restaurant> restaurants = restaurantRepository.searchRestaurants(keyword, pageable);
+        //# JPQL, QUERY_DSL, JDBC, NATIVE_QUERY 중 하나 선택
+        log.info("검색 쿼리 시작");
+        long startTime = System.nanoTime();
+        Page<Restaurant> restaurants = JpqlRestaurantRepository.searchRestaurants(keyword, pageable);
+//        Page<Restaurant> restaurants = repositoryFactory.searchRestaurants(QUERY_DSL, keyword, pageable);
+//        Page<Restaurant> restaurants = repositoryFactory.searchRestaurants(JDBC, keyword, pageable);
+//        Page<Restaurant> restaurants = repositoryFactory.searchRestaurants(NATIVE_QUERY, keyword, pageable);
+        long endTime = System.nanoTime();
+        log.info("검색 쿼리 소요 시간: {}ms", (endTime - startTime) / 1_000_000);
+        log.info("검색 쿼리 종료");
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 

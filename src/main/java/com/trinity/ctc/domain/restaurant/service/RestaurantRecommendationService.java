@@ -79,8 +79,8 @@ public class RestaurantRecommendationService {
         log.info("AI 추천 요청: {}", userId, request.getPreferredCategories());
 
 
-//        AIRecommendationResponse aiResponse = aiRecommendationClient.getRecommendations(request);
-        AIRecommendationResponse aiResponse = aiRecommendationClientDumy.getRecommendations(request);
+        AIRecommendationResponse aiResponse = aiRecommendationClient.getRecommendations(request);
+//        AIRecommendationResponse aiResponse = aiRecommendationClientDumy.getRecommendations(request);
         log.info("AI 추천 결과: {}", aiResponse.getUserId(), aiResponse.getRecommendations());
 
         return aiResponse.getRecommendations().stream()
