@@ -15,13 +15,13 @@ public interface JpqlRestaurantRepository extends JpaRepository<Restaurant, Long
     Page<Restaurant> findByCategory(@Param("categoryId") Long categoryId, Pageable pageable);
 
     @Query("SELECT r FROM Restaurant r " +
-        "LEFT JOIN r.menus m " +
-        "LEFT JOIN r.restaurantCategoryList rc " +
-        "LEFT JOIN rc.category c " +
+        "JOIN r.menus m " +
+        "JOIN r.restaurantCategoryList rc " +
+        "JOIN rc.category c " +
         "WHERE ((r.name) LIKE (CONCAT('%', :keyword, '%')) " +
         "OR (m.name) LIKE (CONCAT('%', :keyword, '%')) " +
         "OR (c.name) LIKE (CONCAT('%', :keyword, '%'))) " +
-        "AND r.averagePrice>5000")
+        "AND r.averagePrice>0")
     Page<Restaurant> searchRestaurants(@Param("keyword") String keyword, Pageable pageable);
 
 }
