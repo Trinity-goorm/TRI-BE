@@ -22,7 +22,6 @@ import com.trinity.ctc.domain.seat.repository.SeatRepository;
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.global.exception.CustomException;
-import com.trinity.ctc.global.exception.error_code.FcmErrorCode;
 import com.trinity.ctc.global.exception.error_code.NotificationErrorCode;
 import com.trinity.ctc.global.exception.error_code.SeatErrorCode;
 import com.trinity.ctc.global.exception.error_code.UserErrorCode;
@@ -185,49 +184,45 @@ public class SeatNotificationService {
 
         int pageNumber = 0;
         int pageSize = 500;
-        Slice<SeatNotificationSubscription> slice;
+        Slice<Fcm> slice;
 
         List<NotificationHistory> notificationHistoryList = new ArrayList<>();
 
-        // 빈자리 알림 메세지 정보 (구독한 빈자리 알림)
+        // 빈자리 알림 정보
         SeatNotification seatNotification = seatNotificationRepository.findBySeatId(seatId)
                 .orElseThrow(() -> new CustomException(NotificationErrorCode.NOT_FOUND));
 
+        // 빈자리 알림 구독자 리스트
+        List<SeatNotificationSubscription> seatNotificationSubscriptionList =
+                seatNotificationSubscriptionRepository.findAllBySeatIdWithUsers(seatId).orElseThrow(
+                        () -> new CustomException(NotificationErrorCode.NO_SUBSCRIPTION));
+
+        List<User> userList = seatNotificationSubscriptionList.stream().map(SeatNotificationSubscription::getUser).toList();
+
         do {
-            List<FcmMulticastMessageDto> multicastMessageDtos = new ArrayList<>();
+            List<FcmMulticastMessageDto> multicastMessageDtoList = new ArrayList<>();
 
             Pageable pageable = PageRequest.of(pageNumber, pageSize);
-            slice = seatNotificationSubscriptionRepository.findAllBySeatId(seatId, pageable);
-            List<SeatNotificationSubscription> seatNotificationSubscriptionList = slice.getContent();
+            slice = fcmRepository.findByUserIn(userList, pageable);
 
-            if (seatNotificationSubscriptionList.isEmpty()) {
-                log.info("❌ 구독자가 없습니다. 알림 발송을 중단합니다.");
-                return;
-            }
+            List<Fcm> tokenList = slice.getContent();
+            List<String> tokens = tokenList.stream().map(Fcm::getToken).toList();
 
-            List<String> tokenList = new ArrayList<>();
-            for (SeatNotificationSubscription notificationSubscription : seatNotificationSubscriptionList) {
-//                List<String> userTokens = fcmRepository.findByUser(notificationSubscription.getUser().getId()).orElseThrow(() -> new CustomException(FcmErrorCode.NO_FCM_TOKEN_REGISTERED));
-
-                List<String> userTokens = notificationSubscription.getUser().getFcmList().stream().map(Fcm::getToken).toList();
-                tokenList.addAll(userTokens);
-                multicastMessageDtos.add(new FcmMulticastMessageDto(userTokens, seatNotification.getTitle(), seatNotification.getBody(), seatNotification.getUrl(), notificationSubscription.getUser()));
-            }
-
-            MulticastMessage multicastMessage = createMulticastMessageWithUrl(seatNotification.getTitle(), seatNotification.getBody(), seatNotification.getUrl(), tokenList);
+            multicastMessageDtoList.add(new FcmMulticastMessageDto(tokenList, seatNotification.getTitle(), seatNotification.getBody(), seatNotification.getUrl()));
+            MulticastMessage multicastMessage = createMulticastMessageWithUrl(seatNotification.getTitle(), seatNotification.getBody(), seatNotification.getUrl(), tokens);
 
             // 알림 전송
             List<FcmSendingResultDto> resultList = notificationSender.sendMulticastNotification(multicastMessage);
-            log.info("✅ 빈자리 알림 발송 완료 (Batch {}): {} 개", pageNumber, seatNotificationSubscriptionList.size());
+            log.info("✅ 빈자리 알림 발송 완료 (Batch {}): {} 개", pageNumber, tokenList.size());
 
             // 전송된 알림 히스토리를 배치로 저장
             List<NotificationHistory> notificationHistories = notificationHistoryService.buildMulticastNotificationHistory(
-                    multicastMessageDtos, resultList, SEAT_NOTIFICATION);
+                    multicastMessageDtoList, resultList, SEAT_NOTIFICATION);
 
             notificationHistoryList.addAll(notificationHistories);
 
-            pageNumber++; // 다음 페이지로 이동
-        } while (slice.hasNext()); // 다음 페이지가 있으면 계속 반복
+            pageNumber++;
+        } while (slice.hasNext());
 
         long endTime = System.nanoTime(); // 종료 시간 측정
         long elapsedTime = endTime - startTime; // 경과 시간 (나노초 단위)

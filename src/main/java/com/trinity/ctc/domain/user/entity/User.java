@@ -26,7 +26,6 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@BatchSize(size = 500)
 @NoArgsConstructor
 public class User {
 
@@ -51,7 +50,6 @@ public class User {
     private String imageUrl;
     private Boolean isDeleted;
 
-    @BatchSize(size = 500)
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Fcm> fcmList = new ArrayList<>();
 

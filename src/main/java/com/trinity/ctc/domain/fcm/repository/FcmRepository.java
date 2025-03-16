@@ -1,6 +1,9 @@
 package com.trinity.ctc.domain.fcm.repository;
 
 import com.trinity.ctc.domain.fcm.entity.Fcm;
+import com.trinity.ctc.domain.user.entity.User;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -31,6 +34,9 @@ public interface FcmRepository extends JpaRepository<Fcm, Long> {
                      @Param("updatedAt") LocalDateTime updatedAt,
                      @Param("expiresAt") LocalDateTime expiresAt);
 
-    @Query("SELECT f.token FROM Fcm f WHERE f.user.id = :userId")
+    @Query("SELECT f.token FROM Fcm f WHERE f.user.id = :userId ORDER BY f.id")
     Optional<List<String>> findByUser(@Param("userId") Long userId);
+
+    @Query("SELECT f FROM Fcm f WHERE f.user IN :users ORDER BY f.id")
+    Slice<Fcm> findByUserIn(@Param("users") List<User> users, Pageable pageable);
 }
