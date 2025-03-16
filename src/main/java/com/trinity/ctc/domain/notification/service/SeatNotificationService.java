@@ -30,10 +30,7 @@ import com.trinity.ctc.global.kakao.service.AuthService;
 import com.trinity.ctc.global.util.formatter.DateTimeUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -188,7 +185,7 @@ public class SeatNotificationService {
 
         int pageNumber = 0;
         int pageSize = 500;
-        Page<SeatNotificationSubscription> page;
+        Slice<SeatNotificationSubscription> slice;
 
         List<NotificationHistory> notificationHistoryList = new ArrayList<>();
 
@@ -200,8 +197,8 @@ public class SeatNotificationService {
             List<FcmMulticastMessageDto> multicastMessageDtos = new ArrayList<>();
 
             Pageable pageable = PageRequest.of(pageNumber, pageSize);
-            page = seatNotificationSubscriptionRepository.findAllBySeatId(seatId, pageable);
-            List<SeatNotificationSubscription> seatNotificationSubscriptionList = page.getContent();
+            slice = seatNotificationSubscriptionRepository.findAllBySeatId(seatId, pageable);
+            List<SeatNotificationSubscription> seatNotificationSubscriptionList = slice.getContent();
 
             if (seatNotificationSubscriptionList.isEmpty()) {
                 log.info("❌ 구독자가 없습니다. 알림 발송을 중단합니다.");
@@ -210,9 +207,9 @@ public class SeatNotificationService {
 
             List<String> tokenList = new ArrayList<>();
             for (SeatNotificationSubscription notificationSubscription : seatNotificationSubscriptionList) {
-                List<String> userTokens = fcmRepository.findByUser(notificationSubscription.getUser().getId()).orElseThrow(() -> new CustomException(FcmErrorCode.NO_FCM_TOKEN_REGISTERED));
+//                List<String> userTokens = fcmRepository.findByUser(notificationSubscription.getUser().getId()).orElseThrow(() -> new CustomException(FcmErrorCode.NO_FCM_TOKEN_REGISTERED));
 
-//                List<String> userTokens = notificationSubscription.getUser().getFcmList().stream().map(Fcm::getToken).toList();
+                List<String> userTokens = notificationSubscription.getUser().getFcmList().stream().map(Fcm::getToken).toList();
                 tokenList.addAll(userTokens);
                 multicastMessageDtos.add(new FcmMulticastMessageDto(userTokens, seatNotification.getTitle(), seatNotification.getBody(), seatNotification.getUrl(), notificationSubscription.getUser()));
             }
@@ -230,12 +227,12 @@ public class SeatNotificationService {
             notificationHistoryList.addAll(notificationHistories);
 
             pageNumber++; // 다음 페이지로 이동
-        } while (page.hasNext()); // 다음 페이지가 있으면 계속 반복
+        } while (slice.hasNext()); // 다음 페이지가 있으면 계속 반복
 
         long endTime = System.nanoTime(); // 종료 시간 측정
         long elapsedTime = endTime - startTime; // 경과 시간 (나노초 단위)
 
-        notificationHistoryService.saveNotificationHistory(notificationHistoryList);
+//        notificationHistoryService.saveNotificationHistory(notificationHistoryList);
 
         log.info("sendSeatNotification 실행 시간: {} ms", elapsedTime / 1_000_000);
     }
