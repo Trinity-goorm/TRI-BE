@@ -30,6 +30,7 @@ import java.util.List;
 
 import static com.trinity.ctc.domain.notification.fomatter.NotificationContentUtil.*;
 import static com.trinity.ctc.domain.notification.fomatter.NotificationMessageUtil.createMessageWithUrl;
+import static com.trinity.ctc.domain.notification.type.NotificationType.RESERVATION_CANCELED;
 import static com.trinity.ctc.domain.notification.type.NotificationType.RESERVATION_COMPLETE;
 
 @Slf4j
@@ -144,11 +145,8 @@ public class ConfirmationNotificationService {
         List<Message> messageList = groupFcmInformationDto.getMessageList();
         List<FcmMessageDto> messageDtoList = groupFcmInformationDto.getMessageDtoList();
 
-        // 알림 타입 세팅
-        NotificationType type = NotificationType.RESERVATION_CANCELED;
-
         // 단 건의 알림 전송 로직에 대해 처리하는 메서드
-        List<NotificationHistory> notificationHistoryList = sendSingleNotification(messageList, type, messageDtoList);
+        List<NotificationHistory> notificationHistoryList = sendSingleNotification(messageList, RESERVATION_CANCELED, messageDtoList);
 
         // 전송된 알림 히스토리를 전부 history 테이블에 저장하는 메서드
         notificationHistoryService.saveNotificationHistory(notificationHistoryList);

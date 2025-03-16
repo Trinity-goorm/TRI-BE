@@ -1,28 +1,32 @@
 package com.trinity.ctc.domain.notification.service;
 
+import com.google.firebase.messaging.MessagingErrorCode;
 import com.trinity.ctc.domain.notification.dto.FcmMessageDto;
 import com.trinity.ctc.domain.notification.dto.FcmMulticastMessageDto;
 import com.trinity.ctc.domain.notification.dto.FcmSendingResultDto;
 import com.trinity.ctc.domain.notification.entity.NotificationHistory;
 import com.trinity.ctc.domain.notification.repository.NotificationHistoryRepository;
+import com.trinity.ctc.domain.notification.result.SentResult;
 import com.trinity.ctc.domain.notification.type.NotificationType;
+import com.trinity.ctc.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static com.trinity.ctc.domain.notification.entity.NotificationHistory.createNotificationHistory;
+import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
 
 @Slf4j
 @Service
 @EnableAsync
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class NotificationHistoryService {
     private final NotificationHistoryRepository notificationHistoryRepository;
@@ -75,15 +79,21 @@ public class NotificationHistoryService {
 
             // 각 메시지에 대해 여러 개의 FCM 토큰을 개별적으로 처리
             List<String> fcmTokens = multicastMessageDtoList.get(i).getFcmTokens();
+
+            LocalDateTime sentAt = resultList.get(i).getSentAt();
+            SentResult sentResult = resultList.get(i).getSentResult();
+            MessagingErrorCode errorCode = resultList.get(i).getErrorCode();
+            User user = multicastMessageDtoList.get(i).getUser();
+
             for (String token : fcmTokens) {
                 notificationHistoryList.add(createNotificationHistory(
                         type,
                         messageHistory,
-                        resultList.get(i).getSentAt(),
-                        resultList.get(i).getSentResult(),
-                        resultList.get(i).getErrorCode(),
+                        sentAt,
+                        sentResult,
+                        errorCode,
                         token,
-                        multicastMessageDtoList.get(i).getUser()
+                        user
                 ));
             }
         }
@@ -97,7 +107,7 @@ public class NotificationHistoryService {
      *
      * @param notificationHistoryList 알림 history Entity 리스트
      */
-    @Transactional
+    @Transactional(propagation = REQUIRES_NEW)
     public void saveNotificationHistory(List<NotificationHistory> notificationHistoryList) {
         notificationHistoryRepository.saveAll(notificationHistoryList);
     }

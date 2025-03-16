@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -17,8 +18,8 @@ public interface SeatNotificationSubscriptionRepository extends JpaRepository<Se
     @Query("Select s FROM SeatNotificationSubscription s WHERE s.user.id = :userId AND s.seatNotification = :seatNotification")
     Optional<SeatNotificationSubscription> findByUserIdAndSubscription(@Param("userId") long userId, @Param("seatNotification") SeatNotification seatNotification);
 
-    @Query("Select s FROM SeatNotificationSubscription s WHERE s.user.id = :userId ORDER BY s.id ASC")
-    Page<SeatNotificationSubscription> findAllByUserId(@Param("userId") long userId, Pageable pageable);
+    @Query("Select s FROM SeatNotificationSubscription s WHERE s.user.id = :userId")
+    List<SeatNotificationSubscription> findAllByUserId(@Param("userId") long userId);
 
     @Query("SELECT COUNT(s) FROM SeatNotificationSubscription s WHERE s.seatNotification = :seatNotification")
     int countBySeatNotificationMessage(@Param("seatNotification") SeatNotification seatNotification);

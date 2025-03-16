@@ -22,6 +22,7 @@ import com.trinity.ctc.domain.seat.repository.SeatRepository;
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.global.exception.CustomException;
+import com.trinity.ctc.global.exception.error_code.FcmErrorCode;
 import com.trinity.ctc.global.exception.error_code.NotificationErrorCode;
 import com.trinity.ctc.global.exception.error_code.SeatErrorCode;
 import com.trinity.ctc.global.exception.error_code.UserErrorCode;
@@ -54,11 +55,11 @@ import static com.trinity.ctc.domain.notification.type.NotificationType.SEAT_NOT
 @RequiredArgsConstructor
 public class SeatNotificationService {
     private final UserRepository userRepository;
-    private final FcmRepository fcmRepository;
     private final ReservationRepository reservationRepository;
     private final SeatRepository seatRepository;
     private final SeatNotificationRepository seatNotificationRepository;
     private final SeatNotificationSubscriptionRepository seatNotificationSubscriptionRepository;
+    private final FcmRepository fcmRepository;
 
     private final NotificationHistoryService notificationHistoryService;
     private final AuthService authService;
@@ -67,12 +68,12 @@ public class SeatNotificationService {
     @Transactional
     public void subscribeSeatNotification(Long seatId) {
         String kakaoId = authService.getAuthenticatedKakaoId();
-
         User user = userRepository.findByKakaoId(Long.valueOf(kakaoId)).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
         // 티켓 개수 검증, 509 반환
         EmptyTicketValidator.validateEmptyTicketUsage(user.getEmptyTicketCount());
 
+        // 기존에 조ㅗㄴ
         SeatNotification seatNotification = seatNotificationRepository.findBySeatId(seatId)
                 .orElseGet(() -> registerSeatNotificationMessage(seatId));
 
@@ -146,40 +147,28 @@ public class SeatNotificationService {
      *
      * @return
      */
-    @Transactional
+    @Transactional(readOnly = true)
     public SubscriptionListResponse getSeatNotifications() {
         String kakaoId = authService.getAuthenticatedKakaoId();
-        User user = userRepository.findByKakaoId(Long.valueOf(kakaoId))
-                .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
+        User user = userRepository.findByKakaoId(Long.valueOf(kakaoId)).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
-        int pageNumber = 0;
-        int pageSize = 500;
+        List<SeatNotificationSubscription> seatNotificationSubscriptionList = seatNotificationSubscriptionRepository.findAllByUserId(user.getId());
         List<SubscriptionResponse> subscriptionResponseList = new ArrayList<>();
+        log.info("조회된 SeatNotification 개수: {}", seatNotificationSubscriptionList.size());
 
-        Page<SeatNotificationSubscription> page;
 
-        do {
-            Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("id").ascending());
-            page = seatNotificationSubscriptionRepository.findAllByUserId(user.getId(), pageable);
-            List<SeatNotificationSubscription> seatNotificationSubscriptionList = page.getContent();
+        for (SeatNotificationSubscription notification : seatNotificationSubscriptionList) {
+            int subscriberCount = seatNotificationSubscriptionRepository.countBySeatNotificationMessage(notification.getSeatNotification());
 
-            log.info("조회된 SeatNotification 개수 (페이지 {}): {}", pageNumber, seatNotificationSubscriptionList.size());
+            log.info("SeatNotification ID: {}, 관련 Seat ID: {}, 구독자 수: {}",
+                    notification.getId(),
+                    notification.getSeatNotification().getSeat().getId(),
+                    subscriberCount);
 
-            for (SeatNotificationSubscription notification : seatNotificationSubscriptionList) {
-                int subscriberCount = seatNotificationSubscriptionRepository.countBySeatNotificationMessage(notification.getSeatNotification());
-
-                log.info("SeatNotification ID: {}, 관련 Seat ID: {}, 구독자 수: {}",
-                        notification.getId(),
-                        notification.getSeatNotification().getSeat().getId(),
-                        subscriberCount);
-
-                SubscriptionResponse subscriptionResponse = SubscriptionResponse.of(notification.getId(), notification.getSeatNotification().getSeat(), subscriberCount);
-                subscriptionResponseList.add(subscriptionResponse);
-                log.info("response: " + subscriptionResponse.getSeatNotificationId());
-            }
-
-            pageNumber++; // 다음 페이지로 이동
-        } while (page.hasNext()); // 다음 페이지가 있으면 반복
+            SubscriptionResponse subscriptionResponse = SubscriptionResponse.of(notification.getId(), notification.getSeatNotification().getSeat(), subscriberCount);
+            subscriptionResponseList.add(subscriptionResponse);
+            log.info("response: " + subscriptionResponse.getSeatNotificationId());
+        }
 
         return new SubscriptionListResponse(subscriptionResponseList.size(), subscriptionResponseList);
     }
@@ -191,7 +180,7 @@ public class SeatNotificationService {
      *
      * @param seatId
      */
-    @Transactional
+    @Transactional(readOnly = true)
     public void sendSeatNotification(long seatId) {
         log.info("✅ 빈자리 알림 발송 로직 시작!");
 
@@ -200,13 +189,16 @@ public class SeatNotificationService {
         int pageNumber = 0;
         int pageSize = 500;
         Page<SeatNotificationSubscription> page;
-        List<FcmMulticastMessageDto> multicastMessageDtos = new ArrayList<>();
+
+        List<NotificationHistory> notificationHistoryList = new ArrayList<>();
 
         // 빈자리 알림 메세지 정보 (구독한 빈자리 알림)
         SeatNotification seatNotification = seatNotificationRepository.findBySeatId(seatId)
                 .orElseThrow(() -> new CustomException(NotificationErrorCode.NOT_FOUND));
 
         do {
+            List<FcmMulticastMessageDto> multicastMessageDtos = new ArrayList<>();
+
             Pageable pageable = PageRequest.of(pageNumber, pageSize);
             page = seatNotificationSubscriptionRepository.findAllBySeatId(seatId, pageable);
             List<SeatNotificationSubscription> seatNotificationSubscriptionList = page.getContent();
@@ -218,8 +210,9 @@ public class SeatNotificationService {
 
             List<String> tokenList = new ArrayList<>();
             for (SeatNotificationSubscription notificationSubscription : seatNotificationSubscriptionList) {
-//                List<String> userTokens = fcmRepository.findByUser(notificationSubscription.getUser().getId()).orElseThrow(() -> new CustomException(NO_FCM_TOKEN_REGISTERED));
-                List<String> userTokens = notificationSubscription.getUser().getFcmList().stream().map(Fcm::getToken).toList();
+                List<String> userTokens = fcmRepository.findByUser(notificationSubscription.getUser().getId()).orElseThrow(() -> new CustomException(FcmErrorCode.NO_FCM_TOKEN_REGISTERED));
+
+//                List<String> userTokens = notificationSubscription.getUser().getFcmList().stream().map(Fcm::getToken).toList();
                 tokenList.addAll(userTokens);
                 multicastMessageDtos.add(new FcmMulticastMessageDto(userTokens, seatNotification.getTitle(), seatNotification.getBody(), seatNotification.getUrl(), notificationSubscription.getUser()));
             }
@@ -231,20 +224,20 @@ public class SeatNotificationService {
             log.info("✅ 빈자리 알림 발송 완료 (Batch {}): {} 개", pageNumber, seatNotificationSubscriptionList.size());
 
             // 전송된 알림 히스토리를 배치로 저장
-            List<NotificationHistory> notificationHistoryList = notificationHistoryService.buildMulticastNotificationHistory(
+            List<NotificationHistory> notificationHistories = notificationHistoryService.buildMulticastNotificationHistory(
                     multicastMessageDtos, resultList, SEAT_NOTIFICATION);
-            notificationHistoryService.saveNotificationHistory(notificationHistoryList);
+
+            notificationHistoryList.addAll(notificationHistories);
 
             pageNumber++; // 다음 페이지로 이동
         } while (page.hasNext()); // 다음 페이지가 있으면 계속 반복
 
         long endTime = System.nanoTime(); // 종료 시간 측정
         long elapsedTime = endTime - startTime; // 경과 시간 (나노초 단위)
+
+        notificationHistoryService.saveNotificationHistory(notificationHistoryList);
+
         log.info("sendSeatNotification 실행 시간: {} ms", elapsedTime / 1_000_000);
-    }
-
-    private void saveNotificationHistory(List<String> fcmTokens, String title, String body, String url, List<FcmSendingResultDto> resultList, List<User> userList) {
-
     }
 
     /**

@@ -16,6 +16,7 @@ import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.global.exception.CustomException;
+import com.trinity.ctc.global.exception.error_code.FcmErrorCode;
 import com.trinity.ctc.global.exception.error_code.ReservationErrorCode;
 import com.trinity.ctc.global.exception.error_code.UserErrorCode;
 import com.trinity.ctc.global.util.formatter.DateTimeUtil;
@@ -36,7 +37,6 @@ import static com.trinity.ctc.domain.notification.entity.ReservationNotification
 import static com.trinity.ctc.domain.notification.fomatter.NotificationMessageUtil.createMessageWithUrl;
 import static com.trinity.ctc.domain.notification.type.NotificationType.BEFORE_ONE_HOUR_NOTIFICATION;
 import static com.trinity.ctc.domain.notification.type.NotificationType.DAILY_NOTIFICATION;
-import static com.trinity.ctc.global.exception.error_code.FcmErrorCode.NO_FCM_TOKEN_REGISTERED;
 import static com.trinity.ctc.global.util.formatter.DateTimeUtil.combineWithDate;
 
 @Slf4j
@@ -176,12 +176,9 @@ public class ReservationNotificationService {
         List<NotificationHistory> notificationHistoryList = new ArrayList<>();
         List<Long> reservationNotificationIdList = new ArrayList<>();
 
-        // 알림 타입 세팅
-        NotificationType type = BEFORE_ONE_HOUR_NOTIFICATION;
-
         // 전송할 알림 리스트를 전부 도는 알림 발송 로직(현재 동기 처리 중)
         for (ReservationNotification notification : reservationNotificationList) {
-            List<NotificationHistory> notificationHistory = handleEachNotification(notification, type);
+            List<NotificationHistory> notificationHistory = handleEachNotification(notification, BEFORE_ONE_HOUR_NOTIFICATION);
             notificationHistoryList.addAll(notificationHistory);
             reservationNotificationIdList.add(notification.getId());
         }
@@ -214,7 +211,7 @@ public class ReservationNotificationService {
      */
     private GroupFcmInformationDto buildReservationNotification(ReservationNotification notification) {
         // FCM 토큰 가져오기
-        List<String> tokenList = fcmRepository.findByUser(notification.getUser().getId()).orElseThrow(() -> new CustomException(NO_FCM_TOKEN_REGISTERED));
+        List<String> tokenList = fcmRepository.findByUser(notification.getUser().getId()).orElseThrow(() -> new CustomException(FcmErrorCode.NO_FCM_TOKEN_REGISTERED));
 
         List<Message> messageList = new ArrayList<>();
         List<FcmMessageDto> messageDtoList = new ArrayList<>();
