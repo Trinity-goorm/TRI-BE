@@ -37,6 +37,8 @@ public interface FcmRepository extends JpaRepository<Fcm, Long> {
     @Query("SELECT f.token FROM Fcm f WHERE f.user.id = :userId ORDER BY f.id")
     Optional<List<String>> findByUser(@Param("userId") Long userId);
 
+    List<Fcm> findByUserIn(List<User> userList);
+
     @Query("SELECT f FROM Fcm f WHERE f.user IN :users ORDER BY f.id")
     Slice<Fcm> findByUserIn(@Param("users") List<User> users, Pageable pageable);
 }

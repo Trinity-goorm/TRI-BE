@@ -1,5 +1,6 @@
 package com.trinity.ctc.domain.notification.service;
 
+import com.google.common.collect.Lists;
 import com.google.firebase.messaging.MulticastMessage;
 import com.trinity.ctc.domain.fcm.entity.Fcm;
 import com.trinity.ctc.domain.fcm.repository.FcmRepository;
@@ -30,6 +31,7 @@ import com.trinity.ctc.global.util.formatter.DateTimeUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +41,8 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 
 import static com.trinity.ctc.domain.notification.entity.SeatNotification.createSeatNotification;
 import static com.trinity.ctc.domain.notification.entity.SeatNotificationSubscription.createSeatNotificationSubscription;
@@ -178,15 +182,13 @@ public class SeatNotificationService {
      */
     @Transactional(readOnly = true)
     public void sendSeatNotification(long seatId) {
-        log.info("✅ 빈자리 알림 발송 로직 시작!");
-
+        log.info("✅ 빈자리 알림 비동기 발송 시작!");
         long startTime = System.nanoTime(); // 시작 시간 측정
 
-        int pageNumber = 0;
+        int batchCount = 0;
         int pageSize = 500;
-        Slice<Fcm> slice;
 
-        List<NotificationHistory> notificationHistoryList = new ArrayList<>();
+        List<CompletableFuture<List<NotificationHistory>>> futureList = new ArrayList<>();
 
         // 빈자리 알림 정보
         SeatNotification seatNotification = seatNotificationRepository.findBySeatId(seatId)
@@ -199,37 +201,47 @@ public class SeatNotificationService {
 
         List<User> userList = seatNotificationSubscriptionList.stream().map(SeatNotificationSubscription::getUser).toList();
 
-        do {
-            List<FcmMulticastMessageDto> multicastMessageDtoList = new ArrayList<>();
+        List<Fcm> fcmList = fcmRepository.findByUserIn(userList);
+        List<List<Fcm>> batches = Lists.partition(fcmList, pageSize);
 
-            Pageable pageable = PageRequest.of(pageNumber, pageSize);
-            slice = fcmRepository.findByUserIn(userList, pageable);
-
-            List<Fcm> tokenList = slice.getContent();
-            List<String> tokens = tokenList.stream().map(Fcm::getToken).toList();
-
-            multicastMessageDtoList.add(new FcmMulticastMessageDto(tokenList, seatNotification.getTitle(), seatNotification.getBody(), seatNotification.getUrl()));
-            MulticastMessage multicastMessage = createMulticastMessageWithUrl(seatNotification.getTitle(), seatNotification.getBody(), seatNotification.getUrl(), tokens);
-
-            // 알림 전송
-            List<FcmSendingResultDto> resultList = notificationSender.sendMulticastNotification(multicastMessage);
-            log.info("✅ 빈자리 알림 발송 완료 (Batch {}): {} 개", pageNumber, tokenList.size());
-
-            // 전송된 알림 히스토리를 배치로 저장
-            List<NotificationHistory> notificationHistories = notificationHistoryService.buildMulticastNotificationHistory(
-                    multicastMessageDtoList, resultList, SEAT_NOTIFICATION);
-
-            notificationHistoryList.addAll(notificationHistories);
-
-            pageNumber++;
-        } while (slice.hasNext());
+        for (List<Fcm> batch : batches) {
+            batchCount++;
+            CompletableFuture<List<NotificationHistory>> future = sendSeatNotificationAsync(seatNotification, batch, batchCount);
+            futureList.add(future);
+        }
 
         long endTime = System.nanoTime(); // 종료 시간 측정
         long elapsedTime = endTime - startTime; // 경과 시간 (나노초 단위)
 
-//        notificationHistoryService.saveNotificationHistory(notificationHistoryList);
+        List<NotificationHistory> notificationHistoryList = futureList.stream()
+                .map(CompletableFuture::join) // 각 future의 실행이 끝날 때까지 기다림
+                .flatMap(List::stream) // 여러 리스트를 하나로 합침
+                .toList();
 
-        log.info("sendSeatNotification 실행 시간: {} ms", elapsedTime / 1_000_000);
+        notificationHistoryService.saveNotificationHistory(notificationHistoryList);
+
+        log.info("sendSeatNotification 전체 실행 시간: {} ms", elapsedTime / 1_000_000);
+    }
+
+    @Async
+    @Transactional(readOnly = true)
+    public CompletableFuture<List<NotificationHistory>> sendSeatNotificationAsync(SeatNotification seatNotification, List<Fcm> batch, int batchCount) {
+        return CompletableFuture.supplyAsync(() -> {
+            log.info("✅ 빈자리 알림 발송 (Batch {}): 시작", batchCount);
+            List<String> tokens = batch.stream().map(Fcm::getToken).toList();
+
+            MulticastMessage multicastMessage = createMulticastMessageWithUrl(seatNotification.getTitle(), seatNotification.getBody(), seatNotification.getUrl(), tokens);
+
+            // 알림 전송
+            List<FcmSendingResultDto> resultList = notificationSender.sendMulticastNotification(multicastMessage);
+            log.info("✅ 빈자리 알림 발송 완료 (Batch {}): {} 개", batchCount, batch.size());
+
+            // 전송된 알림 히스토리를 배치로 저장
+            return notificationHistoryService.buildMulticastNotificationHistory(
+                    List.of(new FcmMulticastMessageDto(batch, seatNotification.getTitle(), seatNotification.getBody(), seatNotification.getUrl())),
+                    resultList, SEAT_NOTIFICATION
+            );
+        }, Executors.newFixedThreadPool(8));
     }
 
     /**

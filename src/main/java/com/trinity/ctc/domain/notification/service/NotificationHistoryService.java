@@ -11,6 +11,7 @@ import com.trinity.ctc.domain.notification.result.SentResult;
 import com.trinity.ctc.domain.notification.type.NotificationType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -107,6 +108,7 @@ public class NotificationHistoryService {
      * @param notificationHistoryList 알림 history Entity 리스트
      */
     @Transactional(propagation = REQUIRES_NEW)
+    @Async
     public void saveNotificationHistory(List<NotificationHistory> notificationHistoryList) {
         notificationHistoryRepository.saveAll(notificationHistoryList);
     }
