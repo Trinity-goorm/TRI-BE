@@ -20,8 +20,7 @@ public interface JpqlRestaurantRepository extends JpaRepository<Restaurant, Long
         "JOIN rc.category c " +
         "WHERE ((r.name) LIKE (CONCAT('%', :keyword, '%')) " +
         "OR (m.name) LIKE (CONCAT('%', :keyword, '%')) " +
-        "OR (c.name) LIKE (CONCAT('%', :keyword, '%'))) " +
-        "AND r.averagePrice>0")
+        "OR (c.name) LIKE (CONCAT('%', :keyword, '%'))) " )
     Page<Restaurant> searchRestaurants(@Param("keyword") String keyword, Pageable pageable);
 
 }
