@@ -37,7 +37,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
         log.info("[LogoutFilter] - requestMethod: {}", requestMethod);
 
         // 🚀 로그아웃 요청이 아니면 필터 통과하도록 수정
-        if (!requestURI.equals("/logout") || !"POST".equals(requestMethod)) {
+        if (!requestURI.equals("/api/logout") || !"POST".equals(requestMethod)) {
             log.info("=========로그아웃 패스!==========");
             filterChain.doFilter(request, response);
             return;
