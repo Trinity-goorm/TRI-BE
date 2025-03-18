@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
-@RequestMapping("/token")
+@RequestMapping("/api/token")
 @RequiredArgsConstructor
 public class TokenController {
 
