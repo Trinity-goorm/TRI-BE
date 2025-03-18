@@ -1,4 +1,4 @@
-package com.trinity.ctc.global.config;
+package com.trinity.ctc.global.firebase;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;

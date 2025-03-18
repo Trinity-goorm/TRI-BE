@@ -1,4 +1,4 @@
-package com.trinity.ctc.global.config;
+package com.trinity.ctc.global.firebase;
 
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.ThreadManager;
