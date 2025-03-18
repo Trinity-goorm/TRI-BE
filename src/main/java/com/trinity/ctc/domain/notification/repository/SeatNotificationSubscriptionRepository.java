@@ -22,6 +22,6 @@ public interface SeatNotificationSubscriptionRepository extends JpaRepository<Se
     @Query("SELECT COUNT(s) FROM SeatNotificationSubscription s WHERE s.seatNotification = :seatNotification")
     int countBySeatNotificationMessage(@Param("seatNotification") SeatNotification seatNotification);
 
-    @Query("SELECT s FROM SeatNotificationSubscription s WHERE s.seatNotification.seat.id = :seatId")
-    Optional<List<SeatNotificationSubscription>> findAllBySeatIdWithUsers(@Param("seatId") long seatId);
+    @Query("SELECT s FROM SeatNotificationSubscription s WHERE s.seatNotification = :seatNotification")
+    Optional<List<SeatNotificationSubscription>> findAllBySeatNotificationWithUsers(@Param("seatNotification") SeatNotification seatNotification);
 }

@@ -602,4 +602,7 @@ VALUES (2, 1, 1), -- Seat Type 1: 최소 1명, 최대 2명
 -- Reservation 테이블
 INSERT INTO ctc.reservation
 (`reservation_date`, `created_at`, reservation_time_id, restaurant_id, seat_type_id, user_id, status)
-VALUES ('2025-03-01', NOW(), 1, 1, 1, 1, 'COMPLETED')
+VALUES ('2025-03-01', NOW(), 1, 1, 1, 1, 'COMPLETED');
+
+# CREATE INDEX idx_receiver_id ON fcm (receiver_id);
+# CREATE INDEX idx_seat_notification_id ON seat_notification_subscription (seat_notification_id);

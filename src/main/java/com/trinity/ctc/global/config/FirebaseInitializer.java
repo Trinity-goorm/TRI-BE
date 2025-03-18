@@ -28,6 +28,7 @@ public class FirebaseInitializer {
             if (FirebaseApp.getApps().isEmpty()) {
                 FirebaseOptions options = FirebaseOptions.builder()
                         .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                        .setThreadManager(new CustomThreadManager())
                         .build();
 
                 FirebaseApp.initializeApp(options);
