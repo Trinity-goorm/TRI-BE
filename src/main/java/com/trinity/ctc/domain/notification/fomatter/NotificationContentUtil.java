@@ -43,11 +43,11 @@ public class NotificationContentUtil {
         return MessageFormat.format(" http://localhost:5173/detail/{0}", restaurantId);
     }
 
-    public static String formatReservationCompleteNotificationTitle(String restaurantName) {
+    public static String formatReservationCompletedNotificationTitle(String restaurantName) {
         return MessageFormat.format("예약해주셔서 감사합니다.\r\n{0}에서 예약 내역을 알려드립니다.", restaurantName);
     }
 
-    public static String formatReservationCompleteNotificationBody(LocalDate date, LocalTime time, int min, int max) {
+    public static String formatReservationCompletedNotificationBody(LocalDate date, LocalTime time, int min, int max) {
         return MessageFormat.format("날짜: {0}\r\n시간: {1}\r\n인원: {2}~{3}명",
                 date, time, min, max);
     }

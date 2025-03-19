@@ -80,11 +80,4 @@ public class NotificationController {
         seatNotificationService.cancelSubscribeSeatNotification(seatNotificationId);
         return ResponseEntity.noContent().build();
     }
-
-
-    @PostMapping("/seats/test")
-    public ResponseEntity<ReservationResultResponse> testCancelReservation(@RequestParam long reservationId) {
-        ReservationResultResponse result = reservationService.cancelReservation(reservationId);
-        return ResponseEntity.ok(result);
-    }
 }

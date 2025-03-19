@@ -20,7 +20,6 @@ public class TreadPoolConfig {
         return Executors.newFixedThreadPool(16);
     }
 
-
     @Bean(name = "cachedThreadPoolExecutor")
     public Executor cachedThreadPoolExecutor() {
         return Executors.newCachedThreadPool();
@@ -33,13 +32,14 @@ public class TreadPoolConfig {
 
     @Bean(name = "customThreadPoolExecutor")
     public Executor customThreadPoolExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(8);
-        executor.setMaxPoolSize(16);
-        executor.setQueueCapacity(50);
-        executor.setThreadNamePrefix("custom-Thread-");
-        executor.setAllowCoreThreadTimeOut(true);
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor(
 
+        );
+        executor.setCorePoolSize(50);
+        executor.setMaxPoolSize(100);
+        executor.setQueueCapacity(100);
+        executor.setThreadNamePrefix("custom-sending-Thread-");
+        executor.setAllowCoreThreadTimeOut(true);
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(60);
         executor.setThreadPriority(Thread.NORM_PRIORITY);

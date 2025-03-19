@@ -226,7 +226,7 @@ public class SeatNotificationService {
                 .flatMap(List::stream) // 여러 리스트를 하나로 합침
                 .toList();
 
-//        notificationHistoryService.saveNotificationHistory(notificationHistoryList);
+        notificationHistoryService.saveNotificationHistory(notificationHistoryList);
     }
 
     @Async("fixedThreadPoolExecutor")

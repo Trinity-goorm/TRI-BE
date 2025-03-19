@@ -5,7 +5,7 @@ import com.trinity.ctc.domain.notification.service.ReservationNotificationServic
 import com.trinity.ctc.domain.notification.service.SeatNotificationService;
 import com.trinity.ctc.domain.reservation.event.PreOccupancyCanceledEvent;
 import com.trinity.ctc.domain.reservation.event.ReservationCanceledEvent;
-import com.trinity.ctc.domain.reservation.event.ReservationCompleteEvent;
+import com.trinity.ctc.domain.reservation.event.ReservationCompletedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -22,9 +22,9 @@ public class ReservationEventListener {
 
     @Async
     @EventListener
-    public void handleReservationSuccessEvent(ReservationCompleteEvent reservationEvent) {
+    public void handleReservationCompletedEvent(ReservationCompletedEvent reservationEvent) {
         reservationNotificationService.registerReservationNotification(reservationEvent.getUserId(), reservationEvent.getReservationId());
-        confirmationNotificationService.sendReservationSuccessNotification(reservationEvent.getUserId(), reservationEvent.getReservationId());
+        confirmationNotificationService.sendReservationCompletedNotification(reservationEvent.getUserId(), reservationEvent.getReservationId());
     }
 
     @Async

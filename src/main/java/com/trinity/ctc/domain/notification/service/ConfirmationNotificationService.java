@@ -31,7 +31,7 @@ import java.util.List;
 import static com.trinity.ctc.domain.notification.fomatter.NotificationContentUtil.*;
 import static com.trinity.ctc.domain.notification.fomatter.NotificationMessageUtil.createMessageWithUrl;
 import static com.trinity.ctc.domain.notification.type.NotificationType.RESERVATION_CANCELED;
-import static com.trinity.ctc.domain.notification.type.NotificationType.RESERVATION_COMPLETE;
+import static com.trinity.ctc.domain.notification.type.NotificationType.RESERVATION_COMPLETED;
 
 @Slf4j
 @EnableAsync
@@ -50,17 +50,17 @@ public class ConfirmationNotificationService {
      * @param reservationId
      */
     @Transactional
-    public void sendReservationSuccessNotification(Long userId, Long reservationId) {
+    public void sendReservationCompletedNotification(Long userId, Long reservationId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
         Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(() -> new CustomException(ReservationErrorCode.NOT_FOUND));
 
-        FcmMessageDto messageData = formattingReservationCompleteNotification(reservation);
+        FcmMessageDto messageData = formattingReservationCompletedNotification(reservation);
         GroupFcmInformationDto groupFcmInformationDto = buildMessageList(user, messageData);
         List<Message> messageList = groupFcmInformationDto.getMessageList();
         List<FcmMessageDto> messageDtoList = groupFcmInformationDto.getMessageDtoList();
 
         // 단 건의 알림 전송 로직에 대해 처리하는 메서드
-        List<NotificationHistory> notificationHistoryList = sendSingleNotification(messageList, RESERVATION_COMPLETE, messageDtoList);
+        List<NotificationHistory> notificationHistoryList = sendSingleNotification(messageList, RESERVATION_COMPLETED, messageDtoList);
 
         // 전송된 알림 히스토리를 전부 history 테이블에 저장하는 메서드
         notificationHistoryService.saveNotificationHistory(notificationHistoryList);
@@ -72,7 +72,7 @@ public class ConfirmationNotificationService {
      * @param reservation
      * @return
      */
-    private FcmMessageDto formattingReservationCompleteNotification(Reservation reservation) {
+    private FcmMessageDto formattingReservationCompletedNotification(Reservation reservation) {
         // 예약 완료 알림 메세지에 필요한 정보 변수 선언
         String restaurantName = reservation.getRestaurant().getName();
         LocalDate reservedDate = reservation.getReservationDate();
@@ -81,8 +81,8 @@ public class ConfirmationNotificationService {
         int maxCapacity = reservation.getSeatType().getMaxCapacity();
 
         // 알림 메세지 data 별 포멧팅
-        String title = NotificationContentUtil.formatReservationCompleteNotificationTitle(restaurantName);
-        String body = NotificationContentUtil.formatReservationCompleteNotificationBody(reservedDate, reservedTime, minCapacity,
+        String title = NotificationContentUtil.formatReservationCompletedNotificationTitle(restaurantName);
+        String body = NotificationContentUtil.formatReservationCompletedNotificationBody(reservedDate, reservedTime, minCapacity,
                 maxCapacity);
         String url = NotificationContentUtil.formatReservationNotificationUrl();
 
