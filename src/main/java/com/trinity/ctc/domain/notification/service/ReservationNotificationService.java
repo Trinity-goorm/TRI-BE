@@ -137,8 +137,7 @@ public class ReservationNotificationService {
     /**
      * 매일 8시에 당일 예약 알림을 보내는 메서드
      */
-    public void sendDailyNotification() {
-        LocalDate today = LocalDate.now();
+    public void sendDailyNotification(LocalDate today) {
 
         // 알림 타입과 오늘 날짜로 당일 예약 알림 정보 가져오기
         List<ReservationNotification> reservationNotificationList = reservationNotificationRepository
@@ -165,9 +164,7 @@ public class ReservationNotificationService {
     /**
      * 예약 1시간 전 알림을 보내는 메서드
      */
-    public void sendHourBeforeNotification() {
-        LocalDateTime now = DateTimeUtil.truncateToMinute(LocalDateTime.now());
-
+    public void sendHourBeforeNotification(LocalDateTime now) {
         // 알림 타입과 현재 시간으로 보낼 예약 1시간 전 알림 정보 가져오기
         List<ReservationNotification> reservationNotificationList = reservationNotificationRepository
                 .findAllByTypeAndDateTime(BEFORE_ONE_HOUR_NOTIFICATION, now);

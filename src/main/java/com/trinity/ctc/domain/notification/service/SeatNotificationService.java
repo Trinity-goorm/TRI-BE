@@ -263,10 +263,7 @@ public class SeatNotificationService {
      * 날짜/시간이 지난 자리에 대한 빈자리 알림 메세지/빈자리 알림 신청에 대한 데이터 삭제 메서드
      */
     @Transactional
-    public void deleteSeatNotificationMessages() {
-        // 현재 날짜/시간 포멧팅
-        LocalDate currentDate = LocalDate.now();
-        LocalTime currentTime = DateTimeUtil.truncateTimeToMinute(LocalTime.now());
+    public void deleteSeatNotificationMessages(LocalDate currentDate, LocalTime currentTime) {
 
         // 현재 날짜/시간 기준으로 이전의 자리에 해당하는 빈자리 알림 메세지를 select
         List<SeatNotification> messages = seatNotificationRepository.findAllByCurrentDateTime(currentDate, currentTime);
