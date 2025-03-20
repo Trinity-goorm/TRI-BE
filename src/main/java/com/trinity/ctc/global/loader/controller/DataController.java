@@ -7,17 +7,19 @@ import com.trinity.ctc.domain.restaurant.service.RestaurantService;
 import com.trinity.ctc.domain.seat.dto.InsertSeatTypeRequest;
 import com.trinity.ctc.domain.seat.service.SeatBatchService;
 import com.trinity.ctc.domain.seat.service.SeatTypeService;
+import com.trinity.ctc.domain.user.service.UserDummyService;
+import com.trinity.ctc.global.util.parser.CsvParser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -31,6 +33,8 @@ public class DataController {
     private final RestaurantService restaurantService;
     private final SeatTypeService seatTypeService;
     private final ReservationTimeService reservationTimeService;
+    private final CsvParser csvParser;
+    private final UserDummyService userDummyService;
 
     @PostMapping("/order-a/crawling/categories")
     @Operation(summary = "1. 카테고리 데이터 삽입", description = "파일에서 카테고리 데이터를 읽어와 DB에 삽입합니다.")
@@ -75,5 +79,20 @@ public class DataController {
         seatBatchService.batchInsertSeatDummy();
         log.info("=== Finished Loading init seats ===");
         return ResponseEntity.ok("이번달, 다음달 예약가능 초기 데이터 로드 성공.");
+    }
+
+    @Operation(summary = "CSV 업로드 후 더미 데이터 생성", description = "3개의 CSV 파일을 업로드하면 DB에 더미 데이터를 생성합니다.")
+    @PostMapping(value = "/order-f/user/csv/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> loadUserCsv(
+            @RequestPart("userCsv") MultipartFile userCsv,
+            @RequestPart("preferenceCsv") MultipartFile preferenceCsv,
+            @RequestPart("categoryCsv") MultipartFile categoryCsv
+    ) {
+        List<Map<String, String>> userData = csvParser.parse(userCsv);
+        List<Map<String, String>> preferenceData = csvParser.parse(preferenceCsv);
+        List<Map<String, String>> categoryData = csvParser.parse(categoryCsv);
+
+        userDummyService.generateDummyData(userData, preferenceData, categoryData, 1000);
+        return ResponseEntity.ok("CSV 데이터 업로드 및 DB 저장 성공!");
     }
 }

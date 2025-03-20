@@ -57,7 +57,7 @@ public class UserFactory {
         return preferences;
     }
 
-    public List<UserPreferenceCategory> createPreferenceCategories(List<Map<String, String>> csvData, Map<Long, UserPreference> preferenceMap) {
+    public List<UserPreferenceCategory> createPreferenceCategoriesByCsv(List<Map<String, String>> csvData, Map<Long, UserPreference> preferenceMap) {
         List<UserPreferenceCategory> categories = new ArrayList<>();
         for (Map<String, String> row : csvData) {
             Long preferenceId = Long.parseLong(row.get("user_preference_id"));
