@@ -47,7 +47,8 @@ public class User {
 
     private LocalDate birthday;
     private String imageUrl;
-    private Boolean isDeleted;
+
+    private Boolean isDeleted = false;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Fcm> fcmList = new ArrayList<>();
@@ -77,11 +78,17 @@ public class User {
     private List<SeatNotificationSubscription> seatNotificationSubscriptionList = new ArrayList<>();
 
     @Builder
-    public User(Long kakaoId, Integer normalTicketCount, Integer emptyTicket, UserStatus status) {
+    public User(Long kakaoId, Integer normalTicketCount, Integer emptyTicket, UserStatus status, Sex sex, String imageUrl, String nickname, String phoneNumber, LocalDate birthday, boolean isDeleted) {
         this.kakaoId = kakaoId;
         this.normalTicketCount = normalTicketCount;
         this.emptyTicketCount = emptyTicket;
         this.status = status;
+        this.sex = sex;
+        this.imageUrl = imageUrl;
+        this.nickname = nickname;
+        this.phoneNumber = phoneNumber;
+        this.birthday = birthday;
+        this.isDeleted = isDeleted;
     }
 
     /* 내부 메서드 */
