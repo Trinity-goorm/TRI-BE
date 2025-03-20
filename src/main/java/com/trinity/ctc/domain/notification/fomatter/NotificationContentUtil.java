@@ -26,7 +26,7 @@ public class NotificationContentUtil {
                 restaurantName, date, time);
     }
 
-    public static String formatReservationNotificationUrl() {
+    public static String  formatReservationNotificationUrl() {
         return "http://localhost:5173/mydining";
     }
 

@@ -6,9 +6,7 @@ import com.trinity.ctc.domain.notification.dto.FcmMessageDto;
 import com.trinity.ctc.domain.notification.dto.FcmSendingResultDto;
 import com.trinity.ctc.domain.notification.dto.GroupFcmInformationDto;
 import com.trinity.ctc.domain.notification.entity.NotificationHistory;
-import com.trinity.ctc.domain.notification.fomatter.NotificationContentUtil;
 import com.trinity.ctc.domain.notification.sender.NotificationSender;
-import com.trinity.ctc.domain.notification.type.NotificationType;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
 import com.trinity.ctc.domain.user.entity.User;
@@ -30,7 +28,6 @@ import java.util.List;
 
 import static com.trinity.ctc.domain.notification.fomatter.NotificationContentUtil.*;
 import static com.trinity.ctc.domain.notification.fomatter.NotificationMessageUtil.createMessageWithUrl;
-import static com.trinity.ctc.domain.notification.type.NotificationType.RESERVATION_CANCELED;
 import static com.trinity.ctc.domain.notification.type.NotificationType.RESERVATION_COMPLETED;
 
 @Slf4j
@@ -39,7 +36,7 @@ import static com.trinity.ctc.domain.notification.type.NotificationType.RESERVAT
 @RequiredArgsConstructor
 public class ConfirmationNotificationService {
     private final UserRepository userRepository;
-    private final ReservationRepository reservationRepository;
+    private final ReservationRepository reservationRepository;         
     private final NotificationHistoryService notificationHistoryService;
     private final NotificationSender notificationSender;
 
@@ -49,21 +46,15 @@ public class ConfirmationNotificationService {
      * @param userId
      * @param reservationId
      */
-    @Transactional
+    @Transactional(readOnly = true)
     public void sendReservationCompletedNotification(Long userId, Long reservationId) {
+        // 사용자 조회, 해당하는 사용자가 없으면 404 반환
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
+        // 예약 내역 조회, 해당하는 예약 내역이 없으면 404 반환
         Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(() -> new CustomException(ReservationErrorCode.NOT_FOUND));
-
         FcmMessageDto messageData = formattingReservationCompletedNotification(reservation);
-        GroupFcmInformationDto groupFcmInformationDto = buildMessageList(user, messageData);
-        List<Message> messageList = groupFcmInformationDto.getMessageList();
-        List<FcmMessageDto> messageDtoList = groupFcmInformationDto.getMessageDtoList();
 
-        // 단 건의 알림 전송 로직에 대해 처리하는 메서드
-        List<NotificationHistory> notificationHistoryList = sendSingleNotification(messageList, RESERVATION_COMPLETED, messageDtoList);
-
-        // 전송된 알림 히스토리를 전부 history 테이블에 저장하는 메서드
-        notificationHistoryService.saveNotificationHistory(notificationHistoryList);
+        sendConfirmationNotification(user, messageData);
     }
 
     /**
@@ -81,10 +72,9 @@ public class ConfirmationNotificationService {
         int maxCapacity = reservation.getSeatType().getMaxCapacity();
 
         // 알림 메세지 data 별 포멧팅
-        String title = NotificationContentUtil.formatReservationCompletedNotificationTitle(restaurantName);
-        String body = NotificationContentUtil.formatReservationCompletedNotificationBody(reservedDate, reservedTime, minCapacity,
-                maxCapacity);
-        String url = NotificationContentUtil.formatReservationNotificationUrl();
+        String title = formatReservationCompletedNotificationTitle(restaurantName);
+        String body = formatReservationCompletedNotificationBody(reservedDate, reservedTime, minCapacity, maxCapacity);
+        String url = formatReservationNotificationUrl();
 
         return new FcmMessageDto(title, body, url);
     }
@@ -115,20 +105,6 @@ public class ConfirmationNotificationService {
     }
 
     /**
-     * 하나의 사용자를 대상으로 하는 단 건 알림을 발송하는 내부 메서드
-     *
-     * @param messageList
-     * @param type
-     * @param fcmMessageDtoList
-     * @return
-     */
-    private List<NotificationHistory> sendSingleNotification(List<Message> messageList, NotificationType type, List<FcmMessageDto> fcmMessageDtoList) {
-        // FCM 메세지 전송 및 전송 결과 반환
-        List<FcmSendingResultDto> resultList = notificationSender.sendEachNotification(messageList);
-        return notificationHistoryService.buildNotificationHistory(fcmMessageDtoList, resultList, type);
-    }
-
-    /**
      * 예약 취소 알림 전송 메서드
      *
      * @param userId
@@ -140,20 +116,31 @@ public class ConfirmationNotificationService {
         User user = userRepository.findById(userId).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
         Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(() -> new CustomException(ReservationErrorCode.NOT_FOUND));
         FcmMessageDto messageData = formattingReservationCanceledNotification(reservation, user, isCODPassed);
+
+        sendConfirmationNotification(user, messageData);
+    }
+
+    /**
+     *
+     * @param user
+     * @param messageData
+     */
+    private void sendConfirmationNotification(User user, FcmMessageDto messageData) {
         GroupFcmInformationDto groupFcmInformationDto = buildMessageList(user, messageData);
 
         List<Message> messageList = groupFcmInformationDto.getMessageList();
         List<FcmMessageDto> messageDtoList = groupFcmInformationDto.getMessageDtoList();
 
         // 단 건의 알림 전송 로직에 대해 처리하는 메서드
-        List<NotificationHistory> notificationHistoryList = sendSingleNotification(messageList, RESERVATION_CANCELED, messageDtoList);
+        List<FcmSendingResultDto> resultList = notificationSender.sendNotification(messageList);
+        List<NotificationHistory> notificationHistoryList = notificationHistoryService.buildNotificationHistory(messageDtoList, resultList, RESERVATION_COMPLETED);
 
         // 전송된 알림 히스토리를 전부 history 테이블에 저장하는 메서드
         notificationHistoryService.saveNotificationHistory(notificationHistoryList);
     }
 
     /**
-     * 예약 취소 메세지를 포멧팅하는 내부 메서드
+     * 예약 취소 메세지를 포멧팅하는 내부 메서드                                                         
      *
      * @param reservation
      * @param user
@@ -172,10 +159,10 @@ public class ConfirmationNotificationService {
         // 알림 메세지 data 별 포멧팅
         if (isCODPassed) {
             title = formatReservationFullCanceledNotificationTitle(restaurantName);
-            body = formatReservationFullCanceledNotificationBody(reservedDate, reservedTime, user.getNormalTicketCount());
+            body = formatReservationFullCanceledNotificationBody(reservedDate, reservedTime, user.getEmptyTicketCount());
         } else {
             title = formatReservationNullCanceledNotificationTitle(restaurantName);
-            body = formatReservationNullCanceledNotificationBody(reservedDate, reservedTime, user.getNormalTicketCount());
+            body = formatReservationNullCanceledNotificationBody(reservedDate, reservedTime, user.getEmptyTicketCount());
         }
 
         String url = formatReservationNotificationUrl();

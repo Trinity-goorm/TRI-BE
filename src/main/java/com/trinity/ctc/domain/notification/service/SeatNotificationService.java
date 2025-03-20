@@ -11,6 +11,7 @@ import com.trinity.ctc.domain.notification.entity.NotificationHistory;
 import com.trinity.ctc.domain.notification.entity.SeatNotification;
 import com.trinity.ctc.domain.notification.entity.SeatNotificationSubscription;
 import com.trinity.ctc.domain.notification.fomatter.NotificationContentUtil;
+import com.trinity.ctc.domain.notification.message.FcmMulticastMessage;
 import com.trinity.ctc.domain.notification.repository.SeatNotificationRepository;
 import com.trinity.ctc.domain.notification.repository.SeatNotificationSubscriptionRepository;
 import com.trinity.ctc.domain.notification.sender.NotificationSender;
@@ -71,7 +72,7 @@ public class SeatNotificationService {
         // 티켓 개수 검증, 509 반환
         EmptyTicketValidator.validateEmptyTicketUsage(user.getEmptyTicketCount());
 
-        // 기존에 조ㅗㄴ
+        // 해당 자리에 대한 빈알림 데이터 조회, 없을 시 빈자리 알림 데이터 생성
         SeatNotification seatNotification = seatNotificationRepository.findBySeatId(seatId)
                 .orElseGet(() -> registerSeatNotificationMessage(seatId));
 
@@ -178,6 +179,7 @@ public class SeatNotificationService {
      *
      * @param seatId
      */
+    @Async
     @Transactional(readOnly = true)
     public void sendSeatNotification(long seatId) {
         log.info("✅ 빈자리 알림 비동기 발송 시작!");
@@ -187,7 +189,7 @@ public class SeatNotificationService {
         int clearCount;
         int batchSize = 500;
 
-        List<CompletableFuture<List<NotificationHistory>>> futureList = new ArrayList<>();
+        List<CompletableFuture<List<NotificationHistory>>> resultList = new ArrayList<>();
 
         // 빈자리 알림 정보
         SeatNotification seatNotification = seatNotificationRepository.findBySeatId(seatId)
@@ -208,12 +210,12 @@ public class SeatNotificationService {
 
         for (List<Fcm> batch : batches) {
             batchCount++;
-            CompletableFuture<List<NotificationHistory>> future = sendSeatNotificationAsync(seatNotification, batch, batchCount, clearCount);
-            futureList.add(future);
+            CompletableFuture<List<NotificationHistory>> sendingResult = sendSeatNotificationAsync(seatNotification, batch, batchCount, clearCount);
+            resultList.add(sendingResult);
         }
 
         // 모든 배치가 완료된 후 최종 로그를 찍고 시간도 기록
-        CompletableFuture.allOf(futureList.toArray(new CompletableFuture[0]))
+        CompletableFuture.allOf(resultList.toArray(new CompletableFuture[0]))
                 .thenRun(() -> {
                     long endTime = System.nanoTime();  // 종료 시간 측정
                     long elapsedTime = endTime - startTime;  // 경과 시간 (나노초 단위)
@@ -221,7 +223,7 @@ public class SeatNotificationService {
                     log.info("sendSeatNotification 발송 실행 시간: {} ms", elapsedTime / 1_000_000);
                 });
 
-        List<NotificationHistory> notificationHistoryList = futureList.stream()
+        List<NotificationHistory> notificationHistoryList = resultList.stream()
                 .map(CompletableFuture::join) // 각 future의 실행이 끝날 때까지 기다림
                 .flatMap(List::stream) // 여러 리스트를 하나로 합침
                 .toList();
@@ -236,13 +238,14 @@ public class SeatNotificationService {
         log.info("✅ 빈자리 알림 발송 (Batch {}): 시작", batchCount);
         List<String> tokens = batch.stream().map(Fcm::getToken).toList();
 
-        MulticastMessage multicastMessage = createMulticastMessageWithUrl(
+        FcmMulticastMessage multicastMessage = createMulticastMessageWithUrl(
                 seatNotification.getTitle(), seatNotification.getBody(), seatNotification.getUrl(), tokens);
 
         // FCM 메시지를 비동기 전송 (CompletableFuture 반환)
-        return notificationSender.sendMulticastNotification(multicastMessage, batchCount, clearCount)
+        return notificationSender.sendMulticastNotification(multicastMessage)
                 .thenApplyAsync(resultList -> {
-                    log.info("✅ 빈자리 알림 발송 완료 (Batch {}): {} 개", batchCount, batch.size());
+                    log.info("✅ 빈자리 알림 발송 완료 Batch {}", batchCount);
+                    if (batchCount == clearCount) log.info("전송완료!!!!!!!!!!!!!");
 
                     // 전송된 알림 히스토리를 배치로 저장
                     return notificationHistoryService.buildMulticastNotificationHistory(

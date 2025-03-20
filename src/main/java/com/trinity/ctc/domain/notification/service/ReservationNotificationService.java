@@ -199,7 +199,7 @@ public class ReservationNotificationService {
         // 보낼 FCM 메세지 빌드
         GroupFcmInformationDto fcmInformationDto = buildReservationNotification(notification);
         // FCM 메세지 전송 및 전송 결과 반환
-        List<FcmSendingResultDto> resultList = notificationSender.sendEachNotification(fcmInformationDto.getMessageList());
+        List<FcmSendingResultDto> resultList = notificationSender.sendNotification(fcmInformationDto.getMessageList());
         return notificationHistoryService.buildNotificationHistory(fcmInformationDto.getMessageDtoList(), resultList, type);
     }
 
