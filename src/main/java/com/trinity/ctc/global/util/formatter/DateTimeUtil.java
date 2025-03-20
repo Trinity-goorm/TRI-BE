@@ -79,8 +79,20 @@ public class DateTimeUtil {
         }
     }
 
+    // String("yyyy-MM-dd HH:mm") -> LocalDateTime(yyyy-MM-dd HH:mm) 컨버트
+    public static LocalDateTime convertToLocalDateTime(String dateTime) {
+        return LocalDateTime.parse(dateTime, DATE_TIME_FORMATTER);
+    }
+
+    // String("yyyy-MM-dd") -> LocalDate(yyyy-MM-dd) 컨버트
+    public static LocalDate convertToLocalDate(String date) {
+        return LocalDate.parse(date, DATE_FORMATTER);
+    }
+
     // 초 제거
     public static String formatToHHmm(LocalTime time) {
         return time.format(TIME_FORMATTER);
     }
+
+
 }
