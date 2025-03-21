@@ -52,6 +52,9 @@ dependencies {
 	implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
 	implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
 
+	// CSV
+	implementation 'com.opencsv:opencsv:5.9'
+
 	// QueryDSL 의존성 (Jakarta EE 호환)
 	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
 	annotationProcessor 'com.querydsl:querydsl-apt:5.0.0:jakarta'
