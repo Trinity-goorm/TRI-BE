@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.trinity.ctc.domain.notification.fomatter.NotificationContentUtil.*;
-import static com.trinity.ctc.domain.notification.fomatter.NotificationMessageUtil.createMessageWithUrl;
+import static com.trinity.ctc.domain.notification.fomatter.NotificationMessageUtil.createSendingMessageWithUrl;
 import static com.trinity.ctc.domain.notification.type.NotificationType.RESERVATION_COMPLETED;
 
 @Slf4j
@@ -95,7 +95,7 @@ public class ConfirmationNotificationService {
         Message message;
 
         for (Fcm token : tokenList) {
-            message = createMessageWithUrl(fcmMessageDto.getTitle(), fcmMessageDto.getBody(), fcmMessageDto.getUrl(), token.getToken());
+            message = createSendingMessageWithUrl(fcmMessageDto.getTitle(), fcmMessageDto.getBody(), fcmMessageDto.getUrl(), token.getToken());
             messageList.add(message);
 
             fcmMessageDtoList.add(FcmMessageDto.of(fcmMessageDto, token.getToken(), user));

@@ -1,6 +1,5 @@
 package com.trinity.ctc.domain.notification.service;
 
-import com.trinity.ctc.global.util.formatter.DateTimeUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -9,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 import static com.trinity.ctc.global.util.formatter.DateTimeUtil.convertToLocalDate;
 import static com.trinity.ctc.global.util.formatter.DateTimeUtil.convertToLocalDateTime;

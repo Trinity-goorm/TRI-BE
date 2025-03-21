@@ -21,6 +21,13 @@ public class FcmMessageDto {
         this.url = url;
     }
 
+    public FcmMessageDto(String title, String body, String url, String fcmToken) {
+        this.title = title;
+        this.body = body;
+        this.url = url;
+        this.fcmToken = fcmToken;
+    }
+
     public static FcmMessageDto of(FcmMessageDto fcmMessageDto, String fcmToken, User user) {
         return new FcmMessageDto(fcmToken, fcmMessageDto.getTitle(), fcmMessageDto.getBody(), fcmMessageDto.getUrl(), user);
     }

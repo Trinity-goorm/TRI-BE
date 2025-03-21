@@ -182,11 +182,10 @@ public class SeatNotificationService {
     @Async
     @Transactional(readOnly = true)
     public void sendSeatNotification(long seatId) {
-        log.info("✅ 빈자리 알림 비동기 발송 시작!");
+        log.info("✅ 빈자리 알림 발송 시작!");
         long startTime = System.nanoTime(); // 시작 시간 측정
 
         int batchCount = 0;
-        int clearCount;
         int batchSize = 500;
 
         List<CompletableFuture<List<NotificationHistory>>> resultList = new ArrayList<>();
@@ -206,7 +205,7 @@ public class SeatNotificationService {
 
         List<List<Fcm>> batches = Lists.partition(fcmList, batchSize);
 
-        clearCount = batches.size();
+        int clearCount = batches.size();
 
         for (List<Fcm> batch : batches) {
             batchCount++;
@@ -220,7 +219,7 @@ public class SeatNotificationService {
                     long endTime = System.nanoTime();  // 종료 시간 측정
                     long elapsedTime = endTime - startTime;  // 경과 시간 (나노초 단위)
 
-                    log.info("sendSeatNotification 발송 실행 시간: {} ms", elapsedTime / 1_000_000);
+                    log.info("빈자리 알림 발송 실행 시간: {} ms", elapsedTime / 1_000_000);
                 });
 
         List<NotificationHistory> notificationHistoryList = resultList.stream()

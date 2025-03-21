@@ -1,27 +1,25 @@
 package com.trinity.ctc.domain.notification.service;
 
-import com.google.firebase.messaging.Message;
-import com.trinity.ctc.domain.fcm.repository.FcmRepository;
+import com.google.common.collect.Lists;
+import com.trinity.ctc.domain.fcm.entity.Fcm;
 import com.trinity.ctc.domain.notification.dto.FcmMessageDto;
-import com.trinity.ctc.domain.notification.dto.FcmSendingResultDto;
-import com.trinity.ctc.domain.notification.dto.GroupFcmInformationDto;
 import com.trinity.ctc.domain.notification.entity.NotificationHistory;
 import com.trinity.ctc.domain.notification.entity.ReservationNotification;
 import com.trinity.ctc.domain.notification.fomatter.NotificationContentUtil;
+import com.trinity.ctc.domain.notification.message.FcmMessage;
 import com.trinity.ctc.domain.notification.repository.ReservationNotificationRepository;
 import com.trinity.ctc.domain.notification.sender.NotificationSender;
-import com.trinity.ctc.domain.notification.type.NotificationType;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.global.exception.CustomException;
-import com.trinity.ctc.global.exception.error_code.FcmErrorCode;
 import com.trinity.ctc.global.exception.error_code.ReservationErrorCode;
 import com.trinity.ctc.global.exception.error_code.UserErrorCode;
 import com.trinity.ctc.global.util.formatter.DateTimeUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,13 +29,17 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.trinity.ctc.domain.notification.entity.ReservationNotification.createReservationNotification;
 import static com.trinity.ctc.domain.notification.fomatter.NotificationMessageUtil.createMessageWithUrl;
-import static com.trinity.ctc.domain.notification.type.NotificationType.BEFORE_ONE_HOUR_NOTIFICATION;
-import static com.trinity.ctc.domain.notification.type.NotificationType.DAILY_NOTIFICATION;
+import static com.trinity.ctc.domain.notification.type.NotificationType.*;
 import static com.trinity.ctc.global.util.formatter.DateTimeUtil.combineWithDate;
+import static com.trinity.ctc.global.util.formatter.DateTimeUtil.combineWithToday;
 
 @Slf4j
 @EnableAsync
@@ -45,11 +47,11 @@ import static com.trinity.ctc.global.util.formatter.DateTimeUtil.combineWithDate
 @RequiredArgsConstructor
 public class ReservationNotificationService {
     private final UserRepository userRepository;
-    private final FcmRepository fcmRepository;
     private final ReservationRepository reservationRepository;
     private final ReservationNotificationRepository reservationNotificationRepository;
     private final NotificationSender notificationSender;
     private final NotificationHistoryService notificationHistoryService;
+
     /**
      * 예약 이벤트를 통해 예약 알림에 필요한 entity(user, reservation)를 받아오고, 예약 알림 entity을 DB에 저장하는 메서드
      *
@@ -137,67 +139,126 @@ public class ReservationNotificationService {
     /**
      * 매일 8시에 당일 예약 알림을 보내는 메서드
      */
-    public void sendDailyNotification(LocalDate today) {
+    public void sendDailyNotification(LocalDate scheduledDate) {
+        log.info("✅ 당일 예약 알림 발송 시작!");
+        long startTime = System.nanoTime(); // 시작 시간 측정
+
+        int batchSize = 500;
+        int batchCount = 0;
+
+        List<FcmMessage> messageList = new ArrayList<>();
+
+        List<CompletableFuture<List<NotificationHistory>>> resultList = new ArrayList<>();
 
         // 알림 타입과 오늘 날짜로 당일 예약 알림 정보 가져오기
         List<ReservationNotification> reservationNotificationList = reservationNotificationRepository
-                .findAllByTypeAndDate(DAILY_NOTIFICATION, today);
+                .findAllByTypeAndDate(DAILY_NOTIFICATION, scheduledDate);
+        log.info("가져온 목록: " + reservationNotificationList.size());
         if (reservationNotificationList.isEmpty()) return;
 
-        // history 테이블과 알림 발송 후 알림 메세지 삭제를 위한 알림 ID 담을 list 세팅
-        List<NotificationHistory> notificationHistoryList = new ArrayList<>();
-        List<Long> reservationNotificationIdList = new ArrayList<>();
 
-        // 전송할 알림 리스트를 전부 도는 알림 발송 로직(현재 동기 처리 중)
+
+        // 전송할 알림 리스트를 전부 도는 알림 발송 로직
         for (ReservationNotification notification : reservationNotificationList) {
-            // 단 건의 알림 전송 로직에 대해 처리하는 메서드
-            List<NotificationHistory> notificationHistory = handleEachNotification(notification, DAILY_NOTIFICATION);
-            notificationHistoryList.addAll(notificationHistory);
-            reservationNotificationIdList.add(notification.getId());
+            messageList.addAll(buildReservationNotification(notification));
         }
+
+        List<List<FcmMessage>> batches = Lists.partition(messageList, batchSize);
+        int clearCount = batches.size();
+
+        for (List<FcmMessage> batch : batches) {
+            batchCount++;
+            CompletableFuture<List<NotificationHistory>> sendingResult = sendReservationNotification(batch, batchCount, clearCount);
+            resultList.add(sendingResult);
+        }
+
+        long endTime = System.nanoTime();  // 종료 시간 측정
+        long elapsedTime = endTime - startTime;  // 경과 시간 (나노초 단위)
+
+        log.info("당일 예약 알림 발송 실행 시간: {} ms", elapsedTime / 1_000_000);
+
+        List<NotificationHistory> notificationHistoryList = resultList.stream()
+                .map(CompletableFuture::join) // 각 future의 실행이 끝날 때까지 기다림
+                .flatMap(List::stream) // 여러 리스트를 하나로 합침
+                .toList();
+
         // 전송된 알림 히스토리를 전부 history 테이블에 저장하는 메서드
-        notificationHistoryService.saveNotificationHistory(notificationHistoryList);
-        // 전송한 예약 알림을 table에서 삭제하는 메서드
-        deleteSentReservationNotification(reservationNotificationIdList);
+//        notificationHistoryService.saveNotificationHistory(notificationHistoryList);
+        // 해당 날짜에 스케줄된 당일 예약 알림을 table에서 삭제하는 메서드
+//        deleteDailyNReservationNotification();
     }
 
     /**
      * 예약 1시간 전 알림을 보내는 메서드
      */
-    public void sendHourBeforeNotification(LocalDateTime now) {
+    public void sendHourBeforeNotification(LocalDateTime scheduledTime) {
+        log.info("✅ 한시간 전 예약 알림 발송 시작!");
+        long startTime = System.nanoTime(); // 시작 시간 측정
+
+        int batchSize = 500;
+        int batchCount = 0;
+
+        List<CompletableFuture<List<NotificationHistory>>> resultList = new ArrayList<>();
+
+        List<FcmMessage> messageList = new ArrayList<>();
+
         // 알림 타입과 현재 시간으로 보낼 예약 1시간 전 알림 정보 가져오기
         List<ReservationNotification> reservationNotificationList = reservationNotificationRepository
-                .findAllByTypeAndDateTime(BEFORE_ONE_HOUR_NOTIFICATION, now);
+                .findAllByTypeAndDateTime(BEFORE_ONE_HOUR_NOTIFICATION, scheduledTime);
 
-        // history 테이블과 알림 발송 후 알림 메세지 삭제를 위한 알림 ID 담을 list 세팅
-        List<NotificationHistory> notificationHistoryList = new ArrayList<>();
-        List<Long> reservationNotificationIdList = new ArrayList<>();
-
-        // 전송할 알림 리스트를 전부 도는 알림 발송 로직(현재 동기 처리 중)
+        // 전송할 알림 리스트를 전부 도는 알림 발송 로직
         for (ReservationNotification notification : reservationNotificationList) {
-            List<NotificationHistory> notificationHistory = handleEachNotification(notification, BEFORE_ONE_HOUR_NOTIFICATION);
-            notificationHistoryList.addAll(notificationHistory);
-            reservationNotificationIdList.add(notification.getId());
+            messageList.addAll(buildReservationNotification(notification));
         }
+
+        List<List<FcmMessage>> batches = Lists.partition(messageList, batchSize);
+        int clearCount = batches.size();
+
+        for (List<FcmMessage> batch : batches) {
+            batchCount++;
+            CompletableFuture<List<NotificationHistory>> sendingResult = sendReservationNotification(batch, batchCount, clearCount);
+            resultList.add(sendingResult);
+        }
+
+        long endTime = System.nanoTime();  // 종료 시간 측정
+        long elapsedTime = endTime - startTime;  // 경과 시간 (나노초 단위)
+
+        log.info("한시간 전 예약 알림 발송 실행 시간: {} ms", elapsedTime / 1_000_000);
+
+        List<NotificationHistory> notificationHistoryList = resultList.stream()
+                .map(CompletableFuture::join) // 각 future의 실행이 끝날 때까지 기다림
+                .flatMap(List::stream) // 여러 리스트를 하나로 합침
+                .toList();
         // 전송된 알림 히스토리를 전부 history 테이블에 저장하는 메서드
-        notificationHistoryService.saveNotificationHistory(notificationHistoryList);
-        // 전송한 예약 알림을 table에서 삭제하는 메서드
-        deleteSentReservationNotification(reservationNotificationIdList);
+//        notificationHistoryService.saveNotificationHistory(notificationHistoryList);
+        // 해당 시간에 스케줄된 한시간 전 예약 알림을 table에서 삭제하는 메서드
+//        deleteHourlyNReservationNotification(scheduledTime);
     }
 
-    /**
-     * 단 건의 알림 전송 로직에 대해 처리하는 메서드
-     *
-     * @param notification 예약 알림 Entity
-     * @param type         알림 타입(ENUM)
-     * @return
-     */
-    private List<NotificationHistory> handleEachNotification(ReservationNotification notification, NotificationType type) {
-        // 보낼 FCM 메세지 빌드
-        GroupFcmInformationDto fcmInformationDto = buildReservationNotification(notification);
-        // FCM 메세지 전송 및 전송 결과 반환
-        List<FcmSendingResultDto> resultList = notificationSender.sendNotification(fcmInformationDto.getMessageList());
-        return notificationHistoryService.buildNotificationHistory(fcmInformationDto.getMessageDtoList(), resultList, type);
+    @Async("sendingProcessThreadPool")
+    public CompletableFuture<List<NotificationHistory>> sendReservationNotification(List<FcmMessage> fcmMessage, int batchCount, int clearCount) {
+        return notificationSender.sendEachNotification(fcmMessage)
+                .thenApplyAsync(resultList -> {
+                    log.info("✅ 빈자리 알림 발송 완료 Batch {}", batchCount);
+                    if (batchCount == clearCount) log.info("전송완료!!!!!!!!!!!!!");
+
+                    // resultList.get(i)와 fcmMessage.get(i)를 매핑
+                    List<FcmMessageDto> messageDtos = IntStream.range(0, resultList.size())
+                            .mapToObj(i -> new FcmMessageDto(
+                                    fcmMessage.get(i).getData().get("title"),
+                                    fcmMessage.get(i).getData().get("body"),
+                                    fcmMessage.get(i).getData().get("url"),
+                                    fcmMessage.get(i).getToken()
+                            ))
+                            .collect(Collectors.toList());
+
+                    return notificationHistoryService.buildNotificationHistory(
+                            messageDtos, resultList, SEAT_NOTIFICATION
+                    );
+                }).exceptionally(e -> {
+                    log.error("❌ 빈자리 알림 발송 실패 (Batch {}): {}", batchCount, e.getMessage());
+                    return Collections.emptyList(); // 실패 시 빈 리스트 반환
+                });
     }
 
     /**
@@ -206,28 +267,22 @@ public class ReservationNotificationService {
      * @param notification 예약 알림 Entity
      * @return
      */
-    private GroupFcmInformationDto buildReservationNotification(ReservationNotification notification) {
-        // FCM 토큰 가져오기
-        List<String> tokenList = fcmRepository.findByUser(notification.getUser().getId()).orElseThrow(() -> new CustomException(FcmErrorCode.NO_FCM_TOKEN_REGISTERED));
+    private List<FcmMessage> buildReservationNotification(ReservationNotification notification) {
+        List<FcmMessage> messages = new ArrayList<>();
 
-        List<Message> messageList = new ArrayList<>();
-        List<FcmMessageDto> messageDtoList = new ArrayList<>();
-        // FCM 메시지 빌드
-
-        for (String token : tokenList) {
-            messageList.add(createMessageWithUrl(notification.getTitle(), notification.getBody(), notification.getUrl(), token));
-            messageDtoList.add(new FcmMessageDto(token, notification.getTitle(), notification.getBody(), notification.getUrl(), notification.getUser()));
+        for (Fcm fcm : notification.getUser().getFcmList()) {
+            FcmMessage message = createMessageWithUrl(notification.getTitle(), notification.getBody(), notification.getUrl(), fcm.getToken());
+            messages.add(message);
         }
-
-        return new GroupFcmInformationDto(messageDtoList, messageList);
+        return messages;
     }
 
-    /**
-     * 전송한 예약 알림을 table에서 삭제하는 메서드
-     *
-     * @param reservationNotificationIdList
-     */
-    private void deleteSentReservationNotification(List<Long> reservationNotificationIdList) {
-        reservationNotificationRepository.deleteAllById(reservationNotificationIdList);
+    private void deleteDailyNReservationNotification() {
+        LocalDateTime scheduledTime = combineWithToday(LocalTime.of(8, 0));
+        reservationNotificationRepository.deleteAllByScheduledTimeAndType(scheduledTime, DAILY_NOTIFICATION);
+    }
+
+    private void deleteHourlyNReservationNotification(LocalDateTime scheduledTime) {
+        reservationNotificationRepository.deleteAllByScheduledTimeAndType(scheduledTime, BEFORE_ONE_HOUR_NOTIFICATION);
     }
 }

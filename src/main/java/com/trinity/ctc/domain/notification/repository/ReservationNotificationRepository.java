@@ -21,11 +21,13 @@ public interface ReservationNotificationRepository extends JpaRepository<Reserva
     @Query("DELETE FROM ReservationNotification r WHERE r.reservation.id = :reservationId")
     void deleteAllByReservation(@Param("reservationId") long reservationId);
 
-    @Query("Select r FROM ReservationNotification r WHERE r.type = :notificationType AND DATE(r.scheduledTime) = :scheduledDate")
+    @Query("Select r FROM ReservationNotification r join fetch r.user u join fetch r.user.fcmList f left join fetch r.user.userPreference uf WHERE r.type = :notificationType AND DATE(r.scheduledTime) = :scheduledDate")
     List<ReservationNotification> findAllByTypeAndDate(@Param("notificationType") NotificationType notificationtype,
                                                        @Param("scheduledDate") LocalDate scheduledDate);
 
     @Query("Select r FROM ReservationNotification r WHERE r.type = :notificationType AND r.scheduledTime = :scheduledTime")
     List<ReservationNotification> findAllByTypeAndDateTime(@Param("notificationType") NotificationType notificationType,
                                                            @Param("scheduledTime") LocalDateTime scheduledTime);
+
+    void deleteAllByScheduledTimeAndType(LocalDateTime scheduledTime, NotificationType type);
 }
