@@ -31,8 +31,13 @@ public class FcmService {
      */
     @Transactional
     public void registerFcmToken(String fcmToken) {
+        if (fcmRepository.existsByToken(fcmToken)) {
+            renewFcmToken(fcmToken);
+            return;
+        }
+
         String kakaoId = authService.getAuthenticatedKakaoId();
-        
+
         // 유저 entity
         User user = userRepository.findByKakaoId(Long.valueOf(kakaoId))
                 .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
@@ -48,6 +53,7 @@ public class FcmService {
                 .expiresAt(expiresAt)
                 .user(user)
                 .build();
+
 
         // FCM 토큰 저장
         fcmRepository.save(fcm);
@@ -82,6 +88,7 @@ public class FcmService {
      * 매일 자정에 만료된 fcm 토큰 삭제 (스케줄링)
      */
     @Scheduled(cron = "0 0 0 * * ?")
+    @Transactional
     public void expireFcmToken() {
         // 현재 시간 기준으로 만료 시간이 지난 토큰 record 삭제
         LocalDateTime currentDate = LocalDateTime.now();

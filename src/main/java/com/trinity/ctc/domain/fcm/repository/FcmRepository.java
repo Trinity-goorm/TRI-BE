@@ -18,13 +18,13 @@ import java.util.Optional;
 @Repository
 public interface FcmRepository extends JpaRepository<Fcm, Long> {
     @Transactional
-    @Modifying
-    @Query("DELETE FROM Fcm f WHERE f.token = :token")
+//    @Modifying
+//    @Query("DELETE FROM Fcm f WHERE f.token = :token")
     void deleteByToken(@Param("token") String token);
 
     @Transactional
-    @Modifying
-    @Query("DELETE FROM Fcm f WHERE f.expiresAt < :currentDate")
+//    @Modifying
+//    @Query("DELETE FROM Fcm f WHERE f.expiresAt < :currentDate")
     void deleteByExpiresAtBefore(LocalDateTime currentDate);
 
     @Transactional
@@ -34,10 +34,12 @@ public interface FcmRepository extends JpaRepository<Fcm, Long> {
                      @Param("updatedAt") LocalDateTime updatedAt,
                      @Param("expiresAt") LocalDateTime expiresAt);
 
+    List<Fcm> findByUserIn(List<User> userList);
+
+    boolean existsByToken(String fcmToken);
+
     @Query("SELECT f.token FROM Fcm f WHERE f.user.id = :userId ORDER BY f.id")
     Optional<List<String>> findByUser(@Param("userId") Long userId);
-
-    List<Fcm> findByUserIn(List<User> userList);
 
     @Query("SELECT f FROM Fcm f WHERE f.user IN :users ORDER BY f.id")
     Slice<Fcm> findByUserIn(@Param("users") List<User> users, Pageable pageable);
