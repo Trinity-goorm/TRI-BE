@@ -2,7 +2,6 @@ package com.trinity.ctc.domain.notification.service;
 
 import com.google.common.collect.Lists;
 import com.trinity.ctc.domain.fcm.entity.Fcm;
-import com.trinity.ctc.domain.notification.dto.FcmMessageDto;
 import com.trinity.ctc.domain.notification.entity.NotificationHistory;
 import com.trinity.ctc.domain.notification.entity.ReservationNotification;
 import com.trinity.ctc.domain.notification.fomatter.NotificationContentUtil;
@@ -32,8 +31,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static com.trinity.ctc.domain.notification.entity.ReservationNotification.createReservationNotification;
 import static com.trinity.ctc.domain.notification.fomatter.NotificationMessageUtil.createMessageWithUrl;
@@ -236,24 +233,14 @@ public class ReservationNotificationService {
     }
 
     @Async("sendingProcessThreadPool")
-    public CompletableFuture<List<NotificationHistory>> sendReservationNotification(List<FcmMessage> fcmMessage, int batchCount, int clearCount) {
-        return notificationSender.sendEachNotification(fcmMessage)
+    public CompletableFuture<List<NotificationHistory>> sendReservationNotification(List<FcmMessage> fcmMessageList, int batchCount, int clearCount) {
+        return notificationSender.sendEachNotification(fcmMessageList)
                 .thenApplyAsync(resultList -> {
                     log.info("✅ 빈자리 알림 발송 완료 Batch {}", batchCount);
                     if (batchCount == clearCount) log.info("전송완료!!!!!!!!!!!!!");
 
-                    // resultList.get(i)와 fcmMessage.get(i)를 매핑
-                    List<FcmMessageDto> messageDtos = IntStream.range(0, resultList.size())
-                            .mapToObj(i -> new FcmMessageDto(
-                                    fcmMessage.get(i).getData().get("title"),
-                                    fcmMessage.get(i).getData().get("body"),
-                                    fcmMessage.get(i).getData().get("url"),
-                                    fcmMessage.get(i).getToken()
-                            ))
-                            .collect(Collectors.toList());
-
                     return notificationHistoryService.buildNotificationHistory(
-                            messageDtos, resultList, SEAT_NOTIFICATION
+                            fcmMessageList, resultList, SEAT_NOTIFICATION
                     );
                 }).exceptionally(e -> {
                     log.error("❌ 빈자리 알림 발송 실패 (Batch {}): {}", batchCount, e.getMessage());
@@ -271,7 +258,7 @@ public class ReservationNotificationService {
         List<FcmMessage> messages = new ArrayList<>();
 
         for (Fcm fcm : notification.getUser().getFcmList()) {
-            FcmMessage message = createMessageWithUrl(notification.getTitle(), notification.getBody(), notification.getUrl(), fcm.getToken());
+            FcmMessage message = createMessageWithUrl(notification.getTitle(), notification.getBody(), notification.getUrl(), fcm);
             messages.add(message);
         }
         return messages;

@@ -13,10 +13,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -26,31 +24,37 @@ import static com.trinity.ctc.domain.notification.fomatter.NotificationMessageUt
 @Slf4j
 @Component
 public class NotificationSender {
-    /**
-     * 알림 전송 로직 중 FCM 메세지를 발송하는 내부 메서드
-     *
-     * @param messageList FCM 메세지 객체 리스트
-     * @return
-     */
-    public List<FcmSendingResultDto> sendNotification(List<Message> messageList) {
-        // FCM 메세지 전송 결과를 담는 DTO
-        FcmSendingResultDto result;
-        List<FcmSendingResultDto> resultList = new ArrayList<>();
 
-        for (Message message : messageList) {
-            try {
-                // FCM 서버에 메세지 전송
-                FirebaseMessaging.getInstance().send(message);
-                // 전송 결과(전송 시간, 전송 상태)
-                result = new FcmSendingResultDto(LocalDateTime.now(), SentResult.SUCCESS);
-            } catch (FirebaseMessagingException e) {
-                // 전송 결과(전송 시간, 전송 상태, 에러 코드)
-                result = new FcmSendingResultDto(LocalDateTime.now(), SentResult.FAILED, e.getMessagingErrorCode());
+    // 재발송 최대 시도 횟수
+    private static final int MAX_RETRY_COUNT = 3;
+    // 재발송 지수 백오프
+    private static final int[] EXPONENTIAL_BACKOFF = new int[]{10000, 1000, 2000, 4000};
+    //  QUOTA_EXCEEDED 에 대한 재발송 최초 딜레이
+    private static final int INITIAL_DELAY = 60000;
+
+    @Async
+    public CompletableFuture<FcmSendingResultDto> sendSingleNotification(FcmMessage message) {
+        // FCM 서버에 메세지 전송
+        ApiFuture<String> sendResponse = FirebaseMessaging.getInstance().sendAsync(message.getMessage(), true);
+
+        // 블로킹 없이 비동기 처리
+        return CompletableFuture.supplyAsync(() -> handleResponse(sendResponse, message))
+                .thenCompose(Function.identity());
+    }
+
+    @Async
+    public CompletableFuture<FcmSendingResultDto> handleResponse(ApiFuture<String> sendResponse, FcmMessage message) {
+        try {
+            sendResponse.get();
+
+        } catch (Exception e) {
+            if (e.getCause() instanceof FirebaseMessagingException fcmException) {
+                return handleFcmException(fcmException, message, 0);
+            } else {
+                throw new CustomException(FcmErrorCode.SENDING_REQUEST_FAILED);
             }
-            resultList.add(result);
         }
-
-        return resultList;
+        return CompletableFuture.completedFuture(new FcmSendingResultDto(LocalDateTime.now(), SentResult.SUCCESS));
     }
 
     @Async
@@ -61,12 +65,12 @@ public class NotificationSender {
         ApiFuture<BatchResponse> sendResponseFuture = FirebaseMessaging.getInstance().sendEachAsync(messages, true);
 
         // 블로킹 없이 비동기 처리
-        return CompletableFuture.supplyAsync(() -> handleResponse(sendResponseFuture, messageList))
+        return CompletableFuture.supplyAsync(() -> handleEachResponse(sendResponseFuture, messageList))
                 .thenCompose(Function.identity());
     }
 
     @Async("responseHandleThreadPool")
-    public CompletableFuture<List<FcmSendingResultDto>> handleResponse(ApiFuture<BatchResponse> batchResponse, List<FcmMessage> message) {
+    public CompletableFuture<List<FcmSendingResultDto>> handleEachResponse(ApiFuture<BatchResponse> batchResponse, List<FcmMessage> message) {
         try {
             List<SendResponse> responses = batchResponse.get().getResponses();
             List<FcmSendingResultDto> results = IntStream.range(0, responses.size())
@@ -75,27 +79,16 @@ public class NotificationSender {
                         if (sendResponse.isSuccessful()) {
                             return new FcmSendingResultDto(LocalDateTime.now(), SentResult.SUCCESS);
                         } else {
-                            MessagingErrorCode errorCode = sendResponse.getException().getMessagingErrorCode();
-                            if (errorCode.equals(MessagingErrorCode.UNAVAILABLE) || errorCode.equals(MessagingErrorCode.INTERNAL)) {
-                                try {
-                                    FcmMessage retryMessage = createMessageWithUrl(message.get(i).getData().get("title"),
-                                            message.get(i).getData().get("body"),
-                                            message.get(i).getData().get("url"),
-                                            message.get(i).getToken());
-                                    return retrySendingMessage(retryMessage, 0).get();
-                                } catch (InterruptedException | ExecutionException e) {
-                                    throw new RuntimeException(e);
-                                }
-                            } else {
-                                return new FcmSendingResultDto(LocalDateTime.now(), SentResult.FAILED,
-                                        sendResponse.getException().getMessagingErrorCode());
-                            }
+                            FcmMessage retryMessage = createMessageWithUrl(message.get(i).getData().get("title"),
+                                    message.get(i).getData().get("body"),
+                                    message.get(i).getData().get("url"),
+                                    message.get(i).getFcm());
+                            return handleFcmException(sendResponse.getException(), retryMessage, 0).join();
                         }
                     })
                     .collect(Collectors.toList());
             return CompletableFuture.completedFuture(results);
-        } catch (InterruptedException | ExecutionException e) {
-            Thread.currentThread().interrupt();
+        } catch (Exception e) {
             throw new CustomException(FcmErrorCode.SENDING_REQUEST_FAILED);
         }
     }
@@ -126,34 +119,20 @@ public class NotificationSender {
                         if (sendResponse.isSuccessful()) {
                             return new FcmSendingResultDto(LocalDateTime.now(), SentResult.SUCCESS);
                         } else {
-                            MessagingErrorCode errorCode = sendResponse.getException().getMessagingErrorCode();
-                            if (errorCode.equals(MessagingErrorCode.UNAVAILABLE) || errorCode.equals(MessagingErrorCode.INTERNAL)) {
-                                try {
-                                    FcmMessage retryMessage = createMessageWithUrl(message.getData().get("title"),
-                                            message.getData().get("body"),
-                                            message.getData().get("url"),
-                                            message.getTokens().get(i));
-                                    return retrySendingMessage(retryMessage, 0).get();
-                                } catch (Exception e) {
-                                    throw new CustomException(FcmErrorCode.SENDING_REQUEST_FAILED);
-                                }
-                            } else {
-                                return new FcmSendingResultDto(LocalDateTime.now(), SentResult.FAILED,
-                                        sendResponse.getException().getMessagingErrorCode());
-                            }
+                            FcmMessage retryMessage = createMessageWithUrl(message.getData().get("title"),
+                                    message.getData().get("body"),
+                                    message.getData().get("url"),
+                                    message.getFcmList().get(i)
+                                    );
+                            return handleFcmException(sendResponse.getException(), retryMessage, 0).join();
                         }
                     })
                     .collect(Collectors.toList());
             return CompletableFuture.completedFuture(results);
-        } catch (InterruptedException | ExecutionException e) {
-            Thread.currentThread().interrupt();
+        } catch (Exception e) {
             throw new CustomException(FcmErrorCode.SENDING_REQUEST_FAILED);
         }
     }
-
-    private static final int MAX_RETRY_COUNT = 3;
-    private static final int[] EXPONENTIAL_BACKOFF = new int[]{10000, 1000, 2000, 4000};
-    private static final int INITIAL_DELAY = 60000;
 
     @Async("retryThreadPool")
     public CompletableFuture<FcmSendingResultDto> retrySendingMessage(FcmMessage message, int retryCount) {
@@ -162,15 +141,10 @@ public class NotificationSender {
             FirebaseMessaging.getInstance().sendAsync(message.getMessage()).get();
         } catch (Exception e) {
             if (e.getCause() instanceof FirebaseMessagingException fcmException) {
-                if (retryCount >= MAX_RETRY_COUNT)
-                    return CompletableFuture.completedFuture(new FcmSendingResultDto(LocalDateTime.now(), SentResult.FAILED, fcmException.getMessagingErrorCode()));
-                if (fcmException.getMessagingErrorCode().equals(MessagingErrorCode.UNAVAILABLE) || fcmException.getMessagingErrorCode().equals(MessagingErrorCode.INTERNAL)) {
-                    return retrySendingMessage(message, retryCount + 1);
-                } else if (fcmException.getMessagingErrorCode().equals(MessagingErrorCode.QUOTA_EXCEEDED)) {
-                    return retryQuotaExceededException(message);
-                } else {
+                if (retryCount >= MAX_RETRY_COUNT) {
                     return CompletableFuture.completedFuture(new FcmSendingResultDto(LocalDateTime.now(), SentResult.FAILED, fcmException.getMessagingErrorCode()));
                 }
+                return handleFcmException(fcmException, message, retryCount);
             } else {
                 throw new CustomException(FcmErrorCode.SENDING_REQUEST_FAILED);
             }
@@ -185,7 +159,8 @@ public class NotificationSender {
             FirebaseMessaging.getInstance().sendAsync(message.getMessage()).get();
         } catch (Exception e) {
             if (e.getCause() instanceof FirebaseMessagingException fcmException) {
-                if (fcmException.getMessagingErrorCode().equals(MessagingErrorCode.UNAVAILABLE) || fcmException.getMessagingErrorCode().equals(MessagingErrorCode.INTERNAL)) {
+                MessagingErrorCode errorCode = fcmException.getMessagingErrorCode();
+                if (errorCode.equals(MessagingErrorCode.UNAVAILABLE) || errorCode.equals(MessagingErrorCode.INTERNAL)) {
                     return retrySendingMessage(message, 0);
                 } else {
                     return CompletableFuture.completedFuture(new FcmSendingResultDto(LocalDateTime.now(), SentResult.FAILED, fcmException.getMessagingErrorCode()));
@@ -195,5 +170,17 @@ public class NotificationSender {
             }
         }
         return CompletableFuture.completedFuture(new FcmSendingResultDto(LocalDateTime.now(), SentResult.SUCCESS));
+    }
+
+    private CompletableFuture<FcmSendingResultDto> handleFcmException(FirebaseMessagingException e, FcmMessage message, int retryCount) {
+        MessagingErrorCode errorCode = e.getMessagingErrorCode();
+
+        return switch (errorCode) {
+            case UNAVAILABLE, INTERNAL -> retrySendingMessage(message, retryCount);
+            case QUOTA_EXCEEDED -> retryQuotaExceededException(message);
+            default -> CompletableFuture.completedFuture(
+                    new FcmSendingResultDto(LocalDateTime.now(), SentResult.FAILED, errorCode)
+            );
+        };
     }
 }

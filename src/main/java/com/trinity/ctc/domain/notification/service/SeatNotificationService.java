@@ -1,10 +1,8 @@
 package com.trinity.ctc.domain.notification.service;
 
 import com.google.common.collect.Lists;
-import com.google.firebase.messaging.MulticastMessage;
 import com.trinity.ctc.domain.fcm.entity.Fcm;
 import com.trinity.ctc.domain.fcm.repository.FcmRepository;
-import com.trinity.ctc.domain.notification.dto.FcmMulticastMessageDto;
 import com.trinity.ctc.domain.notification.dto.SubscriptionListResponse;
 import com.trinity.ctc.domain.notification.dto.SubscriptionResponse;
 import com.trinity.ctc.domain.notification.entity.NotificationHistory;
@@ -27,7 +25,6 @@ import com.trinity.ctc.global.exception.error_code.NotificationErrorCode;
 import com.trinity.ctc.global.exception.error_code.SeatErrorCode;
 import com.trinity.ctc.global.exception.error_code.UserErrorCode;
 import com.trinity.ctc.global.kakao.service.AuthService;
-import com.trinity.ctc.global.util.formatter.DateTimeUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -235,10 +232,10 @@ public class SeatNotificationService {
     public CompletableFuture<List<NotificationHistory>> sendSeatNotificationAsync(SeatNotification seatNotification, List<Fcm> batch, int batchCount, int clearCount) {
 
         log.info("✅ 빈자리 알림 발송 (Batch {}): 시작", batchCount);
-        List<String> tokens = batch.stream().map(Fcm::getToken).toList();
+//        List<String> tokens = batch.stream().map(Fcm::getToken).toList();
 
         FcmMulticastMessage multicastMessage = createMulticastMessageWithUrl(
-                seatNotification.getTitle(), seatNotification.getBody(), seatNotification.getUrl(), tokens);
+                seatNotification.getTitle(), seatNotification.getBody(), seatNotification.getUrl(), batch);
 
         // FCM 메시지를 비동기 전송 (CompletableFuture 반환)
         return notificationSender.sendMulticastNotification(multicastMessage)
@@ -248,8 +245,7 @@ public class SeatNotificationService {
 
                     // 전송된 알림 히스토리를 배치로 저장
                     return notificationHistoryService.buildMulticastNotificationHistory(
-                            List.of(new FcmMulticastMessageDto(batch, seatNotification.getTitle(),
-                                    seatNotification.getBody(), seatNotification.getUrl())),
+                            multicastMessage,
                             resultList, SEAT_NOTIFICATION
                     );
                 }).exceptionally(e -> {
