@@ -84,17 +84,18 @@ public class RestaurantService {
     }
 
     public List<RestaurantPreviewResponse> convertToRestaurantDtoList(Page<Restaurant> restaurants, User user) {
-        return restaurants.stream()
-                .map(restaurant -> {
-                    boolean isWishlisted = likeRepository.existsByUserAndRestaurant(user, restaurant);
+        List<RestaurantPreviewResponse> result = restaurants.stream()
+            .map(restaurant -> {
+                boolean isWishlisted = likeRepository.existsByUserAndRestaurant(user, restaurant);
 
-                    // 14일간 날짜별 예약 가능 여부 조회
-                    List<ReservationAvailabilityResponse> reservation = seatService
-                            .getAvailabilityForNext14Days(restaurant.getId());
+                // 14일간 날짜별 예약 가능 여부 조회
+                List<ReservationAvailabilityResponse> reservation = seatService
+                    .getAvailabilityForNext14Days(restaurant.getId());
 
-                    log.info("reservation 사이즈: {}", reservation.size());
-                    return RestaurantPreviewResponse.fromEntity(user,restaurant, isWishlisted, reservation);
-                })
-                .collect(Collectors.toList());
+                log.info("reservation 사이즈: {}", reservation.size());
+                return RestaurantPreviewResponse.fromEntity(user,restaurant, isWishlisted, reservation);
+            })
+            .collect(Collectors.toList());
+        return result;
     }
 }
