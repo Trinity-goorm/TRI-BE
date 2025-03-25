@@ -1,7 +1,6 @@
 package com.trinity.ctc.domain.notification.entity;
 
 import com.trinity.ctc.domain.seat.entity.Seat;
-import com.trinity.ctc.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;

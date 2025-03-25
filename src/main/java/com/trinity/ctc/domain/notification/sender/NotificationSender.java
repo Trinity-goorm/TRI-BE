@@ -19,7 +19,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static com.trinity.ctc.domain.notification.fomatter.NotificationMessageUtil.createMessageWithUrl;
+import static com.trinity.ctc.domain.notification.formatter.NotificationMessageFormatter.createMessageWithUrl;
 
 // 발송/응답 처리를 담당 -> Firebase SDK 메서드로 FCM 서버와 통신하는 class
 @Slf4j

@@ -19,14 +19,13 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static com.trinity.ctc.domain.notification.fomatter.NotificationContentUtil.*;
-import static com.trinity.ctc.domain.notification.fomatter.NotificationMessageUtil.createMessageWithUrl;
+import static com.trinity.ctc.domain.notification.formatter.NotificationHistoryFormatter.formattingSingleNotificationHistory;
+import static com.trinity.ctc.domain.notification.formatter.NotificationMessageFormatter.formattingReservationCanceledNotification;
+import static com.trinity.ctc.domain.notification.formatter.NotificationMessageFormatter.formattingReservationCompletedNotification;
 import static com.trinity.ctc.domain.notification.type.NotificationType.RESERVATION_CANCELED;
 import static com.trinity.ctc.domain.notification.type.NotificationType.RESERVATION_COMPLETED;
 
@@ -103,65 +102,11 @@ public class ConfirmationNotificationService {
 
         // 전송 결과로 반환된 각 future 의 전달이 완료될 때까지 기다린 후 알림 history 리스트로 반환
         List<NotificationHistory> notificationHistoryList = resultList.stream()
-                .map(CompletableFuture::join) // 각 future의 실행이 끝날 때까지 기다림
+                .map(CompletableFuture::join)
                 .toList();
 
         // 알림 history 리스트를 저장하는 메서드 호출
         notificationHistoryService.saveNotificationHistory(notificationHistoryList);
-    }
-
-    /**
-     * 예약 완료 알림 메세지를 포멧팅하는 내부 메서드
-     * @param fcm FCM entity
-     * @param reservation 예약 entity
-     * @return FcmMessage -> Message 의 Wrapper 객체
-     */
-    private FcmMessage formattingReservationCompletedNotification(Fcm fcm, Reservation reservation) {
-        // 예약 완료 알림 메세지에 필요한 정보 변수 선언
-        String restaurantName = reservation.getRestaurant().getName();
-        LocalDate reservedDate = reservation.getReservationDate();
-        LocalTime reservedTime = reservation.getReservationTime().getTimeSlot();
-        int minCapacity = reservation.getSeatType().getMinCapacity();
-        int maxCapacity = reservation.getSeatType().getMaxCapacity();
-
-        // 알림 메세지 data 별 포멧팅 -> NotificationContentUtil 내의 각 formatting 메서드 호출
-        String title = formatReservationCompletedNotificationTitle(restaurantName);
-        String body = formatReservationCompletedNotificationBody(reservedDate, reservedTime, minCapacity, maxCapacity);
-        String url = formatReservationNotificationUrl();
-
-        // 알림 메세지 data 로 FcmMessage 객체를 생성하는 메서드 호출
-        return createMessageWithUrl(title, body, url, fcm);
-    }
-
-    /**
-     * 예약 취소 메세지를 포멧팅하는 내부 메서드
-     * @param fcm FCM entity
-     * @param reservation 예약 entity
-     * @param isCODPassed 예약시점에 따른 예약 비용 반환 여부(정책)
-     * @return FcmMessage -> Message 의 Wrapper 객체
-     */
-    private FcmMessage formattingReservationCanceledNotification(Fcm fcm, Reservation reservation, boolean isCODPassed) {
-        // 예약 완료 알림 메세지에 필요한 정보 변수 선언
-        String restaurantName = reservation.getRestaurant().getName();
-        LocalDate reservedDate = reservation.getReservationDate();
-        LocalTime reservedTime = reservation.getReservationTime().getTimeSlot();
-
-        // 알림 메세지 data 별 포멧팅 -> NotificationContentUtil 내의 각 formatting 메서드 호출
-        String title;
-        String body;
-        // isCODPassed 에 따라 다른 title 과 body data 포멧팅
-        if (isCODPassed) {
-            title = formatReservationFullCanceledNotificationTitle(restaurantName);
-            body = formatReservationFullCanceledNotificationBody(reservedDate, reservedTime, fcm.getUser().getEmptyTicketCount());
-        } else {
-            title = formatReservationNullCanceledNotificationTitle(restaurantName);
-            body = formatReservationNullCanceledNotificationBody(reservedDate, reservedTime, fcm.getUser().getEmptyTicketCount());
-        }
-
-        String url = formatReservationNotificationUrl();
-
-        // 알림 메세지 data 로 FcmMessage 객체를 생성하는 메서드 호출
-        return createMessageWithUrl(title, body, url, fcm);
     }
 
     /**
@@ -175,6 +120,6 @@ public class ConfirmationNotificationService {
         // 단 건의 메세지를 발송하는 메서드 호출
         return notificationSender.sendSingleNotification(message)
                 // 반환된 전송 결과 dto 와 Message data 로 알림 History 객체를 생성하는 메서드 호출
-                .thenApplyAsync(result -> notificationHistoryService.buildSingleNotificationHistory(message, result, type));
+                .thenApplyAsync(result -> formattingSingleNotificationHistory(message, result, type));
     }
 }

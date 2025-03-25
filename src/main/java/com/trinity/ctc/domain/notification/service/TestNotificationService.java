@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import static com.trinity.ctc.global.util.formatter.DateTimeUtil.convertToLocalDate;
 import static com.trinity.ctc.global.util.formatter.DateTimeUtil.convertToLocalDateTime;
 
+// 알림 테스트 용 서비스(Shell 명령어로 알림 발송 실행)
 @Component
 @ShellComponent
 @RequiredArgsConstructor

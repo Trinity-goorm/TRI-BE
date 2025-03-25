@@ -1,11 +1,11 @@
-package com.trinity.ctc.domain.notification.fomatter;
+package com.trinity.ctc.domain.notification.formatter;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 // FCM 알림 메세지 포맷터
-public class NotificationContentUtil {
+public class NotificationContentFormatter {
     public static String formatDailyNotificationTitle(String userName, String restaurantName) {
         return MessageFormat.format("[캐치핑] {0}님, 오늘 {1}에 예약이 있어요!",
                 userName, restaurantName);
