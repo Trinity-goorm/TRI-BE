@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 public class FcmSendingResultDto {
     LocalDateTime sentAt;
     SentResult sentResult;
+
+    // FCM Messaging 에서 반환하는 Error Code(Enum)
     MessagingErrorCode errorCode;
 
     public FcmSendingResultDto(LocalDateTime sentAt, SentResult sentResult) {
