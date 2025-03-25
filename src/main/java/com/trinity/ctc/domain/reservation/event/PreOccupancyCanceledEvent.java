@@ -8,5 +8,6 @@ import lombok.Getter;
 public class PreOccupancyCanceledEvent {
     private final Long reservationId;
     private final Long SeatId;
-    private final int availableSeats;
+    private final int availableSeatBefore;
+    private final int availableSeatsAfter;
 }

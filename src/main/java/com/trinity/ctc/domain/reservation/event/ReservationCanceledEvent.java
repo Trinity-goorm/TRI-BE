@@ -9,6 +9,7 @@ public class ReservationCanceledEvent {
     private final Long userId;
     private final Long reservationId;
     private final Long seatId;
-    private final int availableSeats;
+    private final int availableSeatsBefore;
+    private final int availableSeatsAfter;
     private final boolean isCODPassed;
 }
