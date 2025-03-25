@@ -20,14 +20,14 @@ public class ReservationEventListener {
     private final SeatNotificationService seatNotificationService;
     private final ConfirmationNotificationService confirmationNotificationService;
 
-    @Async
+    @Async("reservation-event-listener")
     @EventListener
     public void handleReservationCompletedEvent(ReservationCompletedEvent reservationEvent) {
         reservationNotificationService.registerReservationNotification(reservationEvent.getUserId(), reservationEvent.getReservationId());
         confirmationNotificationService.sendReservationCompletedNotification(reservationEvent.getUserId(), reservationEvent.getReservationId());
     }
 
-    @Async
+    @Async("reservation-event-listener")
     @EventListener
     public void handleReservationCanceledEvent(ReservationCanceledEvent reservationEvent) {
         if (reservationEvent.getAvailableSeats() == 1)
@@ -37,7 +37,7 @@ public class ReservationEventListener {
         reservationNotificationService.deleteReservationNotification(reservationEvent.getReservationId());
     }
 
-    @Async
+    @Async("reservation-event-listener")
     @EventListener
     public void handlePreOccupancyCanceledEvent(PreOccupancyCanceledEvent preOccupancyCanceledEvent) {
 //        빈자리 알림 발송

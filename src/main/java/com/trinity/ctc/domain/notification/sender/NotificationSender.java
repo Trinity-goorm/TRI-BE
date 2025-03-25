@@ -42,7 +42,7 @@ public class NotificationSender {
                 .thenCompose(Function.identity());
     }
 
-    @Async
+    @Async("response-handler")
     public CompletableFuture<FcmSendingResultDto> handleResponse(ApiFuture<String> sendResponse, FcmMessage message) {
         try {
             sendResponse.get();
@@ -69,7 +69,7 @@ public class NotificationSender {
                 .thenCompose(Function.identity());
     }
 
-    @Async("responseHandleThreadPool")
+    @Async("response-handler")
     public CompletableFuture<List<FcmSendingResultDto>> handleEachResponse(ApiFuture<BatchResponse> batchResponse, List<FcmMessage> message) {
         try {
             List<SendResponse> responses = batchResponse.get().getResponses();
@@ -110,7 +110,7 @@ public class NotificationSender {
                 .thenCompose(Function.identity());
     }
 
-    @Async("responseHandleThreadPool")
+    @Async("response-handler")
     public CompletableFuture<List<FcmSendingResultDto>> handleMulticastResponse(ApiFuture<BatchResponse> batchResponse, FcmMulticastMessage message) {
         try {
             List<SendResponse> responses = batchResponse.get().getResponses();
@@ -136,7 +136,7 @@ public class NotificationSender {
         }
     }
 
-    @Async("retryThreadPool")
+    @Async("immediate-retry")
     public CompletableFuture<FcmSendingResultDto> retrySendingMessage(FcmMessage message, int retryCount) {
         try {
             Thread.sleep(EXPONENTIAL_BACKOFF[retryCount]);
@@ -154,7 +154,7 @@ public class NotificationSender {
         return CompletableFuture.completedFuture(new FcmSendingResultDto(LocalDateTime.now(), SentResult.SUCCESS));
     }
 
-    @Async("cashedThreadPool")
+    @Async("delayed-retry")
     public CompletableFuture<FcmSendingResultDto> retryQuotaExceededException(FcmMessage message) {
         try {
             Thread.sleep(INITIAL_DELAY);

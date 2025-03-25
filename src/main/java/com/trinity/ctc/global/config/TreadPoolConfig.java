@@ -3,100 +3,130 @@ package com.trinity.ctc.global.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 @Configuration
 @EnableAsync
 public class TreadPoolConfig {
+    @Bean(name = "reservation-event-listener")
+    public Executor reservationEventListener() {
+        return Executors.newWorkStealingPool();
+    }
+
+
     @Bean(name = "reservation-completed-notification")
-    public Executor reservationCompletedTaskExecutor() {
-        return Executors.newFixedThreadPool(1000);
+    public Executor reservationCompletedNotificationTaskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+
+        executor.setCorePoolSize(2);
+        executor.setThreadNamePrefix("reservation-complete-notification-");
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setThreadPriority(7);
+
+        executor.initialize();
+        return executor;
     }
 
     @Bean(name = "reservation-canceled-notification")
-    public Executor reservationCanceledTaskExecutor() {
-        return Executors.newFixedThreadPool(1000);
+    public Executor reservationCanceledNotificationTaskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+
+        executor.setCorePoolSize(2);
+        executor.setThreadNamePrefix("reservation-canceled-notification-");
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setThreadPriority(7);
+
+        executor.initialize();
+        return executor;
     }
 
-    @Bean(name = "daily-notification")
-    public Executor dailyTaskExecutor() {
-        return Executors.newFixedThreadPool(10);
+    @Bean(name = "daily-reservation-notification")
+    public Executor dailyReservationNotificationTaskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+
+        executor.setCorePoolSize(20);
+        executor.setThreadNamePrefix("daily-reservation-notification-");
+        executor.setAllowCoreThreadTimeOut(true);
+        executor.setKeepAliveSeconds(60);
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setThreadPriority(6);
+
+        executor.initialize();
+        return executor;
     }
 
-    @Bean(name = "hourly-notification")
+    @Bean(name = "hourly-reservation-notification")
     public Executor hourlyTaskExecutor() {
-        return Executors.newFixedThreadPool(10);
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+
+        executor.setCorePoolSize(10);
+        executor.setThreadNamePrefix("daily-reservation-notification-");
+        executor.setAllowCoreThreadTimeOut(true);
+        executor.setKeepAliveSeconds(60);
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setThreadPriority(6);
+
+        executor.initialize();
+        return executor;
     }
 
-    @Bean(name = "seat-notification")
+    @Bean(name = "empty-seat-notification")
     public Executor seatTaskExecutor() {
-        return Executors.newFixedThreadPool(10);
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+
+        executor.setCorePoolSize(20);
+        executor.setThreadNamePrefix("empty-seat-notification-");
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setThreadPriority(10);
+
+        executor.initialize();
+        return executor;
     }
 
-    @Bean(name = "firebase-sending")
-    public Executor sendingTaskExecutor() {
-        return Executors.newFixedThreadPool(10);
-    }
-
-    @Bean(name = "single-response")
+    @Bean(name = "response-handler")
     public Executor singleResponseTaskExecutor() {
-        return Executors.newFixedThreadPool(10);
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+
+        executor.setCorePoolSize(20);
+        executor.setThreadNamePrefix("response-handler-");
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setThreadPriority(8);
+
+        executor.initialize();
+        return executor;
     }
 
-    @Bean(name = "each-response")
-    public Executor eachResponseTaskExecutor() {
-        return Executors.newFixedThreadPool(10);
-    }
-
-    @Bean(name = "multicast-response")
-    public Executor multicastResponseTaskExecutor() {
-        return Executors.newFixedThreadPool(10);
-    }
-
-    @Bean(name = "retry-immediately")
+    @Bean(name = "immediate-retry")
     public Executor retryImmediatelyTaskExecutor() {
-        return Executors.newFixedThreadPool(10);
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+
+        executor.setCorePoolSize(8);
+        executor.setThreadNamePrefix("immediate-retry-");
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.setThreadPriority(9);
+
+        executor.initialize();
+        return executor;
     }
 
-    @Bean(name = "retry-delay")
+    @Bean(name = "delayed-retry")
     public Executor retryDelayTaskExecutor() {
-        return Executors.newFixedThreadPool(10);
+        return Executors.newCachedThreadPool();
     }
 
     @Bean(name = "save-notification-history")
     public Executor saveNotificationHistoryTaskExecutor() {
-        return Executors.newFixedThreadPool(10);
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+
+        executor.setCorePoolSize(2);
+        executor.setThreadNamePrefix("save-notification-history-");
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+
+        executor.initialize();
+        return executor;
     }
-
-
-//    @Bean(name = "each-response")
-//    public Executor customThreadPoolExecutor() {
-//        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-//
-//        executor.setCorePoolSize(50);
-//        executor.setMaxPoolSize(100);
-//        executor.setQueueCapacity(100);
-//        executor.setThreadNamePrefix("custom-sending-Thread-");
-//        executor.setAllowCoreThreadTimeOut(true);
-//        executor.setWaitForTasksToCompleteOnShutdown(true);
-//        executor.setAwaitTerminationSeconds(60);
-//        executor.setThreadPriority(Thread.NORM_PRIORITY);
-//        executor.initialize();
-//        return executor;
-//    }
-//
-//    @Bean(name = "fixCachedThreadPoolExecutor")
-//    public Executor fixCachedThreadPoolExecutor() {
-//
-//        return new ThreadPoolExecutor(
-//                0,
-//                8,
-//                60L,
-//                TimeUnit.SECONDS,
-//                new SynchronousQueue<>(),
-//                new ThreadPoolExecutor.AbortPolicy()
-//        );
-//    }
 }

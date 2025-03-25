@@ -121,7 +121,7 @@ public class NotificationHistoryService {
      * @param notificationHistoryList 알림 history Entity 리스트
      */
     @Transactional(propagation = REQUIRES_NEW)
-    @Async("fixedThreadPoolExecutor")
+    @Async("save-notification-history")
     public void saveNotificationHistory(List<NotificationHistory> notificationHistoryList) {
         log.info("저장 시작");
         notificationHistoryRepository.saveAll(notificationHistoryList);

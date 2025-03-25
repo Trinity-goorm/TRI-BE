@@ -13,7 +13,7 @@ public class CustomThreadManager extends ThreadManager {
             Thread thread = new Thread(runnable);
             thread.setName("firebase-msg-" + thread.getId());
             thread.setDaemon(false);
-            thread.setPriority(Thread.MAX_PRIORITY);
+            thread.setPriority(9);
             return thread;
         };
 
