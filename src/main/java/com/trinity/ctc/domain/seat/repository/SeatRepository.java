@@ -2,7 +2,9 @@ package com.trinity.ctc.domain.seat.repository;
 
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
 import com.trinity.ctc.domain.seat.entity.Seat;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -28,6 +30,7 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
     List<Seat> findAvailableSeatsForDate(@Param("restaurantId") Long restaurantId,
                                          @Param("selectedDate") LocalDate selectedDate);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT sa FROM Seat sa " +
             "WHERE sa.restaurant.id = :restaurantId " +
             "AND sa.reservationDate = :selectedDate " +
