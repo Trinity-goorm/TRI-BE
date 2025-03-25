@@ -1,6 +1,7 @@
 package com.trinity.ctc.domain.seat.repository;
 
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
+import com.trinity.ctc.domain.seat.dto.AvailableSeatPerDay;
 import com.trinity.ctc.domain.seat.entity.Seat;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -24,11 +25,19 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
     List<Seat> findAvailableSeatsToday(@Param("restaurantId") Long restaurantId,
                                        @Param("targetTime") LocalTime targetTime);
 
+    @Query("SELECT new com.trinity.ctc.domain.seat.dto.AvailableSeatPerDay( " +
+        "sa.restaurant.id, sa.reservationDate, sa.availableSeats, sa.reservationTime.timeSlot) " +
+        "FROM Seat sa " +
+        "WHERE sa.restaurant.id = :restaurantId " +
+        "AND sa.reservationDate = :selectedDate")
+    List<AvailableSeatPerDay> findAvailableSeatsForDate(@Param("restaurantId") Long restaurantId,
+                                                        @Param("selectedDate") LocalDate selectedDate);
+
     @Query("SELECT sa FROM Seat sa " +
             "WHERE sa.restaurant.id = :restaurantId " +
             "AND sa.reservationDate = :selectedDate")
-    List<Seat> findAvailableSeatsForDate(@Param("restaurantId") Long restaurantId,
-                                         @Param("selectedDate") LocalDate selectedDate);
+    List<Seat> findAvailableSeatsForDateEntity(@Param("restaurantId") Long restaurantId,
+                                               @Param("selectedDate") LocalDate selectedDate);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT sa FROM Seat sa " +
