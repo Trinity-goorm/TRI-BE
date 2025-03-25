@@ -2,7 +2,6 @@ package com.trinity.ctc.domain.notification.service;
 
 import com.google.common.collect.Lists;
 import com.trinity.ctc.domain.fcm.entity.Fcm;
-import com.trinity.ctc.domain.fcm.repository.FcmRepository;
 import com.trinity.ctc.domain.notification.dto.SubscriptionListResponse;
 import com.trinity.ctc.domain.notification.dto.SubscriptionResponse;
 import com.trinity.ctc.domain.notification.entity.NotificationHistory;
@@ -13,7 +12,6 @@ import com.trinity.ctc.domain.notification.repository.SeatNotificationRepository
 import com.trinity.ctc.domain.notification.repository.SeatNotificationSubscriptionRepository;
 import com.trinity.ctc.domain.notification.sender.NotificationSender;
 import com.trinity.ctc.domain.notification.type.NotificationType;
-import com.trinity.ctc.domain.notification.validator.EmptyTicketValidator;
 import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
 import com.trinity.ctc.domain.reservation.status.ReservationStatus;
 import com.trinity.ctc.domain.seat.entity.Seat;
@@ -44,6 +42,7 @@ import static com.trinity.ctc.domain.notification.formatter.NotificationFormatte
 import static com.trinity.ctc.domain.notification.formatter.NotificationHistoryFormatter.formattingMulticastNotificationHistory;
 import static com.trinity.ctc.domain.notification.formatter.NotificationMessageFormatter.createMulticastMessageWithUrl;
 import static com.trinity.ctc.domain.notification.type.NotificationType.SEAT_NOTIFICATION;
+import static com.trinity.ctc.domain.notification.validator.EmptyTicketValidator.validateEmptyTicketUsage;
 
 @Slf4j
 @EnableAsync
@@ -55,7 +54,6 @@ public class SeatNotificationService {
     private final SeatRepository seatRepository;
     private final SeatNotificationRepository seatNotificationRepository;
     private final SeatNotificationSubscriptionRepository seatNotificationSubscriptionRepository;
-    private final FcmRepository fcmRepository;
 
     private final NotificationHistoryService notificationHistoryService;
     private final AuthService authService;
@@ -76,7 +74,7 @@ public class SeatNotificationService {
         User user = userRepository.findByKakaoId(Long.valueOf(kakaoId)).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
         // 티켓 개수 검증, 509 반환
-        EmptyTicketValidator.validateEmptyTicketUsage(user.getEmptyTicketCount());
+        validateEmptyTicketUsage(user.getEmptyTicketCount());
 
         // 좌석 정보 조회, 없을 시 404 반환
         Seat seat = seatRepository.findById(seatId).orElseThrow(() -> new CustomException(SeatErrorCode.NOT_FOUND));
