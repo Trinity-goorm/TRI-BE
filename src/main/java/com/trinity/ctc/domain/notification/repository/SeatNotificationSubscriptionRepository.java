@@ -13,15 +13,12 @@ import java.util.Optional;
 @Repository
 public interface SeatNotificationSubscriptionRepository extends JpaRepository<SeatNotificationSubscription, Long> {
 
-    @Query("Select s FROM SeatNotificationSubscription s WHERE s.user.id = :userId AND s.seatNotification = :seatNotification")
-    Optional<SeatNotificationSubscription> findByUserIdAndSubscription(@Param("userId") long userId, @Param("seatNotification") SeatNotification seatNotification);
+    Optional<SeatNotificationSubscription> findByUserIdAndSeatNotification(Long userId, SeatNotification seatNotification);
 
-    @Query("Select s FROM SeatNotificationSubscription s WHERE s.user.id = :userId")
-    List<SeatNotificationSubscription> findAllByUserId(@Param("userId") long userId);
+    List<SeatNotificationSubscription> findAllByUserId(Long userId);
 
-    @Query("SELECT COUNT(s) FROM SeatNotificationSubscription s WHERE s.seatNotification = :seatNotification")
-    int countBySeatNotificationMessage(@Param("seatNotification") SeatNotification seatNotification);
+    int countBySeatNotification(SeatNotification seatNotification);
 
-    @Query("SELECT s FROM SeatNotificationSubscription s WHERE s.seatNotification = :seatNotification")
-    Optional<List<SeatNotificationSubscription>> findAllBySeatNotificationWithUsers(@Param("seatNotification") SeatNotification seatNotification);
+    @Query("SELECT s FROM SeatNotificationSubscription s join fetch s.user u join fetch s.user.fcmList f left join fetch s.user.userPreference uf WHERE s.seatNotification = :seatNotification")
+    List<SeatNotificationSubscription> findAllBySeatNotification(@Param("seatNotification") SeatNotification seatNotification);
 }

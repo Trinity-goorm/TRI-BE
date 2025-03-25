@@ -36,7 +36,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -74,7 +73,7 @@ public class SeatNotificationService {
                 .orElseGet(() -> registerSeatNotificationMessage(seatId));
 
         // 이미 신청 내역이 있을 시, 409 반환
-        seatNotificationSubscriptionRepository.findByUserIdAndSubscription(user.getId(), seatNotification)
+        seatNotificationSubscriptionRepository.findByUserIdAndSeatNotification(user.getId(), seatNotification)
                 .ifPresent(notification -> {
                     log.info("이미 신청 내역이 존재합니다. userId: {}", user.getId());
                     throw new CustomException(NotificationErrorCode.ALREADY_SUBSCRIBED);
@@ -154,7 +153,7 @@ public class SeatNotificationService {
 
 
         for (SeatNotificationSubscription notification : seatNotificationSubscriptionList) {
-            int subscriberCount = seatNotificationSubscriptionRepository.countBySeatNotificationMessage(notification.getSeatNotification());
+            int subscriberCount = seatNotificationSubscriptionRepository.countBySeatNotification(notification.getSeatNotification());
 
             log.info("SeatNotification ID: {}, 관련 Seat ID: {}, 구독자 수: {}",
                     notification.getId(),
@@ -192,9 +191,8 @@ public class SeatNotificationService {
                 .orElseThrow(() -> new CustomException(NotificationErrorCode.NOT_FOUND));
 
         // 빈자리 알림 구독자 리스트
-        List<SeatNotificationSubscription> seatNotificationSubscriptionList =
-                seatNotificationSubscriptionRepository.findAllBySeatNotificationWithUsers(seatNotification).orElseThrow(
-                        () -> new CustomException(NotificationErrorCode.NO_SUBSCRIPTION));
+        List<SeatNotificationSubscription> seatNotificationSubscriptionList = seatNotificationSubscriptionRepository.findAllBySeatNotification(seatNotification);
+        if (seatNotificationSubscriptionList.isEmpty()) throw new CustomException(NotificationErrorCode.NO_SUBSCRIPTION);
 
         List<User> userList = seatNotificationSubscriptionList.stream().map(SeatNotificationSubscription::getUser).toList();
 
@@ -252,11 +250,11 @@ public class SeatNotificationService {
      * 날짜/시간이 지난 자리에 대한 빈자리 알림 메세지/빈자리 알림 신청에 대한 데이터 삭제 메서드
      */
     @Transactional
-    public void deleteSeatNotificationMessages(LocalDate currentDate, LocalTime currentTime) {
+    public void deleteSeatNotifications(LocalDate currentDate, LocalTime currentTime) {
 
         // 현재 날짜/시간 기준으로 이전의 자리에 해당하는 빈자리 알림 메세지를 select
-        List<SeatNotification> messages = seatNotificationRepository.findAllByCurrentDateTime(currentDate, currentTime);
+        List<SeatNotification> seatNotificationList = seatNotificationRepository.findAllByCurrentDateTime(currentDate, currentTime);
         // 삭제(Cascade 설정으로 알림 신청 데이터도 삭제됨)
-        seatNotificationRepository.deleteAll(messages);
+        seatNotificationRepository.deleteAll(seatNotificationList);
     }
 }

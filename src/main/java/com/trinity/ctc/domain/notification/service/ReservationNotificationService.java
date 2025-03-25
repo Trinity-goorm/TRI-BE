@@ -28,7 +28,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -130,7 +129,7 @@ public class ReservationNotificationService {
      */
     @Transactional
     public void deleteReservationNotification(Long reservationId) {
-        reservationNotificationRepository.deleteAllByReservation(reservationId);
+        reservationNotificationRepository.deleteAllByReservationId(reservationId);
     }
 
     /**
@@ -150,7 +149,7 @@ public class ReservationNotificationService {
 
         // 알림 타입과 오늘 날짜로 당일 예약 알림 정보 가져오기
         List<ReservationNotification> reservationNotificationList = reservationNotificationRepository
-                .findAllByTypeAndDate(DAILY_NOTIFICATION, scheduledDate);
+                .findAllByTypeAndScheduledDate(DAILY_NOTIFICATION, scheduledDate);
         log.info("가져온 목록: " + reservationNotificationList.size());
         if (reservationNotificationList.isEmpty()) return;
 
@@ -181,7 +180,7 @@ public class ReservationNotificationService {
                 .toList();
 
         // 전송된 알림 히스토리를 전부 history 테이블에 저장하는 메서드
-//        notificationHistoryService.saveNotificationHistory(notificationHistoryList);
+        notificationHistoryService.saveNotificationHistory(notificationHistoryList);
         // 해당 날짜에 스케줄된 당일 예약 알림을 table에서 삭제하는 메서드
 //        deleteDailyNReservationNotification();
     }
@@ -203,7 +202,7 @@ public class ReservationNotificationService {
 
         // 알림 타입과 현재 시간으로 보낼 예약 1시간 전 알림 정보 가져오기
         List<ReservationNotification> reservationNotificationList = reservationNotificationRepository
-                .findAllByTypeAndDateTime(BEFORE_ONE_HOUR_NOTIFICATION, scheduledTime);
+                .findAllByTypeAndScheduledTime(BEFORE_ONE_HOUR_NOTIFICATION, scheduledTime);
 
         // 전송할 알림 리스트를 전부 도는 알림 발송 로직
         for (ReservationNotification notification : reservationNotificationList) {
@@ -229,7 +228,7 @@ public class ReservationNotificationService {
                 .flatMap(List::stream) // 여러 리스트를 하나로 합침
                 .toList();
         // 전송된 알림 히스토리를 전부 history 테이블에 저장하는 메서드
-//        notificationHistoryService.saveNotificationHistory(notificationHistoryList);
+        notificationHistoryService.saveNotificationHistory(notificationHistoryList);
         // 해당 시간에 스케줄된 한시간 전 예약 알림을 table에서 삭제하는 메서드
 //        deleteHourlyNReservationNotification(scheduledTime);
     }

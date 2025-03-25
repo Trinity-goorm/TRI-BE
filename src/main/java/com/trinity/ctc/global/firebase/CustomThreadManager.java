@@ -7,8 +7,11 @@ import java.util.concurrent.*;
 
 public class CustomThreadManager extends ThreadManager {
 
+    // FireBase SDK에 할당할 스레드 풀 설정 -> 발송 스레드
     @Override
     protected ExecutorService getExecutor(FirebaseApp firebaseApp) {
+
+        // 스레드 이름, 우선순위 설정
         ThreadFactory threadFactory = runnable -> {
             Thread thread = new Thread(runnable);
             thread.setName("firebase-msg-" + thread.getId());
@@ -16,7 +19,7 @@ public class CustomThreadManager extends ThreadManager {
             thread.setPriority(9);
             return thread;
         };
-
+        
         ThreadPoolExecutor executor = new ThreadPoolExecutor(
                 100,
                 100,

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+// FCM에서 제공하는 Message, MulticastMessage의 Wrapper 객체(FcmMessage, FcmMulticastMessage)를 생성하는 Util
 public class NotificationMessageUtil {
 
     public static FcmMessage createMessageWithUrl(String title, String body, String url, Fcm fcm) {

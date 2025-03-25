@@ -8,6 +8,7 @@ import lombok.Getter;
 import java.util.List;
 import java.util.Map;
 
+// Firebase의 MulticastMessage 객체의 wrapper 클래스
 @Getter
 public class FcmMulticastMessage {
     private final MulticastMessage multicastMessage;

@@ -44,7 +44,7 @@ public class ReservationEventListener {
     @Async("reservation-event-listener")
     @EventListener
     public void handleReservationCanceledEvent(ReservationCanceledEvent reservationCanceledEvent) {
-
+        // 이벤트를 발행한 대상 예약 자리가 빈자리인지 확인
         if (checkEmptySeat(reservationCanceledEvent.getAvailableSeatsBefore(), reservationCanceledEvent.getAvailableSeatsAfter())) {
             // 빈자리 알림 발송
             seatNotificationService.sendSeatNotification(reservationCanceledEvent.getSeatId());
@@ -63,7 +63,7 @@ public class ReservationEventListener {
     @Async("reservation-event-listener")
     @EventListener
     public void handlePreOccupancyCanceledEvent(PreOccupancyCanceledEvent preOccupancyCanceledEvent) {
-
+        // 이벤트를 발행한 대상 예약 자리가 빈자리인지 확인
         if (checkEmptySeat(preOccupancyCanceledEvent.getAvailableSeatBefore(), preOccupancyCanceledEvent.getAvailableSeatsAfter())) {
             // 빈자리 알림 발송
             seatNotificationService.sendSeatNotification(preOccupancyCanceledEvent.getSeatId());
