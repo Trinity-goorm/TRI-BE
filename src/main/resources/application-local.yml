@@ -52,4 +52,4 @@ logging:
 common:
   seat:
     available:
-      count: 1
+      count: 10

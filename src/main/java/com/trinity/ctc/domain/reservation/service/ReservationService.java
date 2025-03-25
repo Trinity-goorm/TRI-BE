@@ -30,6 +30,9 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -48,24 +51,17 @@ public class ReservationService {
 
     /**
      * 선점하기
-     *
-     * @param reservationRequest
      * @return 선점성공여부
      */
     @Transactional
-    public PreoccupyResponse occupyInAdvance(ReservationRequest reservationRequest) {
-        log.info("[예약 요청] 날짜: {}, 시간: {}, 레스토랑 ID: {}, 좌석 타입 ID: {}",
-                reservationRequest.getSelectedDate(), reservationRequest.getReservationTime(),
-                reservationRequest.getRestaurantId(), reservationRequest.getSeatTypeId());
-
-        // 사용자 KakaoID 획득
-        Long kakaoId = Long.parseLong(authService.getAuthenticatedKakaoId());
+    public PreoccupyResponse occupyInAdvance(Long kakaoId, Long restaurantId, LocalDate reservationDate,
+                                             LocalTime reservationTime, Long seatTypeId) {
 
         // 사용자 예약이력 검증
-        reservationValidator.validateUserReservation(reservationRequest, kakaoId);
+        reservationValidator.validateUserReservation(kakaoId, restaurantId, reservationDate, reservationTime, seatTypeId);
 
         // 검증 (좌석 남은 자리 확인)
-        Seat seat = validateSeatAvailability(reservationRequest);
+        Seat seat = validateSeatAvailability(restaurantId, reservationDate, reservationTime, seatTypeId);
 
         // 좌석 한개 선점
         log.info("[좌석 선점] 기존 좌석 수: {}", seat.getAvailableSeats());
@@ -73,7 +69,36 @@ public class ReservationService {
         log.info("[좌석 선점 완료] 남은 좌석 수: {}", seat.getAvailableSeats());
 
         // 예약정보 생성 -> 저장
-        Reservation reservation = createReservation(reservationRequest, kakaoId);
+        Reservation reservation = createReservation(kakaoId, restaurantId, reservationDate, reservationTime, seatTypeId);
+        reservationRepository.save(reservation);
+
+        log.info("[예약 성공] 예약 ID: {}", reservation.getId());
+
+        // DTO 생성
+        return PreoccupyResponse.of(true, reservation.getId());
+    }
+
+    /**
+     * 선점하기
+     * @return 선점성공여부
+     */
+    @Transactional
+    public PreoccupyResponse occupyInAdvanceTest(Long kakaoId, Long restaurantId, LocalDate reservationDate,
+                                                 LocalTime reservationTime, Long seatTypeId) {
+
+        // 사용자 예약이력 검증
+        reservationValidator.validateUserReservation(kakaoId, restaurantId, reservationDate, reservationTime, seatTypeId);
+
+        // 검증 (좌석 남은 자리 확인)
+        Seat seat = validateSeatAvailability(restaurantId, reservationDate, reservationTime, seatTypeId);
+
+        // 좌석 한개 선점
+        log.info("[좌석 선점] 기존 좌석 수: {}", seat.getAvailableSeats());
+        seat.preoccupyOneSeat();
+        log.info("[좌석 선점 완료] 남은 좌석 수: {}", seat.getAvailableSeats());
+
+        // 예약정보 생성 -> 저장
+        Reservation reservation = createReservation(kakaoId, restaurantId, reservationDate, reservationTime, seatTypeId);
         reservationRepository.save(reservation);
 
         log.info("[예약 성공] 예약 ID: {}", reservation.getId());
@@ -181,22 +206,23 @@ public class ReservationService {
 
     /**
      * 선점가능상태 검증
-     *
-     * @param reservationRequest
      * @return 선점대상 좌석정보
      */
-    private Seat validateSeatAvailability(ReservationRequest reservationRequest) {
+    private Seat validateSeatAvailability(Long restaurantId, LocalDate reservationDate,
+                                          LocalTime reservationTime, Long seatTypeId) {
         Seat seat = seatRepository.findByReservationData(
-                reservationRequest.getRestaurantId(),
-                reservationRequest.getSelectedDate(),
-                reservationRequest.getReservationTime(),
-                reservationRequest.getSeatTypeId()
+                restaurantId,
+                reservationDate,
+                reservationTime,
+                seatTypeId
         );
 
         if (!SeatAvailabilityValidator.checkAvailability(seat)) {
             log.warn("[예약 실패] 좌석 부족 - 레스토랑 ID: {}, 날짜: {}, 시간: {}, 좌석 타입 ID: {}",
-                    reservationRequest.getRestaurantId(), reservationRequest.getSelectedDate(),
-                    reservationRequest.getReservationTime(), reservationRequest.getSeatTypeId());
+                    restaurantId,
+                    reservationDate,
+                    reservationTime,
+                    seatTypeId);
             throw new CustomException(SeatErrorCode.NO_AVAILABLE_SEAT);
         }
 
@@ -206,25 +232,24 @@ public class ReservationService {
 
     /**
      * 예약정보 생성
-     *
-     * @param reservationRequest
      * @return 예약정보
      */
-    private Reservation createReservation(ReservationRequest reservationRequest, Long kakaoId) {
+    private Reservation createReservation(Long kakaoId, Long restaurantId, LocalDate reservationDate,
+                                          LocalTime reservationTimeSlot, Long seatTypeId) {
         User user = userRepository.findByKakaoId(kakaoId)
                 .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
-        Restaurant restaurant = restaurantRepository.findById(reservationRequest.getRestaurantId())
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new CustomException(RestaurantErrorCode.NOT_FOUND));
 
-        SeatType seatType = seatTypeRepository.findById(reservationRequest.getSeatTypeId())
+        SeatType seatType = seatTypeRepository.findById(seatTypeId)
                 .orElseThrow(() -> new CustomException(SeatTypeErrorCode.NOT_FOUND));
 
-        ReservationTime reservationTime = reservationTimeRepository.findByTimeSlot(reservationRequest.getReservationTime())
+        ReservationTime reservationTime = reservationTimeRepository.findByTimeSlot(reservationTimeSlot)
                 .orElseThrow(() -> new CustomException(ReservationTimeErrorCode.NOT_FOUND));
 
         return Reservation.builder()
-                .reservationDate(reservationRequest.getSelectedDate())
+                .reservationDate(reservationDate)
                 .status(ReservationStatus.IN_PROGRESS)
                 .restaurant(restaurant)
                 .user(user)

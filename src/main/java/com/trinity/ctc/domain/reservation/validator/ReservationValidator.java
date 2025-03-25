@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @Component
@@ -41,19 +42,19 @@ public class ReservationValidator {
         return DateTimeValidator.isMoreThanOneDayAway(reservationDate);
     }
 
-    public void validateUserReservation(ReservationRequest request, Long kakaoId) {
-        if (hasExistingReservation(request, kakaoId)) {
+    public void validateUserReservation(Long kakaoId, Long restaurantId, LocalDate reservationDate,
+                                        LocalTime reservationTime, Long seatTypeId) {
+        if (hasExistingReservation(kakaoId, restaurantId, reservationDate,
+                reservationTime, seatTypeId)) {
             throw new CustomException(ReservationErrorCode.ALREADY_RESERVED_BY_USER);
         }
     }
 
     /**
      * 사용자 예약정보 검증 v1 (사용자 필터링 후 예약정보로 확인)
-     *
-     * @param request
-     * @return
      */
-    private boolean hasExistingReservation(ReservationRequest request, Long kakaoId) {
+    private boolean hasExistingReservation(Long kakaoId, Long restaurantId, LocalDate reservationDate,
+                                           LocalTime reservationTime, Long seatTypeId) {
         List<Reservation> userReservations = reservationRepository.findByKakaoIdAndStatusIn(
                 kakaoId,
                 List.of(ReservationStatus.IN_PROGRESS, ReservationStatus.COMPLETED)
@@ -61,10 +62,10 @@ public class ReservationValidator {
 
         return userReservations.stream()
                 .anyMatch(reservation ->
-                        reservation.getRestaurant().getId().equals(request.getRestaurantId()) &&
-                                reservation.getReservationDate().equals(request.getSelectedDate()) &&
-                                reservation.getReservationTime().getTimeSlot().equals(request.getReservationTime()) &&
-                                reservation.getSeatType().getId().equals(request.getSeatTypeId())
+                        reservation.getRestaurant().getId().equals(restaurantId) &&
+                                reservation.getReservationDate().equals(reservationDate) &&
+                                reservation.getReservationTime().getTimeSlot().equals(reservationTime) &&
+                                reservation.getSeatType().getId().equals(seatTypeId)
                 );
     }
 }

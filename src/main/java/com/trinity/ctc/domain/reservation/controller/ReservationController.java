@@ -3,7 +3,9 @@ package com.trinity.ctc.domain.reservation.controller;
 import com.trinity.ctc.domain.reservation.dto.PreoccupyResponse;
 import com.trinity.ctc.domain.reservation.dto.ReservationRequest;
 import com.trinity.ctc.domain.reservation.dto.ReservationResultResponse;
+import com.trinity.ctc.domain.reservation.dto.ReservationTestRequest;
 import com.trinity.ctc.domain.reservation.service.ReservationService;
+import com.trinity.ctc.global.kakao.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final AuthService authService;
 
     @PostMapping("/preoccupy")
     @Operation(
@@ -35,7 +38,27 @@ public class ReservationController {
             )
     )
     public ResponseEntity<PreoccupyResponse> preoccupySeat(@RequestBody ReservationRequest reservationRequest) {
-        PreoccupyResponse result = reservationService.occupyInAdvance(reservationRequest);
+        Long kakaoId = Long.parseLong(authService.getAuthenticatedKakaoId());
+        PreoccupyResponse result = reservationService.occupyInAdvance(kakaoId, reservationRequest.getRestaurantId(), reservationRequest.getSelectedDate(), reservationRequest.getReservationTime(), reservationRequest.getSeatTypeId());
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/preoccupy/test")
+    @Operation(
+            summary = "예약선점 기능 락 테스트",
+            description = "락을 걸었을 때의 성능 체크를 위한 테스트 API"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "예약선점 성공",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = PreoccupyResponse.class)
+            )
+    )
+    public ResponseEntity<PreoccupyResponse> preoccupySeatTest(@RequestBody ReservationTestRequest reservationTestRequest) {
+        PreoccupyResponse result = reservationService.occupyInAdvanceTest(reservationTestRequest.getKakaoId(), reservationTestRequest.getRestaurantId(),
+                reservationTestRequest.getSelectedDate(), reservationTestRequest.getReservationTime(),reservationTestRequest.getSeatTypeId());
         return ResponseEntity.ok(result);
     }
 
