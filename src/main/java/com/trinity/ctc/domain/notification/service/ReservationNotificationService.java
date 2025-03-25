@@ -239,7 +239,7 @@ public class ReservationNotificationService {
                     log.info("✅ 빈자리 알림 발송 완료 Batch {}", batchCount);
                     if (batchCount == clearCount) log.info("전송완료!!!!!!!!!!!!!");
 
-                    return notificationHistoryService.buildNotificationHistory(fcmMessageList, resultList, SEAT_NOTIFICATION);
+                    return notificationHistoryService.buildMultipleNotificationHistory(fcmMessageList, resultList, SEAT_NOTIFICATION);
                 });
     }
 

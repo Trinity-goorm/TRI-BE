@@ -32,29 +32,38 @@ import static org.springframework.transaction.annotation.Propagation.REQUIRES_NE
 public class NotificationHistoryService {
     private final NotificationHistoryRepository notificationHistoryRepository;
 
+    /**
+     * 전송된 단 건의 알림에 대한 히스토리를 빌드하는 내부 메서드
+     *
+     * @param message 전송된 Message 에 대한 Wrapper 객체
+     * @param result  전송 결과 Dto
+     * @param type    전송된 알림 타입
+     * @return 알림 History Entity
+     */
     public NotificationHistory buildSingleNotificationHistory(FcmMessage message,
                                                               FcmSendingResultDto result, NotificationType type) {
 
-            Map<String, String> messageHistory = new HashMap<>();
-            messageHistory.put("title", message.getData().get("title"));
-            messageHistory.put("body",message.getData().get("body"));
-            messageHistory.put("url", message.getData().get("url"));
+        // data로 정제
+        Map<String, String> messageHistory = new HashMap<>();
+        messageHistory.put("title", message.getData().get("title"));
+        messageHistory.put("body", message.getData().get("body"));
+        messageHistory.put("url", message.getData().get("url"));
 
-        return  createNotificationHistory(type, messageHistory, result.getSentAt(), result.getSentResult(),
+        return createNotificationHistory(type, messageHistory, result.getSentAt(), result.getSentResult(),
                 result.getErrorCode(), message.getFcm().getToken(), message.getFcm().getUser());
     }
-    
+
 
     /**
      * 알림 전송 로직 중 전송된 알림에 대한 히스토리를 빌드하는 내부 메서드
      *
      * @param messageList FCM 메세지 정보 DTO 리스트
-     * @param resultList     FCM 메세지 전송 결과 DTO 리스트
-     * @param type           알림 타입
+     * @param resultList  FCM 메세지 전송 결과 DTO 리스트
+     * @param type        알림 타입
      * @return
      */
-    public List<NotificationHistory> buildNotificationHistory(List<FcmMessage> messageList,
-                                                               List<FcmSendingResultDto> resultList, NotificationType type) {
+    public List<NotificationHistory> buildMultipleNotificationHistory(List<FcmMessage> messageList,
+                                                                      List<FcmSendingResultDto> resultList, NotificationType type) {
         List<NotificationHistory> notificationHistoryList = new ArrayList<>();
 
         for (int i = 0; i < messageList.size(); i++) {
