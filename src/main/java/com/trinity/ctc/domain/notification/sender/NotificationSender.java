@@ -32,7 +32,7 @@ public class NotificationSender {
     //  QUOTA_EXCEEDED 에 대한 재발송 최초 딜레이
     private static final int INITIAL_DELAY = 60000;
 
-    @Async
+
     public CompletableFuture<FcmSendingResultDto> sendSingleNotification(FcmMessage message) {
         // FCM 서버에 메세지 전송
         ApiFuture<String> sendResponse = FirebaseMessaging.getInstance().sendAsync(message.getMessage(), true);
@@ -57,7 +57,7 @@ public class NotificationSender {
         return CompletableFuture.completedFuture(new FcmSendingResultDto(LocalDateTime.now(), SentResult.SUCCESS));
     }
 
-    @Async
+
     public CompletableFuture<List<FcmSendingResultDto>> sendEachNotification(List<FcmMessage> messageList) {
         List<Message> messages = messageList.stream().map(FcmMessage::getMessage).toList();
 
@@ -79,10 +79,12 @@ public class NotificationSender {
                         if (sendResponse.isSuccessful()) {
                             return new FcmSendingResultDto(LocalDateTime.now(), SentResult.SUCCESS);
                         } else {
-                            FcmMessage retryMessage = createMessageWithUrl(message.get(i).getData().get("title"),
+                            FcmMessage retryMessage = createMessageWithUrl(
+                                    message.get(i).getData().get("title"),
                                     message.get(i).getData().get("body"),
                                     message.get(i).getData().get("url"),
-                                    message.get(i).getFcm());
+                                    message.get(i).getFcm()
+                            );
                             return handleFcmException(sendResponse.getException(), retryMessage, 0).join();
                         }
                     })
@@ -99,7 +101,6 @@ public class NotificationSender {
      * @param message
      * @return
      */
-    @Async("fixedThreadPoolExecutor")
     public CompletableFuture<List<FcmSendingResultDto>> sendMulticastNotification(FcmMulticastMessage message) {
         // FCM 서버에 메세지 전송
         ApiFuture<BatchResponse> sendResponseFuture = FirebaseMessaging.getInstance().sendEachForMulticastAsync(message.getMulticastMessage(), true);
@@ -119,11 +120,12 @@ public class NotificationSender {
                         if (sendResponse.isSuccessful()) {
                             return new FcmSendingResultDto(LocalDateTime.now(), SentResult.SUCCESS);
                         } else {
-                            FcmMessage retryMessage = createMessageWithUrl(message.getData().get("title"),
+                            FcmMessage retryMessage = createMessageWithUrl(
+                                    message.getData().get("title"),
                                     message.getData().get("body"),
                                     message.getData().get("url"),
                                     message.getFcmList().get(i)
-                                    );
+                            );
                             return handleFcmException(sendResponse.getException(), retryMessage, 0).join();
                         }
                     })

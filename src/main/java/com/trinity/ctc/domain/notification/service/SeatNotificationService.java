@@ -244,13 +244,7 @@ public class SeatNotificationService {
                     if (batchCount == clearCount) log.info("전송완료!!!!!!!!!!!!!");
 
                     // 전송된 알림 히스토리를 배치로 저장
-                    return notificationHistoryService.buildMulticastNotificationHistory(
-                            multicastMessage,
-                            resultList, SEAT_NOTIFICATION
-                    );
-                }).exceptionally(e -> {
-                    log.error("❌ 빈자리 알림 발송 실패 (Batch {}): {}", batchCount, e.getMessage());
-                    return Collections.emptyList(); // 실패 시 빈 리스트 반환
+                    return notificationHistoryService.buildMulticastNotificationHistory(multicastMessage, resultList, SEAT_NOTIFICATION);
                 });
     }
 

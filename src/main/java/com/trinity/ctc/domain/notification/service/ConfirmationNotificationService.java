@@ -14,6 +14,7 @@ import com.trinity.ctc.global.exception.error_code.ReservationErrorCode;
 import com.trinity.ctc.global.exception.error_code.UserErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +45,7 @@ public class ConfirmationNotificationService {
      * @param userId
      * @param reservationId
      */
+    @Async
     @Transactional(readOnly = true)
     public void sendReservationCompletedNotification(Long userId, Long reservationId) {
         // 사용자 조회, 해당하는 사용자가 없으면 404 반환
@@ -55,10 +57,9 @@ public class ConfirmationNotificationService {
 
         List<CompletableFuture<NotificationHistory>> resultList = new ArrayList<>();
 
-//        FcmMessageDto messageData = formattingReservationCompletedNotification(reservation);
         for (Fcm fcm : tokenList) {
             FcmMessage message = formattingReservationCompletedNotification(fcm, reservation);
-            resultList.add(sendConfirmationNotification(message, RESERVATION_COMPLETED));
+            resultList.add(sendSingleNotification(message, RESERVATION_COMPLETED));
         }
 
         List<NotificationHistory> notificationHistoryList = resultList.stream()
@@ -97,7 +98,8 @@ public class ConfirmationNotificationService {
      * @param reservationId
      * @param isCODPassed
      */
-    @Transactional
+    @Async
+    @Transactional(readOnly = true)
     public void sendReservationCanceledNotification(Long userId, Long reservationId, boolean isCODPassed) {
 
         // 사용자 조회, 해당하는 사용자가 없으면 404 반환
@@ -111,7 +113,7 @@ public class ConfirmationNotificationService {
 
         for (Fcm fcm : tokenList) {
             FcmMessage message = formattingReservationCanceledNotification(fcm, reservation, isCODPassed);;
-            resultList.add(sendConfirmationNotification(message, RESERVATION_COMPLETED));
+            resultList.add(sendSingleNotification(message, RESERVATION_COMPLETED));
         }
 
         List<NotificationHistory> notificationHistoryList = resultList.stream()
@@ -152,8 +154,7 @@ public class ConfirmationNotificationService {
         return createMessageWithUrl(title, body, url, fcm);
     }
 
-
-    private CompletableFuture<NotificationHistory> sendConfirmationNotification(FcmMessage message, NotificationType type) {
+    private CompletableFuture<NotificationHistory> sendSingleNotification(FcmMessage message, NotificationType type) {
         return notificationSender.sendSingleNotification(message)
                 .thenApplyAsync(result -> notificationHistoryService.buildSingleNotificationHistory(message, result, type));
     }

@@ -136,6 +136,7 @@ public class ReservationNotificationService {
     /**
      * 매일 8시에 당일 예약 알림을 보내는 메서드
      */
+    @Async
     public void sendDailyNotification(LocalDate scheduledDate) {
         log.info("✅ 당일 예약 알림 발송 시작!");
         long startTime = System.nanoTime(); // 시작 시간 측정
@@ -188,6 +189,7 @@ public class ReservationNotificationService {
     /**
      * 예약 1시간 전 알림을 보내는 메서드
      */
+    @Async
     public void sendHourBeforeNotification(LocalDateTime scheduledTime) {
         log.info("✅ 한시간 전 예약 알림 발송 시작!");
         long startTime = System.nanoTime(); // 시작 시간 측정
@@ -232,19 +234,13 @@ public class ReservationNotificationService {
 //        deleteHourlyNReservationNotification(scheduledTime);
     }
 
-    @Async("sendingProcessThreadPool")
     public CompletableFuture<List<NotificationHistory>> sendReservationNotification(List<FcmMessage> fcmMessageList, int batchCount, int clearCount) {
         return notificationSender.sendEachNotification(fcmMessageList)
                 .thenApplyAsync(resultList -> {
                     log.info("✅ 빈자리 알림 발송 완료 Batch {}", batchCount);
                     if (batchCount == clearCount) log.info("전송완료!!!!!!!!!!!!!");
 
-                    return notificationHistoryService.buildNotificationHistory(
-                            fcmMessageList, resultList, SEAT_NOTIFICATION
-                    );
-                }).exceptionally(e -> {
-                    log.error("❌ 빈자리 알림 발송 실패 (Batch {}): {}", batchCount, e.getMessage());
-                    return Collections.emptyList(); // 실패 시 빈 리스트 반환
+                    return notificationHistoryService.buildNotificationHistory(fcmMessageList, resultList, SEAT_NOTIFICATION);
                 });
     }
 
