@@ -21,7 +21,7 @@ public class JdbcReservationDummyRepository implements ReservationDummyRepositor
         String sql = "INSERT INTO reservation (reservation_date, status, restaurant_id, user_id, reservation_time_id, seat_type_id) " +
                 "VALUES (?, ?, ?, ?, ?, ?)";
 
-        log.info("✅ Reservation Insert 시작 - KeyHolder로 PK 추출");
+        log.info("✅ Reservation Insert 시작");
 
         for (Reservation reservation : reservations) {
             jdbcTemplate.update(con -> {

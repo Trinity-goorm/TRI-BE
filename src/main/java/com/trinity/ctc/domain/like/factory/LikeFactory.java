@@ -24,7 +24,6 @@ public class LikeFactory {
             Likes like = Likes.builder()
                     .user(userRepository.findById(Long.parseLong(row.get("user_id"))).orElse(null))
                     .restaurant(restaurantRepository.findById(Long.parseLong(row.get("restaurant_id"))).orElse(null))
-                    .createdAt(LocalDateTime.parse(row.get("created_at")))
                     .build();
 
             likes.add(like);

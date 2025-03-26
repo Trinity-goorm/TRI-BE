@@ -18,17 +18,15 @@ public class JdbcLikeDummyRepository implements LikeDummyRepository {
 
     @Override
     public void batchInsertLikes(List<Likes> likes, int batchSize) {
-        String sql = "INSERT INTO likes (user_id, reservation_id, created_at) " +
-                "VALUES (?, ?, ?)";
+        String sql = "INSERT INTO likes (user_id, restaurant_id) VALUES (?, ?)";
 
-        log.info("✅ Likes Insert 시작 - KeyHolder로 PK 추출");
+        log.info("✅ Likes Insert 시작");
 
         for (Likes like : likes) {
             jdbcTemplate.update(con -> {
                 PreparedStatement ps = con.prepareStatement(sql, new String[]{"id"});
-                ps.setLong(1, like.getRestaurant().getId());
-                ps.setLong(2, like.getUser().getId());
-                ps.setObject(3, like.getCreatedAt());
+                ps.setLong(1, like.getUser().getId());
+                ps.setLong(2, like.getRestaurant().getId());
 
                 return ps;
             });
