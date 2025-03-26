@@ -2,6 +2,8 @@ package com.trinity.ctc.global.loader.controller;
 
 import com.trinity.ctc.domain.category.service.CategoryService;
 import com.trinity.ctc.domain.like.service.LikeDummyService;
+import com.trinity.ctc.domain.like.service.LikeService;
+import com.trinity.ctc.domain.notification.service.NotificationDummyService;
 import com.trinity.ctc.domain.reservation.dto.InsertReservationTimeRequest;
 import com.trinity.ctc.domain.reservation.service.ReservationDummyService;
 import com.trinity.ctc.domain.reservation.service.ReservationTimeService;
@@ -39,6 +41,7 @@ public class DataController {
     private final UserDummyService userDummyService;
     private final ReservationDummyService reservationDummyService;
     private final LikeDummyService likeDummyService;
+    private final NotificationDummyService notificationDummyService;
 
     @PostMapping("/order-a/crawling/categories")
     @Operation(summary = "1. 카테고리 데이터 삽입", description = "파일에서 카테고리 데이터를 읽어와 DB에 삽입합니다.")
@@ -115,6 +118,21 @@ public class DataController {
         List<Map<String, String>> likeData = csvParser.parse(likeCsv);
 
         likeDummyService.generateDummyData(likeData, 1000);
+        return ResponseEntity.ok("CSV 데이터 업로드 및 DB 저장 성공!");
+    }
+
+    @Operation(summary = "9. CSV 업로드 후 알림  데이터 생성", description = "CSV 파일을 업로드하면 DB에 알림 더미 데이터를 생성합니다.")
+    @PostMapping(value = "/order-i/notification/csv/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> loadNotificationCsv(
+            @RequestPart("reservationNotificationCsv") MultipartFile reservationNotificationCsv,
+            @RequestPart("seatNotificationCsv") MultipartFile seatNotificationCsv,
+            @RequestPart("seatNotificationSubscriptionCsv") MultipartFile seatNotificationSubscriptionCsv
+    ) {
+        List<Map<String, String>> reservationNotificationData = csvParser.parse(reservationNotificationCsv);
+        List<Map<String, String>> seatNotificationData = csvParser.parse(seatNotificationCsv);
+        List<Map<String, String>> seatNotificationSubscriptionData = csvParser.parse(seatNotificationSubscriptionCsv);
+
+        notificationDummyService.generateDummyData(reservationNotificationData, seatNotificationData, seatNotificationSubscriptionData,1000);
         return ResponseEntity.ok("CSV 데이터 업로드 및 DB 저장 성공!");
     }
 }
