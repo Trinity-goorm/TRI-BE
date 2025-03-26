@@ -1,4 +1,4 @@
-package com.trinity.ctc.util.exception;
+package com.trinity.ctc.global.exception;
 
 import org.springframework.security.core.AuthenticationException;
 

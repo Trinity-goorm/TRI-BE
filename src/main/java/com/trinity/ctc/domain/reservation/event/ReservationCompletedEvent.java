@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class ReservationCompleteEvent {
+public class ReservationCompletedEvent {
     private final Long userId;
     private final Long reservationId;
 }

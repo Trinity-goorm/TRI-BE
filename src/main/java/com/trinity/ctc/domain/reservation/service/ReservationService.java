@@ -18,7 +18,7 @@ import com.trinity.ctc.domain.seat.repository.SeatTypeRepository;
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.domain.reservation.event.PreOccupancyCanceledEvent;
 import com.trinity.ctc.domain.reservation.event.ReservationCanceledEvent;
-import com.trinity.ctc.domain.reservation.event.ReservationCompleteEvent;
+import com.trinity.ctc.domain.reservation.event.ReservationCompletedEvent;
 import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.global.exception.CustomException;
 import com.trinity.ctc.global.exception.error_code.*;
@@ -30,6 +30,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.trinity.ctc.domain.seat.validator.CapacityValidator.checkEmptySeat;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -40,8 +42,6 @@ public class ReservationService {
     private final SeatTypeRepository seatTypeRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
-
-    //  이벤트 발행하는 인터페이스
     private final ApplicationEventPublisher eventPublisher;
     private final ReservationValidator reservationValidator;
     private final AuthService authService;
@@ -109,7 +109,7 @@ public class ReservationService {
         reservation.completeReservation();
 
         // 예약 완료 이벤트 발행
-        eventPublisher.publishEvent(new ReservationCompleteEvent(reservation.getUser().getId(), reservation.getId()));
+        eventPublisher.publishEvent(new ReservationCompletedEvent(reservation.getUser().getId(), reservation.getId()));
 
         // 결과 반환
         return ReservationResultResponse.of(true, reservationId, reservation.getRestaurant().getName(), reservation.getReservationDate(), reservation.getReservationTime().getTimeSlot());
@@ -131,11 +131,13 @@ public class ReservationService {
 
         // 가용좌석 증가 (더티체킹)
         Seat seat = seatRepository.findByReservationData(reservation.getRestaurant().getId(), reservation.getReservationDate(), reservation.getReservationTime().getTimeSlot(), reservation.getSeatType().getId());
-        log.info("[예약 취소 전] 가용좌석 수: {}", seat.getAvailableSeats());
+        int availableSeatsBefore = seat.getAvailableSeats();
+        log.info("[예약 취소 전] 가용좌석 수: {}", availableSeatsBefore);
         seat.cancelOneReservation();
-        log.info("[예약 취소 후] 가용좌석 수: {}", seat.getAvailableSeats());
+        int availableSeatsAfter = seat.getAvailableSeats();
+        log.info("[예약 취소 후] 가용좌석 수: {}", availableSeatsAfter);
 
-        eventPublisher.publishEvent(new PreOccupancyCanceledEvent(reservationId, seat.getId(), seat.getAvailableSeats()));
+        eventPublisher.publishEvent(new PreOccupancyCanceledEvent(reservationId, seat.getId(), availableSeatsBefore, availableSeatsAfter));
         // 결과 반환
         return ReservationResultResponse.of(true, reservationId, reservation.getRestaurant().getName(), reservation.getReservationDate(), reservation.getReservationTime().getTimeSlot());
     }
@@ -170,11 +172,13 @@ public class ReservationService {
 
         log.info("id:" + seat.getId());
 
-        log.info("[예약 취소 전] 가용좌석 수: {}", seat.getAvailableSeats());
+        int availableSeatsBefore = seat.getAvailableSeats();
+        log.info("[예약 취소 전] 가용좌석 수: {}", availableSeatsBefore);
         seat.cancelOneReservation();
-        log.info("[예약 취소 후] 가용좌석 수: {}", seat.getAvailableSeats());
+        int availableSeatsAfter = seat.getAvailableSeats();
+        log.info("[예약 취소 후] 가용좌석 수: {}", availableSeatsAfter);
 
-        eventPublisher.publishEvent(new ReservationCanceledEvent(user.getId(), reservationId, seat.getId(), seat.getAvailableSeats(), isCODPassed));
+        eventPublisher.publishEvent(new ReservationCanceledEvent(user.getId(), reservationId, seat.getId(), availableSeatsBefore, availableSeatsAfter, isCODPassed));
 
         return ReservationResultResponse.of(true, reservationId, reservation.getRestaurant().getName(), reservation.getReservationDate(), reservation.getReservationTime().getTimeSlot(), isCODPassed);
     }

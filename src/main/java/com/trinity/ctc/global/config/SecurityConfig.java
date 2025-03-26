@@ -7,7 +7,7 @@ import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.global.exception.CustomAccessDeniedHandler;
 import com.trinity.ctc.global.kakao.service.AuthService;
 import com.trinity.ctc.global.kakao.service.KakaoApiService;
-import com.trinity.ctc.util.exception.CustomAuthenticationEntryPoint;
+import com.trinity.ctc.global.exception.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
