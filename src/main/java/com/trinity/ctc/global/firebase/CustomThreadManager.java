@@ -19,7 +19,8 @@ public class CustomThreadManager extends ThreadManager {
             thread.setPriority(9);
             return thread;
         };
-        
+
+        // 커스텀 스레드풀 초기화
         ThreadPoolExecutor executor = new ThreadPoolExecutor(
                 100,
                 100,
@@ -28,6 +29,7 @@ public class CustomThreadManager extends ThreadManager {
                 threadFactory
         );
 
+        // application init 시, 스레드풀 내 스레드 바로 할당 
         executor.prestartAllCoreThreads();
 
         return executor;
