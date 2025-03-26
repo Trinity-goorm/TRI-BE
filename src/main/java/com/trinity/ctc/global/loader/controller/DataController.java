@@ -1,6 +1,7 @@
 package com.trinity.ctc.global.loader.controller;
 
 import com.trinity.ctc.domain.category.service.CategoryService;
+import com.trinity.ctc.domain.fcm.service.FcmDummyService;
 import com.trinity.ctc.domain.like.service.LikeDummyService;
 import com.trinity.ctc.domain.like.service.LikeService;
 import com.trinity.ctc.domain.notification.service.NotificationDummyService;
@@ -42,6 +43,7 @@ public class DataController {
     private final ReservationDummyService reservationDummyService;
     private final LikeDummyService likeDummyService;
     private final NotificationDummyService notificationDummyService;
+    private final FcmDummyService fcmDummyService;
 
     @PostMapping("/order-a/crawling/categories")
     @Operation(summary = "1. 카테고리 데이터 삽입", description = "파일에서 카테고리 데이터를 읽어와 DB에 삽입합니다.")
@@ -135,6 +137,15 @@ public class DataController {
         notificationDummyService.generateReservationNotifications(reservationNotificationData, 1000);
         notificationDummyService.generateSeatNotifications(seatNotificationData, 1000);
         notificationDummyService.generateSeatNotificationSubscriptions(seatNotificationSubscriptionData, 1000);
+        return ResponseEntity.ok("CSV 데이터 업로드 및 DB 저장 성공!");
+    }
+
+    @Operation(summary = "10. CSV 업로드 후 사용자의 Fcm 더미 데이터 생성", description = "CSV 파일을 업로드하면 DB에 사용자의 Fcm 더미 데이터를 생성합니다.")
+    @PostMapping(value = "/order-j/fcm/csv/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> loadFcmCsv(@RequestPart("fcmCsv") MultipartFile fcmCsv) {
+        List<Map<String, String>> fcmData = csvParser.parse(fcmCsv);
+
+        fcmDummyService.generateDummyData(fcmData, 1000);
         return ResponseEntity.ok("CSV 데이터 업로드 및 DB 저장 성공!");
     }
 }
