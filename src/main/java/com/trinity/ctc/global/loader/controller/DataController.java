@@ -132,7 +132,9 @@ public class DataController {
         List<Map<String, String>> seatNotificationData = csvParser.parse(seatNotificationCsv);
         List<Map<String, String>> seatNotificationSubscriptionData = csvParser.parse(seatNotificationSubscriptionCsv);
 
-        notificationDummyService.generateDummyData(reservationNotificationData, seatNotificationData, seatNotificationSubscriptionData,1000);
+        notificationDummyService.generateReservationNotifications(reservationNotificationData, 1000);
+        notificationDummyService.generateSeatNotifications(seatNotificationData, 1000);
+        notificationDummyService.generateSeatNotificationSubscriptions(seatNotificationSubscriptionData, 1000);
         return ResponseEntity.ok("CSV 데이터 업로드 및 DB 저장 성공!");
     }
 }

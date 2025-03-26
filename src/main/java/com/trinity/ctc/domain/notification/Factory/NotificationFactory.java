@@ -9,13 +9,16 @@ import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
 import com.trinity.ctc.domain.seat.repository.SeatRepository;
 import com.trinity.ctc.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static com.trinity.ctc.global.util.formatter.DateTimeUtil.convertToLocalDateTime;
+
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class NotificationFactory {
@@ -28,18 +31,21 @@ public class NotificationFactory {
     public List<ReservationNotification> createReservationNotificationsByCsv(List<Map<String, String>> reservationNotificationCsv) {
         List<ReservationNotification> reservationNotifications = new ArrayList<>();
         for (Map<String, String> row : reservationNotificationCsv) {
+
             ReservationNotification reservationNotification = ReservationNotification.builder()
                     .type(NotificationType.valueOf(row.get("type")))
                     .title(row.get("title"))
                     .body(row.get("body"))
                     .url(row.get("url"))
-                    .scheduledTime(LocalDateTime.parse(row.get("scheduled_time")))
+                    .scheduledTime(convertToLocalDateTime(row.get("scheduled_time")))
                     .user(userRepository.findById(Long.parseLong(row.get("user_id"))).orElse(null))
                     .reservation(reservationRepository.findById(Long.parseLong(row.get("reservation_id"))).orElse(null))
                     .build();
 
             reservationNotifications.add(reservationNotification);
         }
+
+        log.info("저장 완료");
         return reservationNotifications;
     }
 
