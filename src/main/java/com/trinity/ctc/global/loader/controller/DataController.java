@@ -85,7 +85,7 @@ public class DataController {
         return ResponseEntity.ok("이번달, 다음달 예약가능 초기 데이터 로드 성공.");
     }
 
-    @Operation(summary = "CSV 업로드 후 더미 데이터 생성", description = "3개의 CSV 파일을 업로드하면 DB에 더미 데이터를 생성합니다.")
+    @Operation(summary = "6. CSV 업로드 후 더미 데이터 생성", description = "3개의 CSV 파일을 업로드하면 DB에 더미 데이터를 생성합니다.")
     @PostMapping(value = "/order-f/user/csv/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> loadUserCsv(
             @RequestPart("userCsv") MultipartFile userCsv,
@@ -100,8 +100,8 @@ public class DataController {
         return ResponseEntity.ok("CSV 데이터 업로드 및 DB 저장 성공!");
     }
 
-    @Operation(summary = "CSV 업로드 후 예약 더미 데이터 생성", description = "CSV 파일을 업로드하면 DB에 예약 더미 데이터를 생성합니다.")
-    @PostMapping(value = "/order-f/reservation/csv/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "7. CSV 업로드 후 예약 더미 데이터 생성", description = "CSV 파일을 업로드하면 DB에 예약 더미 데이터를 생성합니다.")
+    @PostMapping(value = "/order-g/reservation/csv/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> loadReservationCsv(@RequestPart("reservationCsv") MultipartFile reservationCsv) {
         List<Map<String, String>> reservationData = csvParser.parse(reservationCsv);
 
@@ -109,8 +109,8 @@ public class DataController {
         return ResponseEntity.ok("CSV 데이터 업로드 및 DB 저장 성공!");
     }
 
-    @Operation(summary = "CSV 업로드 후 사용자의 찜 더미 데이터 생성", description = "CSV 파일을 업로드하면 DB에 사용자의 찜 더미 데이터를 생성합니다.")
-    @PostMapping(value = "/order-f/like/csv/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "8. CSV 업로드 후 사용자의 찜 더미 데이터 생성", description = "CSV 파일을 업로드하면 DB에 사용자의 찜 더미 데이터를 생성합니다.")
+    @PostMapping(value = "/order-h/like/csv/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> loadLikeCsv(@RequestPart("likeCsv") MultipartFile likeCsv) {
         List<Map<String, String>> likeData = csvParser.parse(likeCsv);
 
