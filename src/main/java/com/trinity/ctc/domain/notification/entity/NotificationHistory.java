@@ -59,4 +59,17 @@ public class NotificationHistory {
         this.fcmToken = fcmToken;
         this.user = user;
     }
+
+    public static NotificationHistory createNotificationHistory(NotificationType type, Map<String, String> message, LocalDateTime sentAt, SentResult sentResult,
+                                                                @Nullable MessagingErrorCode errorCode, String fcmToken, User user) {
+        return NotificationHistory.builder()
+                .type(type)
+                .message(message)
+                .sentAt(sentAt)
+                .sentResult(sentResult)
+                .errorCode(errorCode)
+                .fcmToken(fcmToken)
+                .user(user)
+                .build();
+    }
 }

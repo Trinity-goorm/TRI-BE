@@ -1,4 +1,4 @@
-package com.trinity.ctc.global.config;
+package com.trinity.ctc.global.firebase;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
@@ -25,16 +25,12 @@ public class FirebaseInitializer {
     @PostConstruct
     public void initialize() {
         try (InputStream serviceAccount = new ByteArrayInputStream(firebaseCredentials.getBytes(StandardCharsets.UTF_8))) {
-            if (FirebaseApp.getApps().isEmpty()) {
-                FirebaseOptions options = FirebaseOptions.builder()
-                        .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                        .build();
+            FirebaseOptions options = FirebaseOptions.builder()
+                    .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                    .setThreadManager(new CustomThreadManager())
+                    .build();
 
-                FirebaseApp.initializeApp(options);
-                log.info("Firebase initialized successfully.");
-            } else {
-                log.info("Firebase already initialized.");
-            }
+            FirebaseApp.initializeApp(options);
         } catch (IOException e) {
             throw new CustomException(FcmErrorCode.FIREBASE_INITIALIZATION_FAILED);
         }

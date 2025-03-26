@@ -25,6 +25,10 @@ spring:
         jdbc:
           fetch_size: 1000 # 데이터 패치 크기
           batch_size: 1000 # 배치 크기
+        session:
+          events:
+            log:
+              LOG_QUERIES_SLOWER_THAN_MS: 500
     open-in-view: false  # OSIV 끄기 (가능하면 끄는 것이 성능적으로 유리)
 
 ---
@@ -42,10 +46,11 @@ spring:
 ---
 logging:
   level:
-    org.hibernate.SQL: DEBUG  # SQL 쿼리 출력
+#    org.hibernate.SQL: DEBUG  # SQL 쿼리 출력
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE  # 바인딩 파라미터 로그
     org.hibernate.engine.jdbc.batch.internal.BatchingBatch: DEBUG  # 배치 쿼리 로그
     com.zaxxer.hikari: DEBUG  # HikariCP 상태 출력
+    org.hibernate.SQL_SLOW: WARN
 
     org:
       springframework:

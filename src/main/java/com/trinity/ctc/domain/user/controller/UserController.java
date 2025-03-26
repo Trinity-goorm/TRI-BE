@@ -3,7 +3,6 @@ package com.trinity.ctc.domain.user.controller;
 import com.trinity.ctc.domain.user.dto.OnboardingRequest;
 import com.trinity.ctc.domain.user.dto.UserDetailResponse;
 import com.trinity.ctc.domain.user.dto.UserReservationListResponse;
-import com.trinity.ctc.domain.user.jwt.JWTUtil;
 import com.trinity.ctc.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

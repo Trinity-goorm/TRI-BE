@@ -30,4 +30,11 @@ public class SeatNotificationSubscription {
         this.user = user;
         this.seatNotification = seatNotification;
     }
+    
+    public static SeatNotificationSubscription createSeatNotificationSubscription(User user, SeatNotification seatNotification) {
+        return SeatNotificationSubscription.builder()
+                .user(user)
+                .seatNotification(seatNotification)
+                .build();
+    }
 }
