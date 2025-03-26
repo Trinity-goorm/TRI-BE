@@ -57,8 +57,22 @@ public class ReservationController {
             )
     )
     public ResponseEntity<PreoccupyResponse> preoccupySeatTest(@RequestBody ReservationTestRequest reservationTestRequest) {
-        PreoccupyResponse result = reservationService.occupyInAdvanceTest(reservationTestRequest.getKakaoId(), reservationTestRequest.getRestaurantId(),
+//        /* 비관적 락 적용 방법 */
+//        PreoccupyResponse result = reservationService.occupyInAdvanceTest(reservationTestRequest.getKakaoId(), reservationTestRequest.getRestaurantId(),
+//                reservationTestRequest.getSelectedDate(), reservationTestRequest.getReservationTime(),reservationTestRequest.getSeatTypeId());
+
+//        /* 레디스 분산 락 적용 방법 */
+//        PreoccupyResponse result = reservationService.occupyWithRedisLock(reservationTestRequest.getKakaoId(), reservationTestRequest.getRestaurantId(),
+//                reservationTestRequest.getSelectedDate(), reservationTestRequest.getReservationTime(),reservationTestRequest.getSeatTypeId());
+
+//        /* DB 원자적 연산 적용 방법 */
+//        PreoccupyResponse result = reservationService.occupyWithAtomicUpdate(reservationTestRequest.getKakaoId(), reservationTestRequest.getRestaurantId(),
+//                reservationTestRequest.getSelectedDate(), reservationTestRequest.getReservationTime(),reservationTestRequest.getSeatTypeId());
+
+        /* 레디스 원자적 연산 적용 방법 */
+        PreoccupyResponse result = reservationService.occupyWithRedisAtomic(reservationTestRequest.getKakaoId(), reservationTestRequest.getRestaurantId(),
                 reservationTestRequest.getSelectedDate(), reservationTestRequest.getReservationTime(),reservationTestRequest.getSeatTypeId());
+
         return ResponseEntity.ok(result);
     }
 

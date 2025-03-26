@@ -18,7 +18,9 @@ public enum ReservationErrorCode implements ErrorCode {
 
     ALREADY_RESERVED_BY_USER(HttpStatus.BAD_REQUEST, "이미 선점, 완료 된 예약입니다."),
 
-    RESERVATION_USER_MISMATCH(HttpStatus.BAD_REQUEST, "예약자와 요청 사용자가 다릅니다.");
+    RESERVATION_USER_MISMATCH(HttpStatus.BAD_REQUEST, "예약자와 요청 사용자가 다릅니다."),
+
+    PREOCCUPY_FAILED(HttpStatus.CONFLICT, "예약선점 실패, 다시 시도해주세요.");
 
     private final HttpStatus httpStatus;
     private final String message;

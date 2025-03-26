@@ -26,12 +26,17 @@ import com.trinity.ctc.global.kakao.service.AuthService;
 import com.trinity.ctc.global.util.validator.SeatAvailabilityValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -48,6 +53,10 @@ public class ReservationService {
     private final ApplicationEventPublisher eventPublisher;
     private final ReservationValidator reservationValidator;
     private final AuthService authService;
+
+    // 레디스
+    private final RedissonClient redissonClient;
+    private final StringRedisTemplate stringRedisTemplate;
 
     /**
      * 선점하기
@@ -106,6 +115,140 @@ public class ReservationService {
         // DTO 생성
         return PreoccupyResponse.of(true, reservation.getId());
     }
+
+    /**
+     * 레디스 분산락을 사용한 예약선점기능
+     * @param kakaoId
+     * @param restaurantId
+     * @param reservationDate
+     * @param reservationTime
+     * @param seatTypeId
+     * @return
+     */
+    @Transactional
+    public PreoccupyResponse occupyWithRedisLock(Long kakaoId, Long restaurantId, LocalDate reservationDate,
+                                                 LocalTime reservationTime, Long seatTypeId) {
+
+        String lockKey = "lock:reservation:" + restaurantId + ":" + reservationDate + ":" + reservationTime + ":" + seatTypeId;
+        RLock lock = redissonClient.getLock(lockKey);
+
+        try {
+            // 락 시도 (최대 5초 대기, 3초 후 자동 해제)
+            if (!lock.tryLock(5, 3, TimeUnit.SECONDS)) {
+                throw new CustomException(ReservationErrorCode.PREOCCUPY_FAILED);
+            }
+
+            // 사용자 예약이력 검증
+            reservationValidator.validateUserReservation(kakaoId, restaurantId, reservationDate, reservationTime, seatTypeId);
+
+            // 좌석 확인
+            Seat seat = seatRepository.findByReservationData(restaurantId, reservationDate, reservationTime, seatTypeId);
+
+            // 좌석 1개 선점
+            seat.preoccupyOneSeat();
+            seatRepository.save(seat);
+
+            // 예약 정보 저장
+            Reservation reservation = createReservation(kakaoId, restaurantId, reservationDate, reservationTime, seatTypeId);
+            reservationRepository.save(reservation);
+
+            return PreoccupyResponse.of(true, reservation.getId());
+
+        } catch (InterruptedException e) {
+            throw new RuntimeException("락 획득 실패", e);
+        } finally {
+            if (lock.isHeldByCurrentThread()) lock.unlock();
+        }
+    }
+
+    /**
+     * DB의 원자적 연산을 사용한 예약선점 기능
+     * @param kakaoId
+     * @param restaurantId
+     * @param reservationDate
+     * @param reservationTime
+     * @param seatTypeId
+     * @return
+     */
+    @Transactional
+    public PreoccupyResponse occupyWithAtomicUpdate(Long kakaoId, Long restaurantId, LocalDate reservationDate,
+                                                    LocalTime reservationTime, Long seatTypeId) {
+
+        // 사용자 예약이력 검증
+        reservationValidator.validateUserReservation(kakaoId, restaurantId, reservationDate, reservationTime, seatTypeId);
+
+        // 좌석 선점 (원자적 처리)
+        int updated = seatRepository.preoccupySeat(restaurantId, reservationDate, reservationTime, seatTypeId);
+        if (updated == 0) {
+            // 선점 실패 (좌석 부족)
+            throw new CustomException(SeatErrorCode.NO_AVAILABLE_SEAT);
+        }
+
+        // 예약 정보 저장
+        Reservation reservation = createReservation(kakaoId, restaurantId, reservationDate, reservationTime, seatTypeId);
+        reservationRepository.save(reservation);
+
+        log.info("[예약 성공] 예약 ID: {}", reservation.getId());
+
+        return PreoccupyResponse.of(true, reservation.getId());
+    }
+
+    /**
+     * 레디스 원자적 연산 적용 예약선점
+     * @param kakaoId
+     * @param restaurantId
+     * @param reservationDate
+     * @param reservationTime
+     * @param seatTypeId
+     * @return
+     */
+    @Transactional
+    public PreoccupyResponse occupyWithRedisAtomic(Long kakaoId, Long restaurantId, LocalDate reservationDate,
+                                                   LocalTime reservationTime, Long seatTypeId) {
+
+        // 사용자 예약 이력 검증
+        reservationValidator.validateUserReservation(kakaoId, restaurantId, reservationDate, reservationTime, seatTypeId);
+
+        String redisKey = generateRedisKey(restaurantId, reservationDate, reservationTime, seatTypeId);
+        String seatCount = stringRedisTemplate.opsForValue().get(redisKey);
+
+        if (seatCount == null) {
+            // 1. 최초 1명만 DB 조회 후 Redis에 저장하도록 setIfAbsent로 원자성 보장
+            Seat seat = seatRepository.findByReservationData(restaurantId, reservationDate, reservationTime, seatTypeId);
+            if (seat == null) throw new CustomException(SeatErrorCode.NOT_FOUND);
+
+            Boolean success = stringRedisTemplate.opsForValue()
+                    .setIfAbsent(redisKey, String.valueOf(seat.getAvailableSeats()), Duration.ofMinutes(10));
+
+            if (Boolean.TRUE.equals(success)) {
+                log.info("[Redis 초기화 성공] {} 좌석 수: {}", redisKey, seat.getAvailableSeats());
+            } else {
+                log.info("[Redis 초기화 경쟁 발생, 이미 초기화됨] {}", redisKey);
+            }
+        }
+
+        // 2. Redis 원자적 감소
+        Long remain = stringRedisTemplate.opsForValue().decrement(redisKey);
+        if (remain == null || remain < 0) {
+            // 좌석 부족 시 롤백
+            stringRedisTemplate.opsForValue().increment(redisKey); // 감소했던거 복구
+            throw new CustomException(SeatErrorCode.NO_AVAILABLE_SEAT);
+        }
+
+        // 3. 감소된 Redis 값을 그대로 DB에 덮어쓰기 (여기서 -1 연산 안 함!!)
+        int updated = seatRepository.syncSeatWithRedis(remain, restaurantId, reservationDate, reservationTime, seatTypeId);
+        if (updated == 0) {
+            // 비정상 상황 → 롤백
+            throw new CustomException(SeatErrorCode.REDIS_SYNC_FAILED);
+        }
+
+        // 4. 예약 정보 DB 저장
+        Reservation reservation = createReservation(kakaoId, restaurantId, reservationDate, reservationTime, seatTypeId);
+        reservationRepository.save(reservation);
+
+        return PreoccupyResponse.of(true, reservation.getId());
+    }
+
 
     @Transactional
     public ReservationResultResponse complete(long reservationId) {
@@ -256,5 +399,17 @@ public class ReservationService {
                 .reservationTime(reservationTime)
                 .seatType(seatType)
                 .build();
+    }
+
+    /**
+     * seat 레디스키 생성
+     * @param restaurantId
+     * @param date
+     * @param time
+     * @param seatTypeId
+     * @return
+     */
+    private String generateRedisKey(Long restaurantId, LocalDate date, LocalTime time, Long seatTypeId) {
+        return String.format("seat:%d:%s:%s:%d", restaurantId, date, time, seatTypeId);
     }
 }

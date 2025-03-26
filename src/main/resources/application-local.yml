@@ -32,6 +32,12 @@ spring:
   shell:
     interactive:
       enabled: true
+---
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
 ---
 logging:
