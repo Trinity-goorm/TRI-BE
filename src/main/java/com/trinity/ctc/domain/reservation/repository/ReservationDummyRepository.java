@@ -5,5 +5,5 @@ import com.trinity.ctc.domain.reservation.entity.Reservation;
 import java.util.List;
 
 public interface ReservationDummyRepository {
-    void batchInsertReservations(List<Reservation> reservation, int batchSize);
+    void batchInsertReservations(List<Reservation> reservations, int batchSize);
 }
