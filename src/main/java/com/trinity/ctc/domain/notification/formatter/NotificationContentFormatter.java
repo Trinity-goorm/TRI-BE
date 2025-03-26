@@ -1,11 +1,11 @@
-package com.trinity.ctc.domain.notification.fomatter;
+package com.trinity.ctc.domain.notification.formatter;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 // FCM 알림 메세지 포맷터
-public class NotificationMessageUtil {
+public class NotificationContentFormatter {
     public static String formatDailyNotificationTitle(String userName, String restaurantName) {
         return MessageFormat.format("[캐치핑] {0}님, 오늘 {1}에 예약이 있어요!",
                 userName, restaurantName);
@@ -26,7 +26,7 @@ public class NotificationMessageUtil {
                 restaurantName, date, time);
     }
 
-    public static String formatReservationNotificationUrl() {
+    public static String  formatReservationNotificationUrl() {
         return "http://localhost:5173/mydining";
     }
 
@@ -43,11 +43,11 @@ public class NotificationMessageUtil {
         return MessageFormat.format(" http://localhost:5173/detail/{0}", restaurantId);
     }
 
-    public static String formatReservationCompleteNotificationTitle(String restaurantName) {
+    public static String formatReservationCompletedNotificationTitle(String restaurantName) {
         return MessageFormat.format("예약해주셔서 감사합니다.\r\n{0}에서 예약 내역을 알려드립니다.", restaurantName);
     }
 
-    public static String formatReservationCompleteNotificationBody(LocalDate date, LocalTime time, int min, int max) {
+    public static String formatReservationCompletedNotificationBody(LocalDate date, LocalTime time, int min, int max) {
         return MessageFormat.format("날짜: {0}\r\n시간: {1}\r\n인원: {2}~{3}명",
                 date, time, min, max);
     }

@@ -37,4 +37,13 @@ public class SeatNotification {
         this.url = url;
         this.seat = seat;
     }
+
+    public static SeatNotification createSeatNotification(String title, String body, String url, Seat seat) {
+        return SeatNotification.builder()
+                .title(title)
+                .body(body)
+                .url(url)
+                .seat(seat)
+                .build();
+    }
 }

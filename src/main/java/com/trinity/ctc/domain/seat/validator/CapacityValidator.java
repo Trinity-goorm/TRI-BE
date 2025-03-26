@@ -30,4 +30,8 @@ public class CapacityValidator {
             throw new CustomException(SeatErrorCode.CAPACITY_IS_NEGATIVE);
         }
     }
+
+    public static boolean checkEmptySeat(int availableSeatsBefore, int availableSeatsAfter) {
+        return availableSeatsBefore == 0 && availableSeatsAfter == 1;
+    }
 }

@@ -1,7 +1,7 @@
 package com.trinity.ctc.domain.notification.repository;
 
-import com.trinity.ctc.domain.notification.entity.SeatNotificationSubscription;
 import com.trinity.ctc.domain.notification.entity.SeatNotification;
+import com.trinity.ctc.domain.notification.entity.SeatNotificationSubscription;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,15 +13,12 @@ import java.util.Optional;
 @Repository
 public interface SeatNotificationSubscriptionRepository extends JpaRepository<SeatNotificationSubscription, Long> {
 
-    @Query("Select s FROM SeatNotificationSubscription s WHERE s.user.id = :userId AND s.seatNotification = :seatNotification")
-    Optional<SeatNotificationSubscription> findByUserId(@Param("userId") long userId, @Param("seatNotification") SeatNotification seatNotification);
+    Optional<SeatNotificationSubscription> findByUserIdAndSeatNotification(Long userId, SeatNotification seatNotification);
 
-    @Query("Select s FROM SeatNotificationSubscription s WHERE s.user.id = :userId")
-    List<SeatNotificationSubscription> findAllByUserId(@Param("userId") long userId);
+    List<SeatNotificationSubscription> findAllByUserId(Long userId);
 
-    @Query("SELECT COUNT(s) FROM SeatNotificationSubscription s WHERE s.seatNotification = :seatNotification")
-    int countBySeatNotificationMessage(@Param("seatNotification") SeatNotification seatNotification);
+    int countBySeatNotification(SeatNotification seatNotification);
 
-    @Query("Select s FROM SeatNotificationSubscription s WHERE s.seatNotification.seat.id = :seatId")
-    List<SeatNotificationSubscription> findAllBySeatId(@Param("seatId") long seatId);
+    @Query("SELECT s FROM SeatNotificationSubscription s join fetch s.user u join fetch s.user.fcmList f left join fetch s.user.userPreference uf WHERE s.seatNotification = :seatNotification")
+    List<SeatNotificationSubscription> findAllBySeatNotification(@Param("seatNotification") SeatNotification seatNotification);
 }
