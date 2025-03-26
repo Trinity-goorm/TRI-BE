@@ -1,7 +1,9 @@
 package com.trinity.ctc.global.loader.controller;
 
 import com.trinity.ctc.domain.category.service.CategoryService;
+import com.trinity.ctc.domain.like.service.LikeDummyService;
 import com.trinity.ctc.domain.reservation.dto.InsertReservationTimeRequest;
+import com.trinity.ctc.domain.reservation.service.ReservationDummyService;
 import com.trinity.ctc.domain.reservation.service.ReservationTimeService;
 import com.trinity.ctc.domain.restaurant.service.RestaurantService;
 import com.trinity.ctc.domain.seat.dto.InsertSeatTypeRequest;
@@ -35,6 +37,8 @@ public class DataController {
     private final ReservationTimeService reservationTimeService;
     private final CsvParser csvParser;
     private final UserDummyService userDummyService;
+    private final ReservationDummyService reservationDummyService;
+    private final LikeDummyService likeDummyService;
 
     @PostMapping("/order-a/crawling/categories")
     @Operation(summary = "1. 카테고리 데이터 삽입", description = "파일에서 카테고리 데이터를 읽어와 DB에 삽입합니다.")
@@ -81,7 +85,7 @@ public class DataController {
         return ResponseEntity.ok("이번달, 다음달 예약가능 초기 데이터 로드 성공.");
     }
 
-    @Operation(summary = "CSV 업로드 후 더미 데이터 생성", description = "3개의 CSV 파일을 업로드하면 DB에 더미 데이터를 생성합니다.")
+    @Operation(summary = "6. CSV 업로드 후 더미 데이터 생성", description = "3개의 CSV 파일을 업로드하면 DB에 더미 데이터를 생성합니다.")
     @PostMapping(value = "/order-f/user/csv/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> loadUserCsv(
             @RequestPart("userCsv") MultipartFile userCsv,
@@ -93,6 +97,24 @@ public class DataController {
         List<Map<String, String>> categoryData = csvParser.parse(categoryCsv);
 
         userDummyService.generateDummyData(userData, preferenceData, categoryData, 1000);
+        return ResponseEntity.ok("CSV 데이터 업로드 및 DB 저장 성공!");
+    }
+
+    @Operation(summary = "7. CSV 업로드 후 예약 더미 데이터 생성", description = "CSV 파일을 업로드하면 DB에 예약 더미 데이터를 생성합니다.")
+    @PostMapping(value = "/order-g/reservation/csv/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> loadReservationCsv(@RequestPart("reservationCsv") MultipartFile reservationCsv) {
+        List<Map<String, String>> reservationData = csvParser.parse(reservationCsv);
+
+        reservationDummyService.generateDummyData(reservationData, 1000);
+        return ResponseEntity.ok("CSV 데이터 업로드 및 DB 저장 성공!");
+    }
+
+    @Operation(summary = "8. CSV 업로드 후 사용자의 찜 더미 데이터 생성", description = "CSV 파일을 업로드하면 DB에 사용자의 찜 더미 데이터를 생성합니다.")
+    @PostMapping(value = "/order-h/like/csv/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> loadLikeCsv(@RequestPart("likeCsv") MultipartFile likeCsv) {
+        List<Map<String, String>> likeData = csvParser.parse(likeCsv);
+
+        likeDummyService.generateDummyData(likeData, 1000);
         return ResponseEntity.ok("CSV 데이터 업로드 및 DB 저장 성공!");
     }
 }
