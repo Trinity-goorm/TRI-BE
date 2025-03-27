@@ -32,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -87,7 +88,7 @@ public class RestaurantService {
         return convertTorestaurantDtoList(restaurants, user);
     }
 
-    public List<RestaurantPreviewResponse> convertTorestaurantDtoList(Page<Restaurant> restaurants, User user) {
+    public List<RestaurantPreviewResponse> convertTorestaurantDtoList(Slice<Restaurant> restaurants, User user) {
         List<Restaurant> restaurantList = restaurants.getContent();
         List<Long> restaurantIds = restaurantList.stream().map(Restaurant::getId).collect(Collectors.toList());
         Map<Long, Boolean> wishMap = likeService.existsByUserAndRestaurantIds(user, restaurantIds);

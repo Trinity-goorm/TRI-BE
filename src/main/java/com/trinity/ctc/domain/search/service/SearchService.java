@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,7 +42,10 @@ public class SearchService {
         SortingStrategy sortingStrategy = SortingStrategyFactory.getStrategy(request.getSortType());
         Sort sort = sortingStrategy.getSort();
         Pageable pageable = PageRequest.of(request.getPage() - 1, 30, sort);
-        Page<Restaurant> restaurants = restaurantRepository.searchRestaurants(keyword, pageable);
+
+        Slice<Long> idPage = restaurantRepository.searchRestaurantIds(keyword, pageable);
+        Slice<Restaurant> restaurants = restaurantRepository.findAllByIdIn(idPage.getContent());
+
 
         User user = userRepository.findById(1L)
             .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
@@ -61,7 +65,7 @@ public class SearchService {
 
         Pageable pageable = PageRequest.of(request.getPage() - 1, 30, sort);
 
-        Page<Restaurant> restaurants = restaurantRepository.searchRestaurants(keyword, pageable);
+        Slice<Restaurant> restaurants = restaurantRepository.searchRestaurants(keyword, pageable);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
