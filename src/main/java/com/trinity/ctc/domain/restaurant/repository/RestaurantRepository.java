@@ -16,20 +16,6 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
     @Query("SELECT r FROM Restaurant r JOIN r.restaurantCategoryList rc WHERE rc.category.id = :categoryId")
     Page<Restaurant> findByCategory(@Param("categoryId") Long categoryId, Pageable pageable);
 
-    @Query("""
-    SELECT r FROM Restaurant r
-    WHERE r.name LIKE %:keyword%
-       OR EXISTS (
-           SELECT 1 FROM Menu m
-           WHERE m.restaurant = r AND m.name LIKE %:keyword%
-       )
-       OR EXISTS (
-           SELECT 1 FROM RestaurantCategory rc
-           JOIN rc.category c
-           WHERE rc.restaurant = r AND c.name LIKE %:keyword%
-       )
-""")
-    Slice<Restaurant> searchRestaurants(@Param("keyword") String keyword, Pageable pageable);
 
     @Query("""
     SELECT r.id FROM Restaurant r

@@ -65,7 +65,9 @@ public class SearchService {
 
         Pageable pageable = PageRequest.of(request.getPage() - 1, 30, sort);
 
-        Slice<Restaurant> restaurants = restaurantRepository.searchRestaurants(keyword, pageable);
+        Slice<Long> idPage = restaurantRepository.searchRestaurantIds(keyword, pageable);
+        Slice<Restaurant> restaurants = restaurantRepository.findAllByIdIn(idPage.getContent());
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
