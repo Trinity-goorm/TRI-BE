@@ -32,7 +32,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -89,7 +88,6 @@ public class RestaurantService {
     }
 
     public List<RestaurantPreviewResponse> convertTorestaurantDtoList(List<Restaurant> restaurantList, User user) {
-//        List<Restaurant> restaurantList = restaurants.getContent();
         List<Long> restaurantIds = restaurantList.stream().map(Restaurant::getId).collect(Collectors.toList());
         Map<Long, Boolean> wishMap = likeService.existsByUserAndRestaurantIds(user, restaurantIds);
         Map<Long, List<AvailableSeatPerDay>> rawSeatMap = seatService.findAvailableSeatsGrouped(restaurantIds, LocalDate.now(), LocalDate.now().plusDays(14));
@@ -99,6 +97,7 @@ public class RestaurantService {
                 Entry::getKey,
                 entry -> processAvailabilityPerRestaurant(entry.getValue())
             ));
+
 
         return restaurantList.stream()
             .map(restaurant -> {
