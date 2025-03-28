@@ -32,7 +32,6 @@ public class Category {
     private List<UserPreferenceCategory> userPreferenceCategories = new ArrayList<>();
 
     @OneToMany(mappedBy = "category")
-    @BatchSize(size = 30)
     private List<RestaurantCategory> restaurantCategoryList = new ArrayList<>();
 
     @Builder

@@ -84,12 +84,12 @@ public class RestaurantService {
         Pageable pageable = PageRequest.of(request.getPage() - 1, 30, sort);
 
         Page<Restaurant> restaurants = restaurantRepository.findByCategory(categoryId, pageable);
-
-        return convertTorestaurantDtoList(restaurants, user);
+        List<Restaurant> restaurantList = restaurants.getContent();
+        return convertTorestaurantDtoList(restaurantList, user);
     }
 
-    public List<RestaurantPreviewResponse> convertTorestaurantDtoList(Slice<Restaurant> restaurants, User user) {
-        List<Restaurant> restaurantList = restaurants.getContent();
+    public List<RestaurantPreviewResponse> convertTorestaurantDtoList(List<Restaurant> restaurantList, User user) {
+//        List<Restaurant> restaurantList = restaurants.getContent();
         List<Long> restaurantIds = restaurantList.stream().map(Restaurant::getId).collect(Collectors.toList());
         Map<Long, Boolean> wishMap = likeService.existsByUserAndRestaurantIds(user, restaurantIds);
         Map<Long, List<AvailableSeatPerDay>> rawSeatMap = seatService.findAvailableSeatsGrouped(restaurantIds, LocalDate.now(), LocalDate.now().plusDays(14));

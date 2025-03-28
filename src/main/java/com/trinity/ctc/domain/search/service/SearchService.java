@@ -45,12 +45,12 @@ public class SearchService {
 
         Slice<Long> idPage = restaurantRepository.searchRestaurantIds(keyword, pageable);
         Slice<Restaurant> restaurants = restaurantRepository.findAllByIdIn(idPage.getContent());
-
+        List<Restaurant> restaurantList = restaurants.getContent();
 
         User user = userRepository.findById(1L)
             .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
         saveSearchHistory(1L, keyword);
-        return restaurantService.convertTorestaurantDtoList(restaurants, user);
+        return restaurantService.convertTorestaurantDtoList(restaurantList, user);
     }
 
 
@@ -67,12 +67,14 @@ public class SearchService {
 
         Slice<Long> idPage = restaurantRepository.searchRestaurantIds(keyword, pageable);
         Slice<Restaurant> restaurants = restaurantRepository.findAllByIdIn(idPage.getContent());
+        List<Restaurant> restaurantList = restaurants.getContent();
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
         saveSearchHistory(userId, keyword);
-        return restaurantService.convertTorestaurantDtoList(restaurants, user);
+
+        return restaurantService.convertTorestaurantDtoList(restaurantList, user);
     }
 
     public List<SearchHistoryResponse> getSearchHistory(String kakaoId) {

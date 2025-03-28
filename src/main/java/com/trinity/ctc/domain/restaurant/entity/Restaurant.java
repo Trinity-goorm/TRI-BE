@@ -16,6 +16,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 @Getter
 @Entity
@@ -41,27 +43,23 @@ public class Restaurant {
     private int averagePrice;
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
-    @BatchSize(size = 30)
+    @Fetch(FetchMode.SUBSELECT)
     private List<RestaurantImage> imageUrls = new ArrayList<>();
 
     @OneToMany(mappedBy = "restaurant")
-    @BatchSize(size = 30)
     private List<Likes> likeList = new ArrayList<>();
 
     @OneToMany(mappedBy = "restaurant")
-    @BatchSize(size = 30)
     private List<Reservation> reservationList = new ArrayList<>();
 
     @OneToMany(mappedBy = "restaurant")
-    @BatchSize(size = 30)
     private List<Seat> seatList = new ArrayList<>();
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
-    @BatchSize(size = 30)
+    @Fetch(FetchMode.SUBSELECT)
     private List<RestaurantCategory> restaurantCategoryList = new ArrayList<>();
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
-    @BatchSize(size = 30)
     private List<Menu> menus = new ArrayList<>();
 
     @Builder
