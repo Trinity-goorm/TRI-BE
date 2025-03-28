@@ -13,6 +13,7 @@ import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 
 @Entity
 @NoArgsConstructor
@@ -31,6 +32,7 @@ public class Category {
     private List<UserPreferenceCategory> userPreferenceCategories = new ArrayList<>();
 
     @OneToMany(mappedBy = "category")
+    @BatchSize(size = 30)
     private List<RestaurantCategory> restaurantCategoryList = new ArrayList<>();
 
     @Builder
