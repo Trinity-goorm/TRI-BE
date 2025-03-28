@@ -12,8 +12,11 @@ import com.trinity.ctc.global.exception.error_code.LikeErrorCode;
 import com.trinity.ctc.global.exception.error_code.UserErrorCode;
 import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -72,6 +75,13 @@ public class LikeService {
         return likes.stream()
                 .map(like -> RestaurantDetailResponse.fromLike(like.getRestaurant()))
                 .collect(Collectors.toList());
+    }
+
+    public Map<Long, Boolean> existsByUserAndRestaurantIds(User user, List<Long> restaurantIds) {
+        List<Long> likedIds = likeRepository.findLikedRestaurantIds(user, restaurantIds);
+        Set<Long> likedSet = new HashSet<>(likedIds);
+        return restaurantIds.stream()
+            .collect(Collectors.toMap(id -> id, likedSet::contains));
     }
 }
 

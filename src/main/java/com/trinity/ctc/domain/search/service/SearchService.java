@@ -37,6 +37,20 @@ public class SearchService {
     private final SearchRepository searchRepository;
 
     @Transactional
+    public List<RestaurantPreviewResponse> searchForTest(RestaurantPreviewRequest request, String keyword) {
+        SortingStrategy sortingStrategy = SortingStrategyFactory.getStrategy(request.getSortType());
+        Sort sort = sortingStrategy.getSort();
+        Pageable pageable = PageRequest.of(request.getPage() - 1, 30, sort);
+        Page<Restaurant> restaurants = restaurantRepository.searchRestaurants(keyword, pageable);
+
+        User user = userRepository.findById(1L)
+            .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
+        saveSearchHistory(1L, keyword);
+        return restaurantService.convertTorestaurantDtoList(restaurants, user);
+    }
+
+
+    @Transactional
     public List<RestaurantPreviewResponse> search(String kakaoId, RestaurantPreviewRequest request, String keyword) {
         Optional<User> userOptional = userRepository.findByKakaoId(Long.valueOf(kakaoId));
         Long userId = userOptional.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND)).getId();
@@ -52,7 +66,7 @@ public class SearchService {
                 .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
         saveSearchHistory(userId, keyword);
-        return restaurantService.convertToRestaurantDtoList(restaurants, user);
+        return restaurantService.convertTorestaurantDtoList(restaurants, user);
     }
 
     public List<SearchHistoryResponse> getSearchHistory(String kakaoId) {

@@ -1,15 +1,20 @@
+server:
+  tomcat:
+    max-threads: 300   # 동시 처리 쓰레드 수
+    max-connections: 10000  # 최대 연결 수
+
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${LOCAL_DATASOURCE_URL}
     username: ${LOCAL_DATASOURCE_USERNAME}
     password: ${LOCAL_DATASOURCE_PASSWORD}
-#    hikari:
-#      maximum-pool-size: 50
+    hikari:
+      maximum-pool-size: 45
 #      minimum-idle: 10
 #      idle-timeout: 60000
 #      max-lifetime: 1800000
-#      connection-timeout: 30000
+      connection-timeout: 30000
 ---
 spring:
   jpa:

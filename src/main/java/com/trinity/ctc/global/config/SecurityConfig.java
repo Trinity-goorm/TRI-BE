@@ -60,6 +60,7 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // CORS 설정
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/api/login", "/api/token", "/api/token/reissue", "/users/kakao/login", "/api/fcmTokens/register", "/api/fcmTokens/delete", "/api/data/**", "trigger/notifications/**").permitAll()
+                    .requestMatchers("/api/login", "/api/token", "/api/token/reissue", "/users/kakao/login", "/api/fcmTokens/register", "/api/fcmTokens/delete", "/api/data/**", "/api/search/noauthenticaiton").permitAll()
                     .requestMatchers("/api/users/onboarding/**").hasRole("TEMPORARILY_UNAVAILABLE")
                     .requestMatchers("/api/**", "/api/logout", "/users/kakao/logout").hasRole("AVAILABLE")
                     .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/v3/api-docs/**").permitAll()
