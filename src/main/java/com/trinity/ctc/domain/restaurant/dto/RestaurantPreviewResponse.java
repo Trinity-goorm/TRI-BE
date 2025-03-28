@@ -2,6 +2,7 @@ package com.trinity.ctc.domain.restaurant.dto;
 
 import com.trinity.ctc.domain.reservation.dto.ReservationAvailabilityResponse;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
+import com.trinity.ctc.domain.restaurant.entity.RestaurantCategory;
 import com.trinity.ctc.domain.user.entity.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
@@ -51,14 +52,14 @@ public class RestaurantPreviewResponse {
 
 
 
-    public static RestaurantPreviewResponse fromEntity(User user, Restaurant restaurant, boolean isWishlisted, List<ReservationAvailabilityResponse> reservation) {
+    public static RestaurantPreviewResponse fromEntity(User user, Restaurant restaurant, boolean isWishlisted, List<ReservationAvailabilityResponse> reservation, List<RestaurantCategory> rcList) {
 
         return RestaurantPreviewResponse.builder()
                 .userName(user.getNickname())
                 .restaurantId(restaurant.getId())
                 .name(restaurant.getName())
                 .rating(restaurant.getRating())
-                .category(restaurant.getCategories())
+                .category(restaurant.getCategories(rcList))
                 .location(restaurant.getAddress())
                 .operatingDays(restaurant.getExpandedDays())
                 .operatingHours(restaurant.getOperatingHour())

@@ -102,12 +102,10 @@ public class Restaurant {
         return this;
     }
 
-    public List<String> getCategories() {
-        List<String> categories = new ArrayList<>();
-        for (RestaurantCategory restaurantCategory : restaurantCategoryList) {
-            categories.add(restaurantCategory.getCategoryName());
-        }
-        return categories;
+    public List<String> getCategories(List<RestaurantCategory> rcList) {
+        return rcList.stream()
+            .map(rc -> rc.getCategory().getName())
+            .toList();
     }
 
     public List<String> getRestaurantImageUrls() {

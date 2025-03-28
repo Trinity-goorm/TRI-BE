@@ -8,6 +8,8 @@ import com.trinity.ctc.domain.restaurant.dto.RestaurantDetailResponse;
 import com.trinity.ctc.domain.restaurant.dto.RestaurantPreviewRequest;
 import com.trinity.ctc.domain.restaurant.dto.RestaurantPreviewResponse;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
+import com.trinity.ctc.domain.restaurant.entity.RestaurantCategory;
+import com.trinity.ctc.domain.restaurant.repository.RestaurantCategoryRepository;
 import com.trinity.ctc.domain.restaurant.repository.RestaurantRepository;
 import com.trinity.ctc.domain.search.sorting.SortingStrategy;
 import com.trinity.ctc.domain.search.sorting.SortingStrategyFactory;
@@ -47,6 +49,7 @@ public class RestaurantService {
     private final UserRepository userRepository;
     private final SeatService seatService;
     private final LikeService likeService;
+    private final RestaurantCategoryRepository restaurantCategoryRepository;
 
     @Transactional(readOnly = true)
     public List<Restaurant> getAllRestaurants() {
@@ -98,6 +101,7 @@ public class RestaurantService {
                 entry -> processAvailabilityPerRestaurant(entry.getValue())
             ));
 
+        List<RestaurantCategory> rcList = restaurantCategoryRepository.findAllWithCategoryByRestaurantIds(restaurantIds);
 
         return restaurantList.stream()
             .map(restaurant -> {
@@ -105,7 +109,7 @@ public class RestaurantService {
                 boolean isWishlisted = wishMap.getOrDefault(restaurantId, false);
                 List<ReservationAvailabilityResponse> reservation = reservationMap.getOrDefault(restaurantId, Collections.emptyList());
 
-                return RestaurantPreviewResponse.fromEntity(user, restaurant, isWishlisted, reservation);
+                return RestaurantPreviewResponse.fromEntity(user, restaurant, isWishlisted, reservation, rcList);
             })
             .collect(Collectors.toList());
     }
