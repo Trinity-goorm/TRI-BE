@@ -17,6 +17,8 @@ import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 @Getter
 @Entity
@@ -42,6 +44,7 @@ public class Restaurant {
     private int averagePrice;
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Fetch(FetchMode.SUBSELECT)
     private List<RestaurantImage> imageUrls = new ArrayList<>();
 
     @OneToMany(mappedBy = "restaurant")
@@ -54,9 +57,11 @@ public class Restaurant {
     private List<Seat> seatList = new ArrayList<>();
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Fetch(FetchMode.SUBSELECT)
     private List<RestaurantCategory> restaurantCategoryList = new ArrayList<>();
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Fetch(FetchMode.SUBSELECT)
     private List<Menu> menus = new ArrayList<>();
 
     @Builder
@@ -97,12 +102,10 @@ public class Restaurant {
         return this;
     }
 
-    public List<String> getCategories() {
-        List<String> categories = new ArrayList<>();
-        for (RestaurantCategory restaurantCategory : restaurantCategoryList) {
-            categories.add(restaurantCategory.getCategoryName());
-        }
-        return categories;
+    public List<String> getCategories(List<RestaurantCategory> rcList) {
+        return rcList.stream()
+            .map(rc -> rc.getCategory().getName())
+            .toList();
     }
 
     public List<String> getRestaurantImageUrls() {

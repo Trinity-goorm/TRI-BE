@@ -2,6 +2,7 @@ package com.trinity.ctc.domain.user.dto;
 
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.reservation.status.ReservationStatus;
+import com.trinity.ctc.domain.restaurant.entity.RestaurantCategory;
 import com.trinity.ctc.domain.seat.dto.SeatTypeInfoResponse;
 import com.trinity.ctc.global.util.formatter.DateTimeUtil;
 import com.trinity.ctc.global.util.validator.DateTimeValidator;
@@ -44,11 +45,11 @@ public class UserReservationResponse {
     @Schema(description = "좌석타입", example = "{ \"minCapacity\": 1, \"maxCapacity\": 2 }")
     private final SeatTypeInfoResponse seatType;
 
-    public static UserReservationResponse from(Reservation reservation) {
+    public static UserReservationResponse from(Reservation reservation, List<RestaurantCategory> rcList) {
         return new UserReservationResponse(
                 reservation.getId(),
                 reservation.getRestaurant().getName(),
-                reservation.getRestaurant().getCategories(),
+                reservation.getRestaurant().getCategories(rcList),
                 reservation.getRestaurant().getRestaurantImageUrls(),
                 DateTimeUtil.formatToDate(reservation.getReservationDate()),
                 DateTimeUtil.formatToHHmm(reservation.getReservationTime().getTimeSlot()),
