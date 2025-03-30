@@ -8,13 +8,17 @@ import com.trinity.ctc.domain.notification.message.FcmMulticastMessage;
 import com.trinity.ctc.domain.notification.result.SentResult;
 import com.trinity.ctc.global.exception.CustomException;
 import com.trinity.ctc.global.exception.error_code.FcmErrorCode;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -33,6 +37,14 @@ public class NotificationSender {
     //  QUOTA_EXCEEDED 에 대한 재발송 최초 딜레이
     private static final int INITIAL_DELAY = 60000;
 
+    private final Map<Integer, NotificationRetryStrategy> retryStrategies;
+    private final int STRATEGY_VERSION = 1;
+
+
+    public NotificationSender(List<NotificationRetryStrategy> strategies, @Qualifier("immediate-retry") Executor retry) {
+        this.retryStrategies = strategies.stream()
+                .collect(Collectors.toMap(NotificationRetryStrategy::getStrategyVersion, Function.identity()));
+    }
 
     /**
      * 단 건 알림 발송 메서드
@@ -62,7 +74,8 @@ public class NotificationSender {
         } catch (Exception e) {
             // Fcm Exception 발생 시, 재전송 여부 판단을 위한 handleFcmException 호출
             if (e.getCause() instanceof FirebaseMessagingException fcmException) {
-                return handleFcmException(fcmException, message, 0);
+                NotificationRetryStrategy strategy = retryStrategies.get(STRATEGY_VERSION);
+                return strategy.retry(fcmException, message, 0);
             } else {
                 // TODO: 예외 처리 로직 개선 필요 -> FirebaseMessagingException 이외의 에러 핸들링
                 log.error("❌ 처리되지 않은 에러: ", e);
@@ -121,7 +134,8 @@ public class NotificationSender {
                                     messageList.get(i).getFcm()
                             );
                             // FcmException 에 따라 재전송/실패 처리를 판단하는 handleFcmException 메서드 호출 -> 결과에 따른 전송 결과 DTO 반환
-                            return handleFcmException(sendResponse.getException(), retryMessage, 0).join();
+                            NotificationRetryStrategy strategy = retryStrategies.get(STRATEGY_VERSION);
+                            return strategy.retry(sendResponse.getException(), retryMessage, 0).join();
                         }
                     })
                     .collect(Collectors.toList());
@@ -177,7 +191,8 @@ public class NotificationSender {
                                     message.getFcmList().get(i)
                             );
                             // FcmException 에 따라 재전송/실패 처리를 판단하는 handleFcmException 메서드 호출 -> 결과에 따른 전송 결과 DTO 반환
-                            return handleFcmException(sendResponse.getException(), retryMessage, 0).join();
+                            NotificationRetryStrategy strategy = retryStrategies.get(STRATEGY_VERSION);
+                            return strategy.retry(sendResponse.getException(), retryMessage, 0).join();
                         }
                     })
                     .collect(Collectors.toList());
@@ -189,97 +204,5 @@ public class NotificationSender {
             // 현재는 FirebaseMessagingException 이외의 Exception 에 대해서 일괄 전송 실패 요청 에러
             throw new CustomException(FcmErrorCode.SENDING_REQUEST_FAILED);
         }
-    }
-
-    /**
-     * FcmException 에 따라 재전송/실패 처리를 판단하는 메서드
-     * @param e FcmException
-     * @param message 재전송할 메세지
-     * @param retryCount 재전송 횟수
-     * @return 전송 결과 DTO
-     */
-    private CompletableFuture<FcmSendingResultDto> handleFcmException(FirebaseMessagingException e, FcmMessage message, int retryCount) {
-        // Firebase Messaging Error 를 get
-        MessagingErrorCode errorCode = e.getMessagingErrorCode();
-
-        return switch (errorCode) {
-            // 500, 503에 해당할 경우 재전송 메서드 호출
-            case UNAVAILABLE, INTERNAL -> retrySendingMessage(message, retryCount);
-            // 429에 해당할 경우 1분 후 재전송하는 메서드 호출
-            case QUOTA_EXCEEDED -> retrySendingMessageWithDelay(message);
-            // 그 외의 경우 전송 실패로 전송 결과 DTO 반환
-            default -> CompletableFuture.completedFuture(
-                    new FcmSendingResultDto(LocalDateTime.now(), SentResult.FAILED, errorCode)
-            );
-        };
-    }
-
-    /**
-     * FCM 서버에서의 응답이 500, 503 일 경우에 대한 알림 재전송 메서드
-     * @param message 재전송할 메세지 정보를 담은 wrapper 객체
-     * @param retryCount 재전송 횟수
-     * @return 전송 결과 DTO
-     */
-    @Async("immediate-retry")
-    public CompletableFuture<FcmSendingResultDto> retrySendingMessage(FcmMessage message, int retryCount) {
-        try {
-            // 정해진 지수 백오프만큼 스레드 대기
-            Thread.sleep(EXPONENTIAL_BACKOFF[retryCount]);
-            // FCM 서버에 메세지 전송 -> 응답으로 반환된 Future 객체를 get
-            FirebaseMessaging.getInstance().sendAsync(message.getMessage()).get();
-        } catch (Exception e) {
-            // Fcm Exception 발생
-            if (e.getCause() instanceof FirebaseMessagingException fcmException) {
-                // 재전송 횟수가 최대 횟수 이상일 경우, 전송 실패로 전송 결과 DTO 반환
-                if (retryCount >= MAX_RETRY_COUNT) {
-                    return CompletableFuture.completedFuture(new FcmSendingResultDto(LocalDateTime.now(), SentResult.FAILED, fcmException.getMessagingErrorCode()));
-                }
-                // FcmException 에 따라 재전송/실패 처리를 판단하는 handleFcmException 메서드 호출
-                // 같은 exception 이라면 사실상 재귀 호출이 됨
-                return handleFcmException(fcmException, message, retryCount);
-            } else {
-                // TODO: 예외 처리 로직 개선 필요 -> FirebaseMessagingException 이외의 에러 핸들링
-                log.error("❌ 처리되지 않은 에러: ", e);
-                // 현재는 FirebaseMessagingException 이외의 Exception 에 대해서 일괄 전송 실패 요청 에러
-                throw new CustomException(FcmErrorCode.SENDING_REQUEST_FAILED);
-            }
-        }
-        // exception 없이 전송 성공 -> 전송 성공 응답 반환
-        return CompletableFuture.completedFuture(new FcmSendingResultDto(LocalDateTime.now(), SentResult.SUCCESS));
-    }
-
-    /**
-     * FCM 서버에서의 응답이 429 일 경우에 대한 1분 지연 후 알림 재전송 메서드
-     * @param message 재전송할 메세지 정보를 담은 wrapper 객체
-     * @return 전송 결과 DTO
-     */
-    @Async("delayed-retry")
-    public CompletableFuture<FcmSendingResultDto> retrySendingMessageWithDelay(FcmMessage message) {
-        try {
-            // 정해진 정책에 따라 지연 시간 이후 재전송 시작
-            Thread.sleep(INITIAL_DELAY);
-            // FCM 서버에 메세지 전송 -> 응답으로 반환된 Future 객체를 get
-            FirebaseMessaging.getInstance().sendAsync(message.getMessage()).get();
-        } catch (Exception e) {
-            // Fcm Exception 발생
-            if (e.getCause() instanceof FirebaseMessagingException fcmException) {
-                MessagingErrorCode errorCode = fcmException.getMessagingErrorCode();
-                // 500, 503에 해당하는 에러 코드일 경우, 재전송 메서드 호출
-                if (errorCode.equals(MessagingErrorCode.UNAVAILABLE) || errorCode.equals(MessagingErrorCode.INTERNAL)) {
-                    return retrySendingMessage(message, 0);
-                } else {
-                    // 그 외의 경우, 전송 실패로 전송 결과 DTO 반환
-                    // 429가 다시 반환되었을 경우에도 실패 처리
-                    return CompletableFuture.completedFuture(new FcmSendingResultDto(LocalDateTime.now(), SentResult.FAILED, fcmException.getMessagingErrorCode()));
-                }
-            } else {
-                // TODO: 예외 처리 로직 개선 필요 -> FirebaseMessagingException 이외의 에러 핸들링
-                log.error("❌ 처리되지 않은 에러: ", e);
-                // 현재는 FirebaseMessagingException 이외의 Exception 에 대해서 일괄 전송 실패 요청 에러
-                throw new CustomException(FcmErrorCode.SENDING_REQUEST_FAILED);
-            }
-        }
-        // exception 없이 전송 성공 -> 전송 성공 응답 반환
-        return CompletableFuture.completedFuture(new FcmSendingResultDto(LocalDateTime.now(), SentResult.SUCCESS));
     }
 }
