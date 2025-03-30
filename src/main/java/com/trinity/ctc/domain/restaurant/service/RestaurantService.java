@@ -4,6 +4,7 @@ import com.trinity.ctc.domain.category.entity.Category;
 import com.trinity.ctc.domain.category.repository.CategoryRepository;
 import com.trinity.ctc.domain.like.service.LikeService;
 import com.trinity.ctc.domain.reservation.dto.ReservationAvailabilityResponse;
+import com.trinity.ctc.domain.restaurant.dto.RestaurantCategoryName;
 import com.trinity.ctc.domain.restaurant.dto.RestaurantDetailResponse;
 import com.trinity.ctc.domain.restaurant.dto.RestaurantPreviewRequest;
 import com.trinity.ctc.domain.restaurant.dto.RestaurantPreviewResponse;
@@ -101,7 +102,7 @@ public class RestaurantService {
                 entry -> processAvailabilityPerRestaurant(entry.getValue())
             ));
 
-        List<RestaurantCategory> rcList = restaurantCategoryRepository.findAllWithCategoryByRestaurantIds(restaurantIds);
+        List<RestaurantCategoryName> rcList = restaurantCategoryRepository.findAllWithCategoryByRestaurantIds(restaurantIds);
 
         return restaurantList.stream()
             .map(restaurant -> {

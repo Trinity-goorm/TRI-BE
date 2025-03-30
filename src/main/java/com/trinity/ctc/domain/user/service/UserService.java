@@ -4,6 +4,7 @@ import com.trinity.ctc.domain.category.entity.Category;
 import com.trinity.ctc.domain.category.repository.CategoryRepository;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
+import com.trinity.ctc.domain.restaurant.dto.RestaurantCategoryName;
 import com.trinity.ctc.domain.restaurant.entity.RestaurantCategory;
 import com.trinity.ctc.domain.restaurant.repository.RestaurantCategoryRepository;
 import com.trinity.ctc.domain.user.dto.OnboardingRequest;
@@ -128,13 +129,10 @@ public class UserService {
             .distinct()
             .toList();
 
-        List<RestaurantCategory> rcList = restaurantCategoryRepository
+        List<RestaurantCategoryName> rcList = restaurantCategoryRepository
             .findAllWithCategoryByRestaurantIds(restaurantIds);
 
-        Map<Long, List<RestaurantCategory>> rcMap = rcList.stream()
-            .collect(Collectors.groupingBy(rc -> rc.getRestaurant().getId()));
-
-        return UserReservationListResponse.from(reservations, rcMap);
+        return UserReservationListResponse.from(reservations, rcList);
     }
 
     /**

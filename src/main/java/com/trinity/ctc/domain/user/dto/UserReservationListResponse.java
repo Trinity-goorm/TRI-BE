@@ -1,6 +1,7 @@
 package com.trinity.ctc.domain.user.dto;
 
 import com.trinity.ctc.domain.reservation.entity.Reservation;
+import com.trinity.ctc.domain.restaurant.dto.RestaurantCategoryName;
 import com.trinity.ctc.domain.restaurant.entity.RestaurantCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Map;
@@ -21,15 +22,10 @@ public class UserReservationListResponse {
     @Schema(description = "예약 목록")
     private final List<UserReservationResponse> reservations;
 
-    public static UserReservationListResponse from(Slice<Reservation> reservations, Map<Long, List<RestaurantCategory>> rcMap) {
+    public static UserReservationListResponse from(Slice<Reservation> reservations, List<RestaurantCategoryName> rcList) {
 
         List<UserReservationResponse> responseList = reservations.getContent().stream()
-            .map(reservation -> {
-                Long restaurantId = reservation.getRestaurant().getId();
-                List<RestaurantCategory> rcList = rcMap.getOrDefault(restaurantId, List.of());
-
-                return UserReservationResponse.from(reservation, rcList);
-            })
+            .map(reservation -> UserReservationResponse.from(reservation, rcList))
             .toList();
 
         return new UserReservationListResponse(reservations.hasNext(), responseList);

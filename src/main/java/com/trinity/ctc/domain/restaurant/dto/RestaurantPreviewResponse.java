@@ -52,14 +52,14 @@ public class RestaurantPreviewResponse {
 
 
 
-    public static RestaurantPreviewResponse fromEntity(User user, Restaurant restaurant, boolean isWishlisted, List<ReservationAvailabilityResponse> reservation, List<RestaurantCategory> rcList) {
+    public static RestaurantPreviewResponse fromEntity(User user, Restaurant restaurant, boolean isWishlisted, List<ReservationAvailabilityResponse> reservation, List<RestaurantCategoryName> rcList) {
 
         return RestaurantPreviewResponse.builder()
                 .userName(user.getNickname())
                 .restaurantId(restaurant.getId())
                 .name(restaurant.getName())
                 .rating(restaurant.getRating())
-                .category(restaurant.getCategories(rcList))
+                .category(restaurant.getCategories(rcList))//rclist에서 restaurantId가 같은 카테고리 이름들을 가져와야함
                 .location(restaurant.getAddress())
                 .operatingDays(restaurant.getExpandedDays())
                 .operatingHours(restaurant.getOperatingHour())

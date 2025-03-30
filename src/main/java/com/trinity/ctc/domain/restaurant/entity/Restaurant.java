@@ -2,6 +2,7 @@ package com.trinity.ctc.domain.restaurant.entity;
 
 import com.trinity.ctc.domain.like.entity.Likes;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
+import com.trinity.ctc.domain.restaurant.dto.RestaurantCategoryName;
 import com.trinity.ctc.domain.seat.entity.Seat;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -102,10 +103,14 @@ public class Restaurant {
         return this;
     }
 
-    public List<String> getCategories(List<RestaurantCategory> rcList) {
-        return rcList.stream()
-            .map(rc -> rc.getCategory().getName())
-            .toList();
+    public List<String> getCategories(List<RestaurantCategoryName> rcList) {
+        List<String> categories = new ArrayList<>();
+        for (RestaurantCategoryName rc : rcList) {
+            if (rc.getRestaurantId().equals(this.id)) {
+                categories.add(rc.getCategoryName());
+            }
+        }
+        return categories;
     }
 
     public List<String> getRestaurantImageUrls() {

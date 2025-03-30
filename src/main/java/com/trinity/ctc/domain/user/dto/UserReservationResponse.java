@@ -2,16 +2,15 @@ package com.trinity.ctc.domain.user.dto;
 
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.reservation.status.ReservationStatus;
-import com.trinity.ctc.domain.restaurant.entity.RestaurantCategory;
+import com.trinity.ctc.domain.restaurant.dto.RestaurantCategoryName;
 import com.trinity.ctc.domain.seat.dto.SeatTypeInfoResponse;
 import com.trinity.ctc.global.util.formatter.DateTimeUtil;
 import com.trinity.ctc.global.util.validator.DateTimeValidator;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-
-import java.util.List;
 
 @Getter
 @Schema(description = "사용자 예약 하나의 정보")
@@ -45,7 +44,7 @@ public class UserReservationResponse {
     @Schema(description = "좌석타입", example = "{ \"minCapacity\": 1, \"maxCapacity\": 2 }")
     private final SeatTypeInfoResponse seatType;
 
-    public static UserReservationResponse from(Reservation reservation, List<RestaurantCategory> rcList) {
+    public static UserReservationResponse from(Reservation reservation, List<RestaurantCategoryName> rcList) {
         return new UserReservationResponse(
                 reservation.getId(),
                 reservation.getRestaurant().getName(),
