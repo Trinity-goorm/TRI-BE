@@ -29,4 +29,14 @@ public class NotificationHistoryService {
     public void saveNotificationHistory(List<NotificationHistory> notificationHistoryList) {
         notificationHistoryRepository.saveAll(notificationHistoryList);
     }
+
+    /**
+     * 전송된 알림 히스토리를 전부 history 테이블에 저장하는 메서드
+     * @param notificationHistoryList 알림 history 리스트
+     */
+    @Transactional(propagation = REQUIRES_NEW)
+    @Async("save-notification-history")
+    public void saveBatchNotificationHistory(List<NotificationHistory> notificationHistoryList) {
+        notificationHistoryRepository.saveAll(notificationHistoryList);
+    }
 }

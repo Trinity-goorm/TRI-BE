@@ -44,7 +44,7 @@ public class ConfirmationNotificationService {
      * @param userId 사용자 ID
      * @param reservationId 예약 ID
      */
-    @Async("reservation-completed-notification")
+    @Async("confirmation-notification")
     @Transactional(readOnly = true)
     public void sendReservationCompletedNotification(Long userId, Long reservationId) {
         // 사용자 조회, 해당하는 사용자가 없으면 404 반환
@@ -79,7 +79,7 @@ public class ConfirmationNotificationService {
      * @param reservationId 예약 ID
      * @param isCODPassed 예약시점에 따른 예약 비용 반환 여부(정책)
      */
-    @Async("reservation-canceled-notification")
+    @Async("confirmation-notification")
     @Transactional(readOnly = true)
     public void sendReservationCanceledNotification(Long userId, Long reservationId, boolean isCODPassed) {
 
