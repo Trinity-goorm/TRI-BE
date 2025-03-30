@@ -102,11 +102,51 @@ public class TreadPoolConfig {
         return executor;
     }
 
+    @Bean(name = "notification-thread")
+    public Executor processTaskExecutor() {
+
+        ThreadFactory factory = Thread.ofVirtual()
+                .name("notification-vt-", 0)
+                .factory();
+
+        return Executors.newThreadPerTaskExecutor(factory);
+    }
+
+    @Bean(name = "sending-thread")
+    public Executor sendingTaskExecutor() {
+
+        ThreadFactory factory = Thread.ofVirtual()
+                .name("sending-vt-", 0)
+                .factory();
+
+        return Executors.newThreadPerTaskExecutor(factory);
+    }
+
+    @Bean(name = "response-thread")
+    public Executor responseTaskExecutor() {
+
+        ThreadFactory factory = Thread.ofVirtual()
+                .name("response-vt-", 0)
+                .factory();
+
+        return Executors.newThreadPerTaskExecutor(factory);
+    }
+
     @Bean(name = "retry-thread")
     public Executor retryTaskExecutor() {
 
         ThreadFactory factory = Thread.ofVirtual()
                 .name("retry-vt-", 0)
+                .factory();
+
+        return Executors.newThreadPerTaskExecutor(factory);
+    }
+
+    @Bean(name = "save-thread")
+    public Executor saveTaskExecutor() {
+
+        ThreadFactory factory = Thread.ofVirtual()
+                .name("save-vt-", 0)
                 .factory();
 
         return Executors.newThreadPerTaskExecutor(factory);
