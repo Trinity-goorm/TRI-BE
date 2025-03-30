@@ -101,4 +101,14 @@ public class TreadPoolConfig {
         executor.initialize();
         return executor;
     }
+
+    @Bean(name = "retry-thread")
+    public Executor retryTaskExecutor() {
+
+        ThreadFactory factory = Thread.ofVirtual()
+                .name("retry-vt-", 0)
+                .factory();
+
+        return Executors.newThreadPerTaskExecutor(factory);
+    }
 }
