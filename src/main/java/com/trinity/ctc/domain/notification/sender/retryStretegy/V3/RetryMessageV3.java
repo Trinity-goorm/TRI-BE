@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 @Getter
 @AllArgsConstructor
-public class RetryMessage implements Delayed {
+public class RetryMessageV3 implements Delayed {
 
     private final FcmMessage fcmMessage;
     private final int retryCount;

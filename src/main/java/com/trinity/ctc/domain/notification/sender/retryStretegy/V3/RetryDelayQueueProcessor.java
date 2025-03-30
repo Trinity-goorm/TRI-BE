@@ -24,12 +24,10 @@ import static com.trinity.ctc.domain.notification.formatter.NotificationHistoryF
 @RequiredArgsConstructor
 public class RetryDelayQueueProcessor {
 
-    private static final int MAX_RETRY = 3;
-    private static final int[] EXPONENTIAL_BACKOFF = {1000, 2000, 4000, 0};
     private static final int RETRY_DELAY = 10000;
 
     private final NotificationHistoryService notificationHistoryService;
-    private final DelayQueue<RetryMessage> queue = new DelayQueue<>();
+    private final DelayQueue<RetryMessageV3> queue = new DelayQueue<>();
 
     @PostConstruct
     public void init() {
@@ -40,13 +38,13 @@ public class RetryDelayQueueProcessor {
 
     public void enqueue(FcmMessage message, int retryCount, long delayMillis) {
         if (retryCount <= 0) return;
-        queue.put(new RetryMessage(message, retryCount, delayMillis + RETRY_DELAY));
+        queue.put(new RetryMessageV3(message, retryCount, delayMillis + RETRY_DELAY));
     }
 
     private void consume() {
         while (true) {
             try {
-                RetryMessage task = queue.take();
+                RetryMessageV3 task = queue.take();
                 FcmMessage message = task.getFcmMessage();
                 int retryCount = task.getRetryCount();
 
@@ -61,7 +59,8 @@ public class RetryDelayQueueProcessor {
 
                         if (errorCode == MessagingErrorCode.UNAVAILABLE || errorCode == MessagingErrorCode.INTERNAL) {
                             int nextRetryCount = retryCount - 1;
-                            enqueue(message, nextRetryCount, EXPONENTIAL_BACKOFF[MAX_RETRY - nextRetryCount]);
+                            long delayMillis = (long) Math.pow(2, 3 - nextRetryCount) * 1000;
+                            enqueue(message, nextRetryCount, delayMillis + RETRY_DELAY);
                         }
 
                         FcmSendingResultDto failResult = new FcmSendingResultDto(LocalDateTime.now(), SentResult.FAILED, errorCode);

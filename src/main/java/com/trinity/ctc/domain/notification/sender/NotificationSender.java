@@ -1,6 +1,7 @@
 package com.trinity.ctc.domain.notification.sender;
 
 import com.google.api.core.ApiFuture;
+import com.google.api.core.ApiFutures;
 import com.google.firebase.messaging.*;
 import com.trinity.ctc.domain.notification.dto.FcmSendingResultDto;
 import com.trinity.ctc.domain.notification.message.FcmMessage;
@@ -34,7 +35,7 @@ public class NotificationSender {
     private final int STRATEGY_VERSION = 1;
 
 
-    public NotificationSender(List<NotificationRetryStrategy> strategies, @Qualifier("immediate-retry") Executor retry) {
+    public NotificationSender(List<NotificationRetryStrategy> strategies) {
         this.retryStrategies = strategies.stream()
                 .collect(Collectors.toMap(NotificationRetryStrategy::getStrategyVersion, Function.identity()));
     }
@@ -66,6 +67,8 @@ public class NotificationSender {
         try {
             // 전송 응답을 get 으로 반환
             sendResponse.get();
+            // 전송 성공 응답 반환
+            return CompletableFuture.completedFuture(new FcmSendingResultDto(LocalDateTime.now(), SentResult.SUCCESS));
         } catch (Exception e) {
             // Fcm Exception 발생 시, 재전송 여부 판단을 위한 handleFcmException 호출
             if (e.getCause() instanceof FirebaseMessagingException fcmException) {
@@ -78,9 +81,6 @@ public class NotificationSender {
                 throw new CustomException(FcmErrorCode.SENDING_REQUEST_FAILED);
             }
         }
-        // 전송 응답을 받았다는 건 전송이 성공했다는 것
-        // 전송 성공 응답 반환
-        return CompletableFuture.completedFuture(new FcmSendingResultDto(LocalDateTime.now(), SentResult.SUCCESS));
     }
 
 

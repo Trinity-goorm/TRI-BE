@@ -11,7 +11,6 @@ import java.util.Map;
 // Firebase의 Message 객체의 wrapper 클래스
 @Getter
 public class FcmMessage {
-    // 
     private final Message message;
     private final Fcm fcm;
     private final Map<String, String> data;
