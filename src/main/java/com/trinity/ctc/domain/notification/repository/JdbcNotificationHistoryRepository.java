@@ -40,7 +40,7 @@ public class JdbcNotificationHistoryRepository implements NotificationHistoryRep
                     ps.setString(2, convertMapToJson(notificationHistory.getMessage()));
                     ps.setObject(3, notificationHistory.getSentAt());
                     ps.setString(4, notificationHistory.getSentResult().name());
-                    ps.setString(5, notificationHistory.getErrorCode().name());
+                    ps.setString(5, notificationHistory.getErrorCode() == null ? null : notificationHistory.getErrorCode().name());
                     ps.setString(6, notificationHistory.getFcmToken());
                     ps.setBoolean(7, false);
                     ps.setLong(8, notificationHistory.getUser().getId());
