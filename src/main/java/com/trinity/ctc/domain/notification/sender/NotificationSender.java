@@ -64,7 +64,9 @@ public class NotificationSender {
             if (e.getCause() instanceof FirebaseMessagingException fcmException) {
                 return handleFcmException(fcmException, message, 0);
             } else {
-                // 이외의 Exception 에 대해서 전송 실패 요청 에러
+                // TODO: 예외 처리 로직 개선 필요 -> FirebaseMessagingException 이외의 에러 핸들링
+                log.error("❌ 처리되지 않은 에러: ", e);
+                // 현재는 FirebaseMessagingException 이외의 Exception 에 대해서 일괄 전송 실패 요청 에러
                 throw new CustomException(FcmErrorCode.SENDING_REQUEST_FAILED);
             }
         }
@@ -126,7 +128,9 @@ public class NotificationSender {
             // 전송 결과 DTO 리스트 반환
             return CompletableFuture.completedFuture(results);
         } catch (Exception e) {
-            // 이외의 Exception 에 대해서 전송 실패 요청 에러
+            // TODO: 예외 처리 로직 개선 필요 -> FirebaseMessagingException 이외의 에러 핸들링
+            log.error("❌ 처리되지 않은 에러: ", e);
+            // 현재는 FirebaseMessagingException 이외의 Exception 에 대해서 일괄 전송 실패 요청 에러
             throw new CustomException(FcmErrorCode.SENDING_REQUEST_FAILED);
         }
     }
@@ -180,7 +184,9 @@ public class NotificationSender {
             // 전송 결과 DTO 리스트 반환
             return CompletableFuture.completedFuture(results);
         } catch (Exception e) {
-            // 이외의 Exception 에 대해서 전송 실패 요청 에러 처리
+            // TODO: 예외 처리 로직 개선 필요 -> FirebaseMessagingException 이외의 에러 핸들링
+            log.error("❌ 처리되지 않은 에러: ", e);
+            // 현재는 FirebaseMessagingException 이외의 Exception 에 대해서 일괄 전송 실패 요청 에러
             throw new CustomException(FcmErrorCode.SENDING_REQUEST_FAILED);
         }
     }
@@ -232,7 +238,9 @@ public class NotificationSender {
                 // 같은 exception 이라면 사실상 재귀 호출이 됨
                 return handleFcmException(fcmException, message, retryCount);
             } else {
-                // 이외의 Exception 에 대해서 전송 실패 요청 에러
+                // TODO: 예외 처리 로직 개선 필요 -> FirebaseMessagingException 이외의 에러 핸들링
+                log.error("❌ 처리되지 않은 에러: ", e);
+                // 현재는 FirebaseMessagingException 이외의 Exception 에 대해서 일괄 전송 실패 요청 에러
                 throw new CustomException(FcmErrorCode.SENDING_REQUEST_FAILED);
             }
         }
@@ -265,7 +273,9 @@ public class NotificationSender {
                     return CompletableFuture.completedFuture(new FcmSendingResultDto(LocalDateTime.now(), SentResult.FAILED, fcmException.getMessagingErrorCode()));
                 }
             } else {
-                // 이외의 Exception 에 대해서 전송 실패 요청 에러
+                // TODO: 예외 처리 로직 개선 필요 -> FirebaseMessagingException 이외의 에러 핸들링
+                log.error("❌ 처리되지 않은 에러: ", e);
+                // 현재는 FirebaseMessagingException 이외의 Exception 에 대해서 일괄 전송 실패 요청 에러
                 throw new CustomException(FcmErrorCode.SENDING_REQUEST_FAILED);
             }
         }

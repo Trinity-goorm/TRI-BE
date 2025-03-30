@@ -18,12 +18,12 @@ public class TreadPoolConfig {
     }
 
 
-    @Bean(name = "reservation-completed-notification")
+    @Bean(name = "confirmation-notification")
     public Executor reservationCompletedNotificationTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 
         executor.setCorePoolSize(2);
-        executor.setThreadNamePrefix("reservation-complete-notification-");
+        executor.setThreadNamePrefix("confirmation-notification-");
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setThreadPriority(7);
 
@@ -31,40 +31,12 @@ public class TreadPoolConfig {
         return executor;
     }
 
-    @Bean(name = "reservation-canceled-notification")
-    public Executor reservationCanceledNotificationTaskExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-
-        executor.setCorePoolSize(2);
-        executor.setThreadNamePrefix("reservation-canceled-notification-");
-        executor.setWaitForTasksToCompleteOnShutdown(true);
-        executor.setThreadPriority(7);
-
-        executor.initialize();
-        return executor;
-    }
-
-    @Bean(name = "daily-reservation-notification")
+    @Bean(name = "reservation-notification")
     public Executor dailyReservationNotificationTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 
         executor.setCorePoolSize(20);
-        executor.setThreadNamePrefix("daily-reservation-notification-");
-        executor.setAllowCoreThreadTimeOut(true);
-        executor.setKeepAliveSeconds(60);
-        executor.setWaitForTasksToCompleteOnShutdown(true);
-        executor.setThreadPriority(6);
-
-        executor.initialize();
-        return executor;
-    }
-
-    @Bean(name = "hourly-reservation-notification")
-    public Executor hourlyTaskExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-
-        executor.setCorePoolSize(10);
-        executor.setThreadNamePrefix("daily-reservation-notification-");
+        executor.setThreadNamePrefix("reservation-notification-");
         executor.setAllowCoreThreadTimeOut(true);
         executor.setKeepAliveSeconds(60);
         executor.setWaitForTasksToCompleteOnShutdown(true);

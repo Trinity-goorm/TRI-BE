@@ -1,8 +1,5 @@
 package com.trinity.ctc.domain.notification.type;
 
-import lombok.Getter;
-
-@Getter
 public enum NotificationType {
     SEAT_NOTIFICATION,
     DAILY_NOTIFICATION,
