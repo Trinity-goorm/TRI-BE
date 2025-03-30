@@ -5,6 +5,7 @@ import com.google.firebase.messaging.MulticastMessage;
 import com.trinity.ctc.domain.fcm.entity.Fcm;
 import com.trinity.ctc.domain.notification.message.FcmMessage;
 import com.trinity.ctc.domain.notification.message.FcmMulticastMessage;
+import com.trinity.ctc.domain.notification.type.NotificationType;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 
 import java.time.LocalDate;
@@ -19,7 +20,7 @@ import static com.trinity.ctc.domain.notification.formatter.NotificationContentF
 // FCM 에서 제공하는 Message, MulticastMessage 의 Wrapper 객체(FcmMessage, FcmMulticastMessage)를 생성하는 Util
 public class NotificationMessageFormatter {
 
-    public static FcmMessage createMessageWithUrl(String title, String body, String url, Fcm fcm) {
+    public static FcmMessage createMessageWithUrl(String title, String body, String url, Fcm fcm, NotificationType type) {
         Message message = Message.builder()
                 .putData("title", title)
                 .putData("body", body)
@@ -32,10 +33,10 @@ public class NotificationMessageFormatter {
         data.put("body", body);
         data.put("url", url);
 
-        return new FcmMessage(message, fcm, data);
+        return new FcmMessage(message, fcm, data, type);
     }
 
-    public static FcmMulticastMessage createMulticastMessageWithUrl(String title, String body, String url, List<Fcm> fcmList) {
+    public static FcmMulticastMessage createMulticastMessageWithUrl(String title, String body, String url, List<Fcm> fcmList, NotificationType type) {
         MulticastMessage multicastMessage = MulticastMessage.builder()
                 .putData("title", title)
                 .putData("body", body)
@@ -48,12 +49,12 @@ public class NotificationMessageFormatter {
         data.put("body", body);
         data.put("url", url);
 
-        return new FcmMulticastMessage(multicastMessage, fcmList, data);
+        return new FcmMulticastMessage(multicastMessage, fcmList, data, type);
     }
 
     // 예약 완료 알림 메세지를 포멧팅하는 메서드
     // 예약 완료 알림은 바로 발송하여 저장하지 않기 때문에 FcmMessage 객체로 반환
-    public static FcmMessage formattingReservationCompletedNotification(Fcm fcm, Reservation reservation) {
+    public static FcmMessage formattingReservationCompletedNotification(Fcm fcm, Reservation reservation, NotificationType type) {
         // 예약 완료 알림 메세지에 필요한 정보 변수 선언
         String restaurantName = reservation.getRestaurant().getName();
         LocalDate reservedDate = reservation.getReservationDate();
@@ -67,13 +68,13 @@ public class NotificationMessageFormatter {
         String url = formatReservationNotificationUrl();
 
         // reservationNotification entity 를 생성하는 팩토리 메서드 호출 -> reservationNotification 반환
-        return createMessageWithUrl(title, body, url, fcm);
+        return createMessageWithUrl(title, body, url, fcm, type);
     }
 
 
     // 예약 취소 메세지를 포멧팅하는 메서드
     // 예약 취소 알림은 바로 발송하여 저장하지 않기 때문에 FcmMessage 객체로 반환
-    public static FcmMessage formattingReservationCanceledNotification(Fcm fcm, Reservation reservation, boolean isCODPassed) {
+    public static FcmMessage formattingReservationCanceledNotification(Fcm fcm, Reservation reservation, boolean isCODPassed, NotificationType type) {
         // 예약 완료 알림 메세지에 필요한 정보 변수 선언
         String restaurantName = reservation.getRestaurant().getName();
         LocalDate reservedDate = reservation.getReservationDate();
@@ -94,6 +95,6 @@ public class NotificationMessageFormatter {
         String url = formatReservationNotificationUrl();
 
         // 알림 메세지 data 로 FcmMessage 객체를 생성하는 메서드 호출
-        return createMessageWithUrl(title, body, url, fcm);
+        return createMessageWithUrl(title, body, url, fcm, type);
     }
 }

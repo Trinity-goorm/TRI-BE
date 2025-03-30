@@ -236,11 +236,11 @@ public class SeatNotificationService {
         for (List<Fcm> batch : batches) {
             // 발송할 MulticasyMessage 정보를 담은 Wrapper 객체 생성
             FcmMulticastMessage multicastMessage = createMulticastMessageWithUrl(
-                    seatNotification.getTitle(), seatNotification.getBody(), seatNotification.getUrl(), batch);
+                    seatNotification.getTitle(), seatNotification.getBody(), seatNotification.getUrl(), batch, type);
             // MulticastMessage 발송 메서드 호출
             CompletableFuture<List<NotificationHistory>> sendingResult = notificationSender.sendMulticastNotification(multicastMessage)
                     // 비동기로 알림 정보와 발송 결과, 알림 타입에 맞춰 알림 history List 를 생성하는 메서드 호출 -> 발송 응답 수신 시, List<NotificationHistory>를 반환
-                    .thenApplyAsync(resultDtoList -> formattingMulticastNotificationHistory(multicastMessage, resultDtoList, type));
+                    .thenApplyAsync(resultDtoList -> formattingMulticastNotificationHistory(multicastMessage, resultDtoList));
             // 알림 발송 메서드 호출 -> 반환값 resultList에 추가(반환 타입: CompletableFuture<List<NotificationHistory>>)
             resultList.add(sendingResult);
         }

@@ -31,6 +31,11 @@ public class NotificationHistoryService {
         }
     }
 
+    @Transactional
+    public void saveSingleNotificationHistory(NotificationHistory history) {
+        jpaNotificationHistoryRepository.save(history);
+    }
+
     /**
      * 전송된 알림 히스토리를 전부 history 테이블에 저장하는 메서드
      * 소량의 발송 건에 대해 jpa saveAll로 저장

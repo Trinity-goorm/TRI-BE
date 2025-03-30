@@ -189,7 +189,7 @@ public class ReservationNotificationService {
         // 예약 알림 리스트 내의 data 와 각 알림 별 수신자의 Fcm 토큰으로 FcmMessage 생성 -> 리스트에 추가
         for (ReservationNotification notification : reservationNotificationList) {
             for (Fcm fcm : notification.getUser().getFcmList()) {
-                FcmMessage message = createMessageWithUrl(notification.getTitle(), notification.getBody(), notification.getUrl(), fcm);
+                FcmMessage message = createMessageWithUrl(notification.getTitle(), notification.getBody(), notification.getUrl(), fcm, type);
                 messageList.add(message);
             }
         }
@@ -202,7 +202,7 @@ public class ReservationNotificationService {
             // 어러 건의 알림 발송 메서드 호출
             CompletableFuture<List<NotificationHistory>> sendingResult = notificationSender.sendEachNotification(batch)
                     // 비동기로 발송 결과와 fcm, 알림 타입에 맞춰 알림 history List 를 생성하는 메서드 호출 -> 발송 응답 수신 시, List<NotificationHistory>를 반환
-                    .thenApplyAsync(resultDtoList -> formattingMultipleNotificationHistory(batch, resultDtoList, type));
+                    .thenApplyAsync(resultDtoList -> formattingMultipleNotificationHistory(batch, resultDtoList));
             // 반환할 결과 리스트에 추가
             resultList.add(sendingResult);
         }

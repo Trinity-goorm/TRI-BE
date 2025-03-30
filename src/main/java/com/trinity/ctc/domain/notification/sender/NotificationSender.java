@@ -6,9 +6,9 @@ import com.trinity.ctc.domain.notification.dto.FcmSendingResultDto;
 import com.trinity.ctc.domain.notification.message.FcmMessage;
 import com.trinity.ctc.domain.notification.message.FcmMulticastMessage;
 import com.trinity.ctc.domain.notification.result.SentResult;
+import com.trinity.ctc.domain.notification.sender.retryStretegy.NotificationRetryStrategy;
 import com.trinity.ctc.global.exception.CustomException;
 import com.trinity.ctc.global.exception.error_code.FcmErrorCode;
-import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
@@ -30,13 +30,6 @@ import static com.trinity.ctc.domain.notification.formatter.NotificationMessageF
 @Component
 public class NotificationSender {
 
-    // 재발송 최대 시도 횟수
-    private static final int MAX_RETRY_COUNT = 3;
-    // 재발송 지수 백오프
-    private static final int[] EXPONENTIAL_BACKOFF = new int[]{10000, 1000, 2000, 4000};
-    //  QUOTA_EXCEEDED 에 대한 재발송 최초 딜레이
-    private static final int INITIAL_DELAY = 60000;
-
     private final Map<Integer, NotificationRetryStrategy> retryStrategies;
     private final int STRATEGY_VERSION = 1;
 
@@ -48,6 +41,7 @@ public class NotificationSender {
 
     /**
      * 단 건 알림 발송 메서드
+     *
      * @param message 발송할 메세지 정보를 담은 wrapper 객체
      * @return 전송 결과 DTO
      */
@@ -62,8 +56,9 @@ public class NotificationSender {
 
     /**
      * 발송된 단 건 알림에 대한 응답 처리 메서드
+     *
      * @param sendResponse 전송에 대한 응답(Future 객체)
-     * @param message 전송된 메세지 정보를 담은 wrapper 객체
+     * @param message      전송된 메세지 정보를 담은 wrapper 객체
      * @return 전송 결과 DTO
      */
     @Async("response-handler")
@@ -75,7 +70,7 @@ public class NotificationSender {
             // Fcm Exception 발생 시, 재전송 여부 판단을 위한 handleFcmException 호출
             if (e.getCause() instanceof FirebaseMessagingException fcmException) {
                 NotificationRetryStrategy strategy = retryStrategies.get(STRATEGY_VERSION);
-                return strategy.retry(fcmException, message, 0);
+                return strategy.retry(fcmException, message);
             } else {
                 // TODO: 예외 처리 로직 개선 필요 -> FirebaseMessagingException 이외의 에러 핸들링
                 log.error("❌ 처리되지 않은 에러: ", e);
@@ -91,6 +86,7 @@ public class NotificationSender {
 
     /**
      * 여러 건의 알림 발송 메서드
+     *
      * @param messageList 발송할 메세지 정보를 담은 wrapper 객체의 리스트
      * @return 전송 결과 DTO 리스트
      */
@@ -108,8 +104,9 @@ public class NotificationSender {
 
     /**
      * 발송된 여러 건의 알림에 대한 응답 처리 메서드
+     *
      * @param batchResponse 전송에 대한 응답(Future 객체)
-     * @param messageList 전송된 메세지 정보를 담은 wrapper 객체 리스트
+     * @param messageList   전송된 메세지 정보를 담은 wrapper 객체 리스트
      * @return 전송 결과 DTO 리스트
      */
     @Async("response-handler")
@@ -126,16 +123,9 @@ public class NotificationSender {
                         if (sendResponse.isSuccessful()) {
                             return new FcmSendingResultDto(LocalDateTime.now(), SentResult.SUCCESS);
                         } else {
-                            // 전송 결과가 실패일 경우, 재전송을 위한 메세지를 생성
-                            FcmMessage retryMessage = createMessageWithUrl(
-                                    messageList.get(i).getData().get("title"),
-                                    messageList.get(i).getData().get("body"),
-                                    messageList.get(i).getData().get("url"),
-                                    messageList.get(i).getFcm()
-                            );
                             // FcmException 에 따라 재전송/실패 처리를 판단하는 handleFcmException 메서드 호출 -> 결과에 따른 전송 결과 DTO 반환
                             NotificationRetryStrategy strategy = retryStrategies.get(STRATEGY_VERSION);
-                            return strategy.retry(sendResponse.getException(), retryMessage, 0).join();
+                            return strategy.retry(sendResponse.getException(), messageList.get(i)).join();
                         }
                     })
                     .collect(Collectors.toList());
@@ -151,6 +141,7 @@ public class NotificationSender {
 
     /**
      * MulticastMessage 발송 메서드 -> 같은 알림을 여러 명의 user 에게 보낼 경우
+     *
      * @param message MulticastMessage 의 정보를 담은 wrapper 객체
      * @return 전송 결과 DTO 리스트
      */
@@ -165,8 +156,9 @@ public class NotificationSender {
 
     /**
      * 발송된 MulticastMessage 에 대한 응답 처리 메서드
+     *
      * @param batchResponse 전송에 대한 응답(Future 객체)
-     * @param message 전송된 MulticastMessage 정보를 담은 wrapper 객체
+     * @param message       전송된 MulticastMessage 정보를 담은 wrapper 객체
      * @return 전송 결과 DTO 리스트
      */
     @Async("response-handler")
@@ -188,11 +180,12 @@ public class NotificationSender {
                                     message.getData().get("title"),
                                     message.getData().get("body"),
                                     message.getData().get("url"),
-                                    message.getFcmList().get(i)
+                                    message.getFcmList().get(i),
+                                    message.getType()
                             );
                             // FcmException 에 따라 재전송/실패 처리를 판단하는 handleFcmException 메서드 호출 -> 결과에 따른 전송 결과 DTO 반환
                             NotificationRetryStrategy strategy = retryStrategies.get(STRATEGY_VERSION);
-                            return strategy.retry(sendResponse.getException(), retryMessage, 0).join();
+                            return strategy.retry(sendResponse.getException(), retryMessage).join();
                         }
                     })
                     .collect(Collectors.toList());
