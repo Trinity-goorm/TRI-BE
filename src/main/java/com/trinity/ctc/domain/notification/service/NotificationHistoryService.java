@@ -1,6 +1,7 @@
 package com.trinity.ctc.domain.notification.service;
 
 import com.trinity.ctc.domain.notification.entity.NotificationHistory;
+import com.trinity.ctc.domain.notification.repository.JpaNotificationHistoryRepository;
 import com.trinity.ctc.domain.notification.repository.NotificationHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,25 +19,35 @@ import static org.springframework.transaction.annotation.Propagation.REQUIRES_NE
 @EnableAsync
 @RequiredArgsConstructor
 public class NotificationHistoryService {
+    private final JpaNotificationHistoryRepository jpaNotificationHistoryRepository;
     private final NotificationHistoryRepository notificationHistoryRepository;
 
-    /**
-     * 전송된 알림 히스토리를 전부 history 테이블에 저장하는 메서드
-     * @param notificationHistoryList 알림 history 리스트
-     */
     @Transactional(propagation = REQUIRES_NEW)
-    @Async("save-notification-history")
-    public void saveNotificationHistory(List<NotificationHistory> notificationHistoryList) {
-        notificationHistoryRepository.saveAll(notificationHistoryList);
+    public void saveNotificationHistory(List<NotificationHistory> list) {
+        if (list.size() <= 50) {
+            saveFewNotificationHistory(list);
+        } else {
+            saveBatchNotificationHistory(list);
+        }
     }
 
     /**
      * 전송된 알림 히스토리를 전부 history 테이블에 저장하는 메서드
+     * 소량의 발송 건에 대해 jpa saveAll로 저장
      * @param notificationHistoryList 알림 history 리스트
      */
-    @Transactional(propagation = REQUIRES_NEW)
+    @Async("save-notification-history")
+    public void saveFewNotificationHistory(List<NotificationHistory> notificationHistoryList) {
+        jpaNotificationHistoryRepository.saveAll(notificationHistoryList);
+    }
+
+    /**
+     * 전송된 알림 히스토리를 전부 history 테이블에 저장하는 메서드
+     * 대량의 발송 건에 대해 jdbc batch insert 로 저장
+     * @param notificationHistoryList 알림 history 리스트
+     */
     @Async("save-notification-history")
     public void saveBatchNotificationHistory(List<NotificationHistory> notificationHistoryList) {
-        notificationHistoryRepository.saveAll(notificationHistoryList);
+        notificationHistoryRepository.batchInsertNotificationHistories(notificationHistoryList);
     }
 }
