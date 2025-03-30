@@ -3,8 +3,7 @@ package com.trinity.ctc.domain.notification.service;
 import com.trinity.ctc.domain.fcm.entity.Fcm;
 import com.trinity.ctc.domain.notification.entity.NotificationHistory;
 import com.trinity.ctc.domain.notification.message.FcmMessage;
-import com.trinity.ctc.domain.notification.sender.NotificationSender;
-import com.trinity.ctc.domain.notification.type.NotificationType;
+import com.trinity.ctc.domain.notification.sender.NotificationSenderV1;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
 import com.trinity.ctc.domain.user.entity.User;
@@ -37,7 +36,8 @@ public class ConfirmationNotificationService {
     private final UserRepository userRepository;
     private final ReservationRepository reservationRepository;
     private final NotificationHistoryService notificationHistoryService;
-    private final NotificationSender notificationSender;
+    private final NotificationSenderV1 notificationSenderV1;
+
 
     /**
      * 예약 완료 알림 전송 메서드
@@ -117,7 +117,7 @@ public class ConfirmationNotificationService {
     private CompletableFuture<NotificationHistory> sendSingleNotification(FcmMessage message) {
 
         // 단 건의 메세지를 발송하는 메서드 호출
-        return notificationSender.sendSingleNotification(message)
+        return notificationSenderV1.sendSingleNotification(message)
                 // 반환된 전송 결과 dto 와 Message data 로 알림 History 객체를 생성하는 메서드 호출
                 .thenApplyAsync(result -> formattingSingleNotificationHistory(message, result));
     }

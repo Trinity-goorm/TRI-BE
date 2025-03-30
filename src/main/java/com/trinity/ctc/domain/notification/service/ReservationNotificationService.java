@@ -6,7 +6,7 @@ import com.trinity.ctc.domain.notification.entity.NotificationHistory;
 import com.trinity.ctc.domain.notification.entity.ReservationNotification;
 import com.trinity.ctc.domain.notification.message.FcmMessage;
 import com.trinity.ctc.domain.notification.repository.ReservationNotificationRepository;
-import com.trinity.ctc.domain.notification.sender.NotificationSender;
+import com.trinity.ctc.domain.notification.sender.NotificationSenderV1;
 import com.trinity.ctc.domain.notification.type.NotificationType;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
@@ -49,7 +49,7 @@ public class ReservationNotificationService {
     private final UserRepository userRepository;
     private final ReservationRepository reservationRepository;
     private final ReservationNotificationRepository reservationNotificationRepository;
-    private final NotificationSender notificationSender;
+    private final NotificationSenderV1 notificationSenderV1;
     private final NotificationHistoryService notificationHistoryService;
 
     // 알림 목록 조회 시, 한 번에 가져오는 slice의 크기
@@ -200,7 +200,7 @@ public class ReservationNotificationService {
         // 파티셔닝된 배치 별로 발송 로직 수행
         for (List<FcmMessage> batch : batches) {
             // 어러 건의 알림 발송 메서드 호출
-            CompletableFuture<List<NotificationHistory>> sendingResult = notificationSender.sendEachNotification(batch)
+            CompletableFuture<List<NotificationHistory>> sendingResult = notificationSenderV1.sendEachNotification(batch)
                     // 비동기로 발송 결과와 fcm, 알림 타입에 맞춰 알림 history List 를 생성하는 메서드 호출 -> 발송 응답 수신 시, List<NotificationHistory>를 반환
                     .thenApplyAsync(resultDtoList -> formattingMultipleNotificationHistory(batch, resultDtoList));
             // 반환할 결과 리스트에 추가

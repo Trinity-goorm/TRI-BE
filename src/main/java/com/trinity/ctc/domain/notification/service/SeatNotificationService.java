@@ -5,13 +5,12 @@ import com.trinity.ctc.domain.fcm.entity.Fcm;
 import com.trinity.ctc.domain.notification.dto.SubscriptionListResponse;
 import com.trinity.ctc.domain.notification.dto.SubscriptionResponse;
 import com.trinity.ctc.domain.notification.entity.NotificationHistory;
-import com.trinity.ctc.domain.notification.entity.ReservationNotification;
 import com.trinity.ctc.domain.notification.entity.SeatNotification;
 import com.trinity.ctc.domain.notification.entity.SeatNotificationSubscription;
 import com.trinity.ctc.domain.notification.message.FcmMulticastMessage;
 import com.trinity.ctc.domain.notification.repository.SeatNotificationRepository;
 import com.trinity.ctc.domain.notification.repository.SeatNotificationSubscriptionRepository;
-import com.trinity.ctc.domain.notification.sender.NotificationSender;
+import com.trinity.ctc.domain.notification.sender.NotificationSenderV1;
 import com.trinity.ctc.domain.notification.type.NotificationType;
 import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
 import com.trinity.ctc.domain.reservation.status.ReservationStatus;
@@ -45,7 +44,6 @@ import static com.trinity.ctc.domain.notification.entity.SeatNotificationSubscri
 import static com.trinity.ctc.domain.notification.formatter.NotificationFormatter.formattingSeatNotification;
 import static com.trinity.ctc.domain.notification.formatter.NotificationHistoryFormatter.formattingMulticastNotificationHistory;
 import static com.trinity.ctc.domain.notification.formatter.NotificationMessageFormatter.createMulticastMessageWithUrl;
-import static com.trinity.ctc.domain.notification.type.NotificationType.DAILY_NOTIFICATION;
 import static com.trinity.ctc.domain.notification.type.NotificationType.SEAT_NOTIFICATION;
 import static com.trinity.ctc.domain.notification.validator.EmptyTicketValidator.validateEmptyTicketUsage;
 
@@ -62,7 +60,7 @@ public class SeatNotificationService {
 
     private final NotificationHistoryService notificationHistoryService;
     private final AuthService authService;
-    private final NotificationSender notificationSender;
+    private final NotificationSenderV1 notificationSenderV1;
 
     // 알림 목록 조회 시, 한 번에 가져오는 slice의 크기
     private final int SLICES_PER_PAGE = 5000;
@@ -238,7 +236,7 @@ public class SeatNotificationService {
             FcmMulticastMessage multicastMessage = createMulticastMessageWithUrl(
                     seatNotification.getTitle(), seatNotification.getBody(), seatNotification.getUrl(), batch, type);
             // MulticastMessage 발송 메서드 호출
-            CompletableFuture<List<NotificationHistory>> sendingResult = notificationSender.sendMulticastNotification(multicastMessage)
+            CompletableFuture<List<NotificationHistory>> sendingResult = notificationSenderV1.sendMulticastNotification(multicastMessage)
                     // 비동기로 알림 정보와 발송 결과, 알림 타입에 맞춰 알림 history List 를 생성하는 메서드 호출 -> 발송 응답 수신 시, List<NotificationHistory>를 반환
                     .thenApplyAsync(resultDtoList -> formattingMulticastNotificationHistory(multicastMessage, resultDtoList));
             // 알림 발송 메서드 호출 -> 반환값 resultList에 추가(반환 타입: CompletableFuture<List<NotificationHistory>>)

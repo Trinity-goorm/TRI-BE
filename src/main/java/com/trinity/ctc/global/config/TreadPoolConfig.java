@@ -19,7 +19,7 @@ public class TreadPoolConfig {
 
 
     @Bean(name = "confirmation-notification")
-    public Executor reservationCompletedNotificationTaskExecutor() {
+    public Executor confirmationNotificationTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 
         executor.setCorePoolSize(2);
@@ -32,7 +32,7 @@ public class TreadPoolConfig {
     }
 
     @Bean(name = "reservation-notification")
-    public Executor dailyReservationNotificationTaskExecutor() {
+    public Executor reservationNotificationTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 
         executor.setCorePoolSize(20);
@@ -47,7 +47,7 @@ public class TreadPoolConfig {
     }
 
     @Bean(name = "empty-seat-notification")
-    public Executor seatTaskExecutor() {
+    public Executor seatNotificationTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 
         executor.setCorePoolSize(20);
@@ -60,7 +60,7 @@ public class TreadPoolConfig {
     }
 
     @Bean(name = "response-handler")
-    public Executor singleResponseTaskExecutor() {
+    public Executor sendingResponseTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 
         executor.setCorePoolSize(20);
