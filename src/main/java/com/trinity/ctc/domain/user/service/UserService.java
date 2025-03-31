@@ -4,6 +4,9 @@ import com.trinity.ctc.domain.category.entity.Category;
 import com.trinity.ctc.domain.category.repository.CategoryRepository;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
+import com.trinity.ctc.domain.restaurant.dto.RestaurantCategoryName;
+import com.trinity.ctc.domain.restaurant.entity.RestaurantCategory;
+import com.trinity.ctc.domain.restaurant.repository.RestaurantCategoryRepository;
 import com.trinity.ctc.domain.user.dto.OnboardingRequest;
 import com.trinity.ctc.domain.user.dto.ReissueTokenRequest;
 import com.trinity.ctc.domain.user.dto.UserDetailResponse;
@@ -19,6 +22,8 @@ import com.trinity.ctc.global.kakao.service.AuthService;
 import com.trinity.ctc.global.util.common.SortOrder;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -39,6 +44,7 @@ public class UserService {
     private final ReservationRepository reservationRepository;
     private final AuthService authService;
     private final TokenService tokenService;
+    private final RestaurantCategoryRepository restaurantCategoryRepository;
 
     /**
      * 온보딩 요청 DTO의 정보로 user entity를 build 후 저장하는 메서드
@@ -117,7 +123,16 @@ public class UserService {
         Long kakaoId = Long.parseLong(authService.getAuthenticatedKakaoId());
 
         Slice<Reservation> reservations = reservationRepository.findAllByKakaoId(kakaoId, pageRequest);
-        return UserReservationListResponse.from(reservations);
+
+        List<Long> restaurantIds = reservations.getContent().stream()
+            .map(res -> res.getRestaurant().getId())
+            .distinct()
+            .toList();
+
+        List<RestaurantCategoryName> rcList = restaurantCategoryRepository
+            .findAllWithCategoryByRestaurantIds(restaurantIds);
+
+        return UserReservationListResponse.from(reservations, rcList);
     }
 
     /**

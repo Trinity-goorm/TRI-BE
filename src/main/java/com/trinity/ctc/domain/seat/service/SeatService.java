@@ -2,7 +2,6 @@ package com.trinity.ctc.domain.seat.service;
 
 import static com.trinity.ctc.global.util.validator.DateTimeValidator.isToday;
 
-import com.trinity.ctc.domain.reservation.dto.ReservationAvailabilityResponse;
 import com.trinity.ctc.domain.seat.dto.AvailableSeatPerDay;
 import com.trinity.ctc.domain.seat.dto.GroupedDailyAvailabilityResponse;
 import com.trinity.ctc.domain.seat.dto.GroupedSeatResponse;
@@ -18,7 +17,6 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -58,26 +56,6 @@ public class SeatService {
      * @param restaurantId
      * @return 날짜별 예약 가능 여부 리스트 (ReservationAvailabilityDto 형태)
      */
-    @Transactional(readOnly = true)
-    public List<ReservationAvailabilityResponse> getAvailabilityForNext14Days(Long restaurantId) {
-        LocalDate today = LocalDate.now();
-        return IntStream.range(0, 14)
-            .mapToObj(i -> processAvailability(restaurantId, today.plusDays(i)))
-            .collect(Collectors.toList());
-    }
-
-    public ReservationAvailabilityResponse processAvailability(Long restaurantId, LocalDate targetDate) {
-        List<AvailableSeatPerDay> availableSeatList = fetchAvailableSeatsForSearch(restaurantId, targetDate);
-
-        long startTime = System.nanoTime();
-        boolean isAvailable = SeatAvailabilityValidator.isAnySeatAvailableForSearch(availableSeatList, isToday(targetDate));
-        long endTime = System.nanoTime();
-
-        log.info("SeatAvailabilityValidator.isAnySeatAvailable 실행 시간: {}ms", (endTime - startTime) / 1_000_000);
-
-        return new ReservationAvailabilityResponse(targetDate, isAvailable); //날짜와 available 여부 반환
-    }
-
 
     /* 내부 메서드 */
 
@@ -88,11 +66,6 @@ public class SeatService {
      * @param selectedDate
      * @return 특정 식당, 날짜의 예약가능데이터
      */
-    private List<AvailableSeatPerDay> fetchAvailableSeatsForSearch(Long restaurantId, LocalDate selectedDate) {
-        List<AvailableSeatPerDay> availableSeatList = seatRepository.findAvailableSeatsForDate(restaurantId, selectedDate);
-
-        return availableSeatList;
-    }
 
     private List<Seat> fetchAvailableSeatsEntity(Long restaurantId, LocalDate selectedDate) {
         return seatRepository.findAvailableSeatsForDateEntity(restaurantId, selectedDate);
@@ -129,5 +102,10 @@ public class SeatService {
                 .toList();
 
         return GroupedTimeSlotResponse.fromGroupedSeats(DateTimeUtil.formatToHHmm(timeslot), isAvailable, groupedSeatResponses);
+    }
+
+    public Map<Long, List<AvailableSeatPerDay>> findAvailableSeatsGrouped(List<Long> restaurantIds, LocalDate startDate, LocalDate endDate) {
+        List<AvailableSeatPerDay> all = seatRepository.findAvailableSeatsForRestaurants(restaurantIds, startDate, endDate);
+        return all.stream().collect(Collectors.groupingBy(AvailableSeatPerDay::getRestaurantId));
     }
 }
