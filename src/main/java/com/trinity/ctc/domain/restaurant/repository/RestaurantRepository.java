@@ -30,9 +30,33 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
            WHERE rc.restaurant = r AND c.name LIKE %:keyword%
        )
 """)
-    Slice<Long> searchRestaurantIds(@Param("keyword") String keyword, Pageable pageable);
+    Slice<Long> searchRestaurantIdsJPQL(@Param("keyword") String keyword, Pageable pageable);
+
+
+    @Query(value = """
+    SELECT r.id FROM restaurant r
+    WHERE r.name LIKE %:keyword%
+       OR EXISTS (
+           SELECT 1 FROM menu m
+           WHERE m.restaurant_id = r.id AND m.name LIKE %:keyword%
+       )
+       OR EXISTS (
+           SELECT 1 FROM restaurant_category rc
+           JOIN category c ON rc.category_id = c.id
+           WHERE rc.restaurant_id = r.id AND c.name LIKE %:keyword%
+       )
+    ORDER BY r.id
+    LIMIT :limit OFFSET :offset
+""", nativeQuery = true)
+    List<Long> searchRestaurantIdsNative(
+        @Param("keyword") String keyword,
+        @Param("limit") int limit,
+        @Param("offset") int offset
+    );
 
     @Query("SELECT r FROM Restaurant r WHERE r.id IN :ids")
-    Slice<Restaurant> findAllByIdIn(@Param("ids") List<Long> ids);
+    List<Restaurant> findAllByIdIn(@Param("ids") List<Long> ids);
 
+    @Query("SELECT r FROM Restaurant r JOIN FETCH r.imageUrls WHERE r.id IN :ids")
+    List<Restaurant> findAllWithImagesByIdIn(@Param("ids") List<Long> ids);
 }
