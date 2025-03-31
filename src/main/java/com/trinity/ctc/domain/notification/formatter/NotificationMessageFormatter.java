@@ -23,12 +23,8 @@ public class NotificationMessageFormatter {
 
     public static FcmMessage createMessageWithUrl(String title, String body, String url, Fcm fcm, NotificationType type) {
         Message message = Message.builder()
-//                .putData("title", title)
-//                .putData("body", body)
-                .setNotification(Notification.builder()
-                        .setTitle(title)
-                        .setBody(body)
-                        .build())
+                .putData("title", title)
+                .putData("body", body)
                 .putData("url", url)
                 .setToken(fcm.getToken())
                 .build();
@@ -43,12 +39,8 @@ public class NotificationMessageFormatter {
 
     public static FcmMulticastMessage createMulticastMessageWithUrl(String title, String body, String url, List<Fcm> fcmList, NotificationType type) {
         MulticastMessage multicastMessage = MulticastMessage.builder()
-//                .putData("title", title)
-//                .putData("body", body)
-                .setNotification(Notification.builder()
-                        .setTitle(title)
-                        .setBody(body)
-                        .build())
+                .putData("title", title)
+                .putData("body", body)
                 .putData("url", url)
                 .addAllTokens(fcmList.stream().map(Fcm::getToken).collect(Collectors.toList()))
                 .build();
