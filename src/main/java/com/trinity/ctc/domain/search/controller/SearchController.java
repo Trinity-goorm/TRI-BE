@@ -32,11 +32,18 @@ public class SearchController {
     private final SearchService searchService;
 
 
-    @PostMapping("/noauthenticaiton")
-    public ResponseEntity<List<RestaurantPreviewResponse>> getRestaurantsBySearchForTest(
+    @PostMapping("/noauthenticaiton/jpql")
+    public ResponseEntity<List<RestaurantPreviewResponse>> getRestaurantsBySearchForTestJPQL(
         @RequestBody RestaurantPreviewRequest request,
         @RequestParam String keyword) {
-        return ResponseEntity.ok(searchService.searchForTest(request, keyword));
+        return ResponseEntity.ok(searchService.searchByJPQL(request, keyword));
+    }
+
+    @PostMapping("/noauthenticaiton/native")
+    public ResponseEntity<List<RestaurantPreviewResponse>> getRestaurantsBySearchForTestNative(
+        @RequestBody RestaurantPreviewRequest request,
+        @RequestParam String keyword) {
+        return ResponseEntity.ok(searchService.searchByNative(request, keyword));
     }
 
     @PostMapping

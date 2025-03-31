@@ -8,7 +8,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Getter
 @Builder
 @Schema(description = "식당 미리보기 정보 반환")
@@ -52,8 +54,7 @@ public class RestaurantPreviewResponse {
 
 
 
-    public static RestaurantPreviewResponse fromEntity(User user, Restaurant restaurant, boolean isWishlisted, List<ReservationAvailabilityResponse> reservation, List<RestaurantCategoryName> rcList) {
-
+    public static RestaurantPreviewResponse fromEntity(User user, Restaurant restaurant, boolean isWishlisted, List<ReservationAvailabilityResponse> reservation, List<RestaurantCategoryName> rcList, List<Restaurant> restaurantImages) {
         return RestaurantPreviewResponse.builder()
                 .userName(user.getNickname())
                 .restaurantId(restaurant.getId())
@@ -63,7 +64,7 @@ public class RestaurantPreviewResponse {
                 .location(restaurant.getAddress())
                 .operatingDays(restaurant.getExpandedDays())
                 .operatingHours(restaurant.getOperatingHour())
-                .imageUrls(restaurant.getRestaurantImageUrls())
+                .imageUrls(restaurant.getRestaurantImageUrls(restaurantImages))
                 .averagePrice(restaurant.getAveragePrice())
                 .isWishlisted(isWishlisted)
                 .reservation(reservation)

@@ -9,8 +9,8 @@ import com.trinity.ctc.domain.restaurant.dto.RestaurantDetailResponse;
 import com.trinity.ctc.domain.restaurant.dto.RestaurantPreviewRequest;
 import com.trinity.ctc.domain.restaurant.dto.RestaurantPreviewResponse;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
-import com.trinity.ctc.domain.restaurant.entity.RestaurantCategory;
 import com.trinity.ctc.domain.restaurant.repository.RestaurantCategoryRepository;
+import com.trinity.ctc.domain.restaurant.repository.RestaurantImageRepository;
 import com.trinity.ctc.domain.restaurant.repository.RestaurantRepository;
 import com.trinity.ctc.domain.search.sorting.SortingStrategy;
 import com.trinity.ctc.domain.search.sorting.SortingStrategyFactory;
@@ -51,6 +51,7 @@ public class RestaurantService {
     private final SeatService seatService;
     private final LikeService likeService;
     private final RestaurantCategoryRepository restaurantCategoryRepository;
+    private final RestaurantImageRepository restaurantImageRepository;
 
     @Transactional(readOnly = true)
     public List<Restaurant> getAllRestaurants() {
@@ -103,14 +104,14 @@ public class RestaurantService {
             ));
 
         List<RestaurantCategoryName> rcList = restaurantCategoryRepository.findAllWithCategoryByRestaurantIds(restaurantIds);
+        List<Restaurant> restaurantImages = restaurantRepository.findAllWithImagesByIdIn(restaurantIds);
 
         return restaurantList.stream()
             .map(restaurant -> {
                 Long restaurantId = restaurant.getId();
                 boolean isWishlisted = wishMap.getOrDefault(restaurantId, false);
                 List<ReservationAvailabilityResponse> reservation = reservationMap.getOrDefault(restaurantId, Collections.emptyList());
-
-                return RestaurantPreviewResponse.fromEntity(user, restaurant, isWishlisted, reservation, rcList);
+                return RestaurantPreviewResponse.fromEntity(user, restaurant, isWishlisted, reservation, rcList, restaurantImages);
             })
             .collect(Collectors.toList());
     }

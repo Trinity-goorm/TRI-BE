@@ -2,14 +2,12 @@ package com.trinity.ctc.domain.user.dto;
 
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.restaurant.dto.RestaurantCategoryName;
-import com.trinity.ctc.domain.restaurant.entity.RestaurantCategory;
+import com.trinity.ctc.domain.restaurant.entity.Restaurant;
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.Map;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.data.domain.Slice;
-
-import java.util.List;
 
 @Getter
 @AllArgsConstructor
@@ -22,10 +20,10 @@ public class UserReservationListResponse {
     @Schema(description = "예약 목록")
     private final List<UserReservationResponse> reservations;
 
-    public static UserReservationListResponse from(Slice<Reservation> reservations, List<RestaurantCategoryName> rcList) {
+    public static UserReservationListResponse from(Slice<Reservation> reservations, List<RestaurantCategoryName> rcList, List<Restaurant> restaurantImages) {
 
         List<UserReservationResponse> responseList = reservations.getContent().stream()
-            .map(reservation -> UserReservationResponse.from(reservation, rcList))
+            .map(reservation -> UserReservationResponse.from(reservation, rcList, restaurantImages))
             .toList();
 
         return new UserReservationListResponse(reservations.hasNext(), responseList);

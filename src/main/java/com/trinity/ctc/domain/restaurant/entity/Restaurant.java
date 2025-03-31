@@ -113,10 +113,14 @@ public class Restaurant {
         return categories;
     }
 
-    public List<String> getRestaurantImageUrls() {
+    public List<String> getRestaurantImageUrls(List<Restaurant> restaurantImages) {
         List<String> images = new ArrayList<>();
-        for (RestaurantImage restaurantImage : this.imageUrls) {
-            images.add(restaurantImage.getUrl());
+        for (Restaurant restaurant : restaurantImages) {
+            if (restaurant.getId().equals(this.id)) {
+                for (RestaurantImage image : restaurant.getImageUrls()) {
+                    images.add(image.getUrl());
+                }
+            }
         }
         return images;
     }
