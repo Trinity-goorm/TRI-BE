@@ -2,13 +2,10 @@ package com.trinity.ctc.domain.restaurant.dto;
 
 import com.trinity.ctc.domain.reservation.dto.ReservationAvailabilityResponse;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
-import com.trinity.ctc.domain.restaurant.entity.RestaurantImage;
+import com.trinity.ctc.domain.restaurant.entity.RestaurantCategory;
 import com.trinity.ctc.domain.user.entity.User;
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.util.List;
-import java.util.stream.Collectors;
-
 import lombok.Builder;
 import lombok.Getter;
 
@@ -30,7 +27,7 @@ public class RestaurantPreviewResponse {
     private double rating;
 
     @Schema(description = "식당 카테고리", example = "한식")
-    private String category;
+    private List<String> category;
 
     @Schema(description = "식당 위치", example = "경기 성남시 분당구 대왕판교로606번길 58 판교푸르지오월드마크 2033호")
     private String location;
@@ -54,22 +51,19 @@ public class RestaurantPreviewResponse {
     private List<ReservationAvailabilityResponse> reservation; // 날짜별 예약 가능 여부 리스트로 변경
 
 
-    public static RestaurantPreviewResponse fromEntity(User user, Restaurant restaurant, boolean isWishlisted, List<ReservationAvailabilityResponse> reservation) {
+
+    public static RestaurantPreviewResponse fromEntity(User user, Restaurant restaurant, boolean isWishlisted, List<ReservationAvailabilityResponse> reservation, List<RestaurantCategoryName> rcList) {
 
         return RestaurantPreviewResponse.builder()
                 .userName(user.getNickname())
                 .restaurantId(restaurant.getId())
                 .name(restaurant.getName())
                 .rating(restaurant.getRating())
-                .category(restaurant.getRestaurantCategoryList().stream()
-                        .map(rc -> rc.getCategory().getName())
-                        .collect(Collectors.joining(", ")))
+                .category(restaurant.getCategories(rcList))//rclist에서 restaurantId가 같은 카테고리 이름들을 가져와야함
                 .location(restaurant.getAddress())
                 .operatingDays(restaurant.getExpandedDays())
                 .operatingHours(restaurant.getOperatingHour())
-                .imageUrls(restaurant.getImageUrls().stream()
-                        .map(RestaurantImage::getUrl)
-                        .collect(Collectors.toList()))
+                .imageUrls(restaurant.getRestaurantImageUrls())
                 .averagePrice(restaurant.getAveragePrice())
                 .isWishlisted(isWishlisted)
                 .reservation(reservation)
