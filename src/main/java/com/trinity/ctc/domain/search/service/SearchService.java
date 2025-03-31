@@ -1,5 +1,7 @@
 package com.trinity.ctc.domain.search.service;
 
+import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
+
 import com.trinity.ctc.domain.restaurant.dto.RestaurantPreviewRequest;
 import com.trinity.ctc.domain.restaurant.dto.RestaurantPreviewResponse;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
@@ -18,9 +20,9 @@ import com.trinity.ctc.global.exception.error_code.UserErrorCode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -37,22 +39,42 @@ public class SearchService {
     private final UserRepository userRepository;
     private final SearchRepository searchRepository;
 
-    @Transactional
-    public List<RestaurantPreviewResponse> searchForTest(RestaurantPreviewRequest request, String keyword) {
-        SortingStrategy sortingStrategy = SortingStrategyFactory.getStrategy(request.getSortType());
-        Sort sort = sortingStrategy.getSort();
+    @Transactional(propagation = REQUIRES_NEW)
+    public List<RestaurantPreviewResponse> searchByJPQL(RestaurantPreviewRequest request, String keyword) {
+        Sort sort = SortingStrategyFactory.getStrategy(request.getSortType()).getSort();
         Pageable pageable = PageRequest.of(request.getPage() - 1, 30, sort);
-
-        Slice<Long> idPage = restaurantRepository.searchRestaurantIds(keyword, pageable);
-        Slice<Restaurant> restaurants = restaurantRepository.findAllByIdIn(idPage.getContent());
-        List<Restaurant> restaurantList = restaurants.getContent();
-
-        User user = userRepository.findById(1L)
-            .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
-        saveSearchHistory(1L, keyword);
-        return restaurantService.convertTorestaurantDtoList(restaurantList, user);
+        List<Long> ids = restaurantRepository.searchRestaurantIdsJPQL(keyword, pageable).getContent();
+        return executeSearch(r -> ids, request, keyword);
     }
 
+    @Transactional(propagation = REQUIRES_NEW)
+    public List<RestaurantPreviewResponse> searchByNative(RestaurantPreviewRequest request, String keyword) {
+        int page = request.getPage() - 1;
+        int limit = 30;
+        int offset = page * limit;
+        return executeSearch(r -> restaurantRepository.searchRestaurantIdsNative(keyword, limit, offset), request, keyword);
+    }
+
+//    public List<RestaurantPreviewResponse> searchByQuerydsl(RestaurantPreviewRequest request, String keyword) {
+//        int page = request.getPage() - 1;
+//        int limit = 30;
+//        int offset = page * limit;
+//        return executeSearch(r -> restaurantRepository.searchRestaurantIdsQuerydsl(keyword, offset, limit), request, keyword);
+//    }
+
+
+
+    private List<RestaurantPreviewResponse> executeSearch(
+        Function<RestaurantPreviewRequest, List<Long>> searchFunction,
+        RestaurantPreviewRequest request,
+        String keyword
+    ) {
+        List<Long> ids = searchFunction.apply(request);
+        List<Restaurant> restaurants = restaurantRepository.findAllByIdIn(ids);
+        User user = userRepository.findById(1L).orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
+        saveSearchHistory(1L, keyword);
+        return restaurantService.convertTorestaurantDtoList(restaurants, user);
+    }
 
     @Transactional
     public List<RestaurantPreviewResponse> search(String kakaoId, RestaurantPreviewRequest request, String keyword) {
@@ -65,16 +87,16 @@ public class SearchService {
 
         Pageable pageable = PageRequest.of(request.getPage() - 1, 30, sort);
 
-        Slice<Long> idPage = restaurantRepository.searchRestaurantIds(keyword, pageable);
-        Slice<Restaurant> restaurants = restaurantRepository.findAllByIdIn(idPage.getContent());
-        List<Restaurant> restaurantList = restaurants.getContent();
+        Slice<Long> idPage = restaurantRepository.searchRestaurantIdsJPQL(keyword, pageable);
+        List<Restaurant> restaurants = restaurantRepository.findAllByIdIn(idPage.getContent());
+//        List<Restaurant> restaurantList = restaurants.getContent();
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
         saveSearchHistory(userId, keyword);
 
-        return restaurantService.convertTorestaurantDtoList(restaurantList, user);
+        return restaurantService.convertTorestaurantDtoList(restaurants, user);
     }
 
     public List<SearchHistoryResponse> getSearchHistory(String kakaoId) {
