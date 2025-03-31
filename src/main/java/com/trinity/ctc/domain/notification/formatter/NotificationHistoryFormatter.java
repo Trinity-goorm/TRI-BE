@@ -18,7 +18,7 @@ public class NotificationHistoryFormatter {
 
     // 단 건 알림에 대한 notificationHistory formatter
     public static NotificationHistory formattingSingleNotificationHistory(FcmMessage message,
-                                                              FcmSendingResultDto result, NotificationType type) {
+                                                              FcmSendingResultDto result) {
 
         // 발송한 알림 data 를 Json 으로 저장하기 위해 Map 에 저장
         Map<String, String> messageHistory = new HashMap<>();
@@ -28,7 +28,7 @@ public class NotificationHistoryFormatter {
 
         // notificationHistory entity 를 생성하는 factory 메서드 호출 -> notificationHistory 반환
         return createNotificationHistory(
-                type,
+                message.getType(),
                 messageHistory,
                 result.getSentAt(),
                 result.getSentResult(),
@@ -40,7 +40,7 @@ public class NotificationHistoryFormatter {
 
     // 여러 건의 알림에 대한 notificationHistory formatter
     public static List<NotificationHistory> formattingMultipleNotificationHistory(List<FcmMessage> messageList,
-                                                                      List<FcmSendingResultDto> resultList, NotificationType type) {
+                                                                      List<FcmSendingResultDto> resultList) {
         // notificationHistoryList 초기화
         List<NotificationHistory> notificationHistoryList = new ArrayList<>();
 
@@ -54,7 +54,7 @@ public class NotificationHistoryFormatter {
 
             // notificationHistory entity 를 생성하는 factory 메서드 호출 -> 반환된 notificationHistory 을 list 에 저장
             notificationHistoryList.add(createNotificationHistory(
-                    type,
+                    messageList.get(i).getType(),
                     messageHistory,
                     resultList.get(i).getSentAt(),
                     resultList.get(i).getSentResult(),
@@ -70,7 +70,7 @@ public class NotificationHistoryFormatter {
 
     // Multicast 알림에 대한 notificationHistory formatter
     public static List<NotificationHistory> formattingMulticastNotificationHistory(FcmMulticastMessage multicastMessage,
-                                                                       List<FcmSendingResultDto> resultList, NotificationType type) {
+                                                                       List<FcmSendingResultDto> resultList) {
         // notificationHistoryList 초기화
         List<NotificationHistory> notificationHistoryList = new ArrayList<>();
 
@@ -84,7 +84,7 @@ public class NotificationHistoryFormatter {
 
             // notificationHistory entity 를 생성하는 factory 메서드 호출 -> 반환된 notificationHistory 을 list 에 저장
             notificationHistoryList.add(createNotificationHistory(
-                    type,
+                    multicastMessage.getType(),
                     messageHistory,
                     resultList.get(i).getSentAt(),
                     resultList.get(i).getSentResult(),

@@ -10,7 +10,7 @@ import com.trinity.ctc.domain.notification.entity.SeatNotificationSubscription;
 import com.trinity.ctc.domain.notification.message.FcmMulticastMessage;
 import com.trinity.ctc.domain.notification.repository.SeatNotificationRepository;
 import com.trinity.ctc.domain.notification.repository.SeatNotificationSubscriptionRepository;
-import com.trinity.ctc.domain.notification.sender.NotificationSender;
+import com.trinity.ctc.domain.notification.sender.NotificationSenderV1;
 import com.trinity.ctc.domain.notification.type.NotificationType;
 import com.trinity.ctc.domain.reservation.repository.ReservationRepository;
 import com.trinity.ctc.domain.reservation.status.ReservationStatus;
@@ -25,6 +25,9 @@ import com.trinity.ctc.global.exception.error_code.UserErrorCode;
 import com.trinity.ctc.global.kakao.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
@@ -57,8 +60,10 @@ public class SeatNotificationService {
 
     private final NotificationHistoryService notificationHistoryService;
     private final AuthService authService;
-    private final NotificationSender notificationSender;
+    private final NotificationSenderV1 notificationSenderV1;
 
+    // 알림 목록 조회 시, 한 번에 가져오는 slice의 크기
+    private final int SLICES_PER_PAGE = 5000;
     // 발송할 알림의 batch-size(Firebase Messaging service 에서 send 메서드의 요청으로 보낼 수 있는 최대 건수)
     private final int BATCH_SIZE = 500;
 
@@ -175,43 +180,72 @@ public class SeatNotificationService {
     @Async("empty-seat-notification")
     @Transactional(readOnly = true)
     public void sendSeatNotification(long seatId) {
+        log.info("✅✅✅ 빈자리 알림 처리 시작!");
+        long startTime = System.nanoTime(); // 시작 시간 측정
+
+        int page = 0;
+        Slice<SeatNotificationSubscription> slice;
+
+        // 빈자리 알림 정보 조회, 없을 시 return
+        SeatNotification seatNotification = seatNotificationRepository.findBySeatId(seatId).orElse(null);
+        if(seatNotification == null) return;
+
+        // slice-size 별로 발송 처리
+        do {
+            Pageable pageable = PageRequest.of(page, SLICES_PER_PAGE);
+            // 빈자리 알림에 대한 구독자 리스트 조회 -> user 를 fetch join
+            // 없을 시 return
+            slice = seatNotificationSubscriptionRepository.findSliceBySeatNotification(seatNotification, pageable);
+            List<SeatNotificationSubscription> seatNotificationSubscriptionList = slice.getContent();
+            if (seatNotificationSubscriptionList.isEmpty()) return;
+
+            // 빈자리 알림 구독 리스트에서 userList를 get
+            List<User> userList = seatNotificationSubscriptionList.stream().map(SeatNotificationSubscription::getUser).toList();
+            // userList에서 각 user의 Fcm을 get -> list로 변환
+            List<Fcm> fcmList = userList.stream().map(User::getFcmList).flatMap(List::stream).toList();
+
+            sendNotification(seatNotification, fcmList, SEAT_NOTIFICATION);
+
+            page++;
+        } while (slice.hasNext());
+
+        long endTimeToProcess = System.nanoTime();  // 종료 시간 측정
+        long elapsedTimeToProcess = endTimeToProcess - startTime; // 발송 처리까지의 경과 시간
+        log.info("✅✅✅ 빈자리 알림 처리 시간: {} ms", elapsedTimeToProcess / 1_000_000);
+    }
+
+    /**
+     * 발송할 MulticastMessage 객체를 생성하고 발송하는 메서드
+     * @param seatNotification 빈자리 알림 entity
+     * @param fcmList 빈자리 알림 구독자 들의 Fcm list
+     */
+    @Transactional(readOnly = true)
+    public void sendNotification(SeatNotification seatNotification, List<Fcm> fcmList, NotificationType type) {
         log.info("✅✅✅ 빈자리 알림 발송 시작!");
         long startTime = System.nanoTime(); // 시작 시간 측정
 
-        // 전송 메서드의 반환값인 알림 history List 를 저장할 list 초기화
-        List<CompletableFuture<List<NotificationHistory>>> resultList = new ArrayList<>();
-        // 빈자리 알림 정보 조회, 없을 시 404 반환
-        SeatNotification seatNotification = seatNotificationRepository.findBySeatId(seatId)
-                .orElseThrow(() -> new CustomException(NotificationErrorCode.NOT_FOUND));
-        // 빈자리 알림 구독자 리스트 조회 -> user와 fcm을 fetch join
-        List<SeatNotificationSubscription> seatNotificationSubscriptionList = seatNotificationSubscriptionRepository.findAllBySeatNotification(seatNotification);
-        // 없을 시 404 반환
-        if (seatNotificationSubscriptionList.isEmpty()) throw new CustomException(NotificationErrorCode.NO_SUBSCRIPTION);
-        // 빈자리 알림 구독 리스트에서 userList를 get
-        List<User> userList = seatNotificationSubscriptionList.stream().map(SeatNotificationSubscription::getUser).toList();
-        // userList에서 각 user의 Fcm을 get -> list로 변환
-        List<Fcm> fcmList = userList.stream().map(User::getFcmList).flatMap(List::stream).toList();
         // batch-size(500)으로 발송 대상 FCM 리스트 파티셔닝
         List<List<Fcm>> batches = Lists.partition(fcmList, BATCH_SIZE);
 
-        int batchCount = batches.size(); // 배치 작업 전체 수
-        int sendingCount = 0; // 발송된 배치 수 측정
+        // 전송 메서드의 반환값인 알림 history List 를 저장할 list 초기화
+        List<CompletableFuture<List<NotificationHistory>>> resultList = new ArrayList<>();
 
         // 파티셔닝된 배치 별로 발송 로직 수행
         for (List<Fcm> batch : batches) {
-            log.info("✅ 알림 발송 시작 Batch {}", sendingCount);
-
+            // 발송할 MulticasyMessage 정보를 담은 Wrapper 객체 생성
+            FcmMulticastMessage multicastMessage = createMulticastMessageWithUrl(
+                    seatNotification.getTitle(), seatNotification.getBody(), seatNotification.getUrl(), batch, type);
+            // MulticastMessage 발송 메서드 호출
+            CompletableFuture<List<NotificationHistory>> sendingResult = notificationSenderV1.sendMulticastNotification(multicastMessage)
+                    // 비동기로 알림 정보와 발송 결과, 알림 타입에 맞춰 알림 history List 를 생성하는 메서드 호출 -> 발송 응답 수신 시, List<NotificationHistory>를 반환
+                    .thenApplyAsync(resultDtoList -> formattingMulticastNotificationHistory(multicastMessage, resultDtoList));
             // 알림 발송 메서드 호출 -> 반환값 resultList에 추가(반환 타입: CompletableFuture<List<NotificationHistory>>)
-            resultList.add(sendNotification(seatNotification, batch, SEAT_NOTIFICATION));
-
-            sendingCount++;  // 발송된 배치 수 ++
-            log.info("✅ 알림 발송 완료 Batch {}", sendingCount);
-            if (sendingCount == batchCount) log.info("✅✅ 전송완료!!!!!!!!!!!!!"); // if(발송 수 == 총 배치 작업 수)
+            resultList.add(sendingResult);
         }
 
-        long endTime = System.nanoTime();  // 종료 시간 측정
-        long elapsedTimeTosend = endTime - startTime;  // 발송까지의 경과 시간
-        log.info("✅✅✅ 당일 예약 알림 발송 실행 시간: {} ms", elapsedTimeTosend / 1_000_000);
+        long endTimeToSend = System.nanoTime();  // 종료 시간 측정
+        long elapsedTimeToSend = endTimeToSend - startTime;  // 발송까지의 경과 시간
+        log.info("✅✅✅ 빈자리 알림 발송 실행 시간: {} ms", elapsedTimeToSend / 1_000_000);
 
         // 전송 결과로 반환된 각 future 의 전달이 완료될 때까지 기다린 후 알림 history 리스트로 반환
         List<NotificationHistory> notificationHistoryList = resultList.stream()
@@ -219,28 +253,12 @@ public class SeatNotificationService {
                 .flatMap(List::stream) // 여러 리스트를 하나로 합침
                 .toList();
 
-        long elapsedTimeToResponse = endTime - startTime; // 응답 반환까지의 경과 시간
-        log.info("✅✅✅ 당일 예약 알림 응답 시간: {} ms", elapsedTimeToResponse / 1_000_000);
+        long endTimeToResponse = System.nanoTime();  // 종료 시간 측정
+        long elapsedTimeToResponse = endTimeToResponse - startTime; // 응답 반환까지의 경과 시간
+        log.info("✅✅✅ 빈자리 알림 응답 시간: {} ms", elapsedTimeToResponse / 1_000_000);
 
         // 전송된 알림의 히스토리를 전부 history 테이블에 저장하는 메서드 호출
         notificationHistoryService.saveNotificationHistory(notificationHistoryList);
-    }
-
-    /**
-     * 발송할 MulticastMessage 객체를 생성하고 발송하는 메서드
-     * @param seatNotification 빈자리 알림 entity
-     * @param batch batch-size 별로 나눈 Fcm list
-     * @return 알림 history List를 비동기로 반환하는 CompletableFuture 객체 리스트
-     */
-    @Transactional(readOnly = true)
-    public CompletableFuture<List<NotificationHistory>> sendNotification(SeatNotification seatNotification, List<Fcm> batch, NotificationType type) {
-        // 발송할 MulticasyMessage 정보를 담은 Wrapper 객체 생성
-        FcmMulticastMessage multicastMessage = createMulticastMessageWithUrl(
-                seatNotification.getTitle(), seatNotification.getBody(), seatNotification.getUrl(), batch);
-        // MulticastMessage 발송 메서드 호출
-        return notificationSender.sendMulticastNotification(multicastMessage)
-                // 비동기로 알림 정보와 발송 결과, 알림 타입에 맞춰 알림 history List 를 생성하는 메서드 호출 -> 발송 응답 수신 시, List<NotificationHistory>를 반환
-                .thenApplyAsync(resultList -> formattingMulticastNotificationHistory(multicastMessage, resultList, type));
     }
 
     /**

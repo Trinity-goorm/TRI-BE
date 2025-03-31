@@ -8,6 +8,7 @@ import com.trinity.ctc.global.util.formatter.JsonUtil;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 @Entity
+@Getter
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class NotificationHistory {
