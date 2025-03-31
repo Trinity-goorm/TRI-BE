@@ -90,7 +90,7 @@ public class RestaurantRecommendationService {
 
                     boolean isWishlisted = likeRepository.existsByUserAndRestaurant(user, restaurant);
 
-                    return RestaurantPreviewResponse.fromEntity(user, restaurant, isWishlisted, List.of(), List.of());
+                    return RestaurantPreviewResponse.fromEntity(user, restaurant, isWishlisted, List.of(), List.of(), List.of());
                 })
                 .collect(Collectors.toList());
     }
