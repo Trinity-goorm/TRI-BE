@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+import static com.trinity.ctc.domain.fcm.util.FcmTokenUtil.extractTokenPrefix;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -31,10 +33,7 @@ public class FcmService {
      */
     @Transactional
     public void registerFcmToken(String fcmToken) {
-        if (fcmRepository.existsByToken(fcmToken)) {
-            renewFcmToken(fcmToken);
-            return;
-        }
+        fcmRepository.findByTokenStartingWith(extractTokenPrefix(fcmToken)).ifPresent(fcmRepository::delete);
 
         String kakaoId = authService.getAuthenticatedKakaoId();
 
@@ -53,7 +52,6 @@ public class FcmService {
                 .expiresAt(expiresAt)
                 .user(user)
                 .build();
-
 
         // FCM 토큰 저장
         fcmRepository.save(fcm);
@@ -76,14 +74,15 @@ public class FcmService {
      */
     @Transactional
     public void renewFcmToken(String fcmToken) {
-        // 토큰 업데이트 시간과 만료 시간 설정
-        LocalDateTime updatedAt = DateTimeUtil.truncateToMinute(LocalDateTime.now());
-        LocalDateTime expiresAt = updatedAt.plusDays(30);
+        fcmRepository.findByTokenStartingWith(extractTokenPrefix(fcmToken))
+            .ifPresent(existingFcm -> {
+                LocalDateTime updatedAt = DateTimeUtil.truncateToMinute(LocalDateTime.now());
+                LocalDateTime expiresAt = updatedAt.plusDays(30);
 
-        // 토큰값이 같은 record 업데이트
-        fcmRepository.updateToken(fcmToken, updatedAt, expiresAt);
+                existingFcm.renewFcmToken(fcmToken, updatedAt, expiresAt);
+                fcmRepository.save(existingFcm);
+            });
     }
-
     /**
      * 매일 자정에 만료된 fcm 토큰 삭제 (스케줄링)
      */

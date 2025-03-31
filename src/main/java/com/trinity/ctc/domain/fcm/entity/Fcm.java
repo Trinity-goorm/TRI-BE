@@ -38,4 +38,10 @@ public class Fcm {
         this.expiresAt = expiresAt;
         this.user = user;
     }
+
+    public void renewFcmToken(String newToken, LocalDateTime registeredAt, LocalDateTime expiresAt) {
+        this.token = newToken;
+        this.registeredAt = registeredAt;
+        this.expiresAt = expiresAt;
+    }
 }

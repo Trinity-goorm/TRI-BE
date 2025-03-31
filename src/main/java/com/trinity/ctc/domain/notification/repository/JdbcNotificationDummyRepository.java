@@ -53,7 +53,6 @@ public class JdbcNotificationDummyRepository implements NotificationDummyReposit
             });
         }
 
-
         log.info("✅ ReservationNotification Insert 완료");
     }
 
@@ -83,7 +82,6 @@ public class JdbcNotificationDummyRepository implements NotificationDummyReposit
             });
         }
 
-
         log.info("✅ SeatNotification Insert 완료 (총 {}건)", seatNotifications.size());
     }
 
@@ -111,8 +109,6 @@ public class JdbcNotificationDummyRepository implements NotificationDummyReposit
                 }
             });
         }
-
-
 
         log.info("✅ SeatNotificationSubscription Insert 완료 (총 {}건)", subscriptions.size());
     }

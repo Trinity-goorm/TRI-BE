@@ -2,6 +2,9 @@ package com.trinity.ctc.domain.notification.repository;
 
 import com.trinity.ctc.domain.notification.entity.ReservationNotification;
 import com.trinity.ctc.domain.notification.type.NotificationType;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -20,6 +23,20 @@ public interface ReservationNotificationRepository extends JpaRepository<Reserva
     @Transactional
     @Query("DELETE FROM ReservationNotification r WHERE r.reservation.id = :reservationId")
     void deleteAllByReservationId(@Param("reservationId") long reservationId);
+
+    @EntityGraph(attributePaths = {"user", "user.userPreference"})
+    @Query("Select r FROM ReservationNotification r WHERE r.type = :notificationType AND DATE(r.scheduledTime) = :scheduledDate")
+    Slice<ReservationNotification> findSliceByTypeAndScheduledDate(
+            NotificationType notificationType,
+            LocalDate scheduledDate,
+            Pageable pageable);
+
+    @EntityGraph(attributePaths = {"user", "user.userPreference"})
+    Slice<ReservationNotification> findSliceByTypeAndScheduledTime(
+            NotificationType type,
+            LocalDateTime scheduledTime,
+            Pageable pageable
+    );
 
     @Query("Select r FROM ReservationNotification r join fetch r.user u join fetch r.user.fcmList f left join fetch r.user.userPreference uf WHERE r.type = :notificationType AND DATE(r.scheduledTime) = :scheduledDate")
     List<ReservationNotification> findAllByTypeAndScheduledDate(@Param("notificationType") NotificationType notificationtype,

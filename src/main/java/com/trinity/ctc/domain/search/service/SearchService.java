@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +38,23 @@ public class SearchService {
     private final SearchRepository searchRepository;
 
     @Transactional
+    public List<RestaurantPreviewResponse> searchForTest(RestaurantPreviewRequest request, String keyword) {
+        SortingStrategy sortingStrategy = SortingStrategyFactory.getStrategy(request.getSortType());
+        Sort sort = sortingStrategy.getSort();
+        Pageable pageable = PageRequest.of(request.getPage() - 1, 30, sort);
+
+        Slice<Long> idPage = restaurantRepository.searchRestaurantIds(keyword, pageable);
+        Slice<Restaurant> restaurants = restaurantRepository.findAllByIdIn(idPage.getContent());
+        List<Restaurant> restaurantList = restaurants.getContent();
+
+        User user = userRepository.findById(1L)
+            .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
+        saveSearchHistory(1L, keyword);
+        return restaurantService.convertTorestaurantDtoList(restaurantList, user);
+    }
+
+
+    @Transactional
     public List<RestaurantPreviewResponse> search(String kakaoId, RestaurantPreviewRequest request, String keyword) {
         Optional<User> userOptional = userRepository.findByKakaoId(Long.valueOf(kakaoId));
         Long userId = userOptional.orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND)).getId();
@@ -47,12 +65,16 @@ public class SearchService {
 
         Pageable pageable = PageRequest.of(request.getPage() - 1, 30, sort);
 
-        Page<Restaurant> restaurants = restaurantRepository.searchRestaurants(keyword, pageable);
+        Slice<Long> idPage = restaurantRepository.searchRestaurantIds(keyword, pageable);
+        Slice<Restaurant> restaurants = restaurantRepository.findAllByIdIn(idPage.getContent());
+        List<Restaurant> restaurantList = restaurants.getContent();
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(UserErrorCode.NOT_FOUND));
 
         saveSearchHistory(userId, keyword);
-        return restaurantService.convertToRestaurantDtoList(restaurants, user);
+
+        return restaurantService.convertTorestaurantDtoList(restaurantList, user);
     }
 
     public List<SearchHistoryResponse> getSearchHistory(String kakaoId) {

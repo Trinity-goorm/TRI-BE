@@ -18,9 +18,14 @@ public interface SeatNotificationRepository extends JpaRepository<SeatNotificati
     Optional<SeatNotification> findBySeatId(@Param("seatId") long seatId);
 
 
-    @Query("SELECT s FROM SeatNotification s WHERE s.seat IN (" +
-            "    SELECT a FROM Seat a WHERE a.reservationDate < :currentDate OR " +
-            "         (a.reservationDate = :currentDate AND a.reservationTime.timeSlot < :currentTime))")
+    @Query("""
+       SELECT s FROM SeatNotification s 
+       WHERE s.seat IN (
+           SELECT a FROM Seat a 
+           WHERE a.reservationDate < :currentDate 
+              OR (a.reservationDate = :currentDate AND a.reservationTime.timeSlot < :currentTime)
+       )
+       """)
     List<SeatNotification> findAllByCurrentDateTime(@Param("currentDate") LocalDate currentDate,
                                                     @Param("currentTime") LocalTime currentTime);
 }
