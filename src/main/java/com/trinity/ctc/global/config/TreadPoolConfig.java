@@ -35,7 +35,7 @@ public class TreadPoolConfig {
     public Executor reservationNotificationTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 
-        executor.setCorePoolSize(20);
+        executor.setCorePoolSize(50);
         executor.setThreadNamePrefix("reservation-notification-");
         executor.setAllowCoreThreadTimeOut(true);
         executor.setKeepAliveSeconds(60);
@@ -50,7 +50,7 @@ public class TreadPoolConfig {
     public Executor seatNotificationTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 
-        executor.setCorePoolSize(20);
+        executor.setCorePoolSize(50);
         executor.setThreadNamePrefix("empty-seat-notification-");
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setThreadPriority(10);
@@ -63,7 +63,7 @@ public class TreadPoolConfig {
     public Executor sendingResponseTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 
-        executor.setCorePoolSize(20);
+        executor.setCorePoolSize(100);
         executor.setThreadNamePrefix("response-handler-");
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setThreadPriority(8);
