@@ -60,7 +60,7 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // CORS 설정
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers("/api/login", "/api/token", "/api/token/reissue", "/users/kakao/login", "/api/fcmTokens/register", "/api/fcmTokens/delete", "/api/data/**", "trigger/notifications/**").permitAll()
-                    .requestMatchers("/api/users/onboarding/**").hasRole("TEMPORARILY_UNAVAILABLE")
+                    .requestMatchers("/api/users/onboarding").hasRole("TEMPORARILY_UNAVAILABLE")
                     .requestMatchers("/api/**", "/api/logout", "/users/kakao/logout").hasRole("AVAILABLE")
                     .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/v3/api-docs/**").permitAll()
                     .anyRequest().authenticated()  // 그 외 경로는 인증 필요

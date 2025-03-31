@@ -2,6 +2,7 @@ package com.trinity.ctc.domain.notification.formatter;
 
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.MulticastMessage;
+import com.google.firebase.messaging.Notification;
 import com.trinity.ctc.domain.fcm.entity.Fcm;
 import com.trinity.ctc.domain.notification.message.FcmMessage;
 import com.trinity.ctc.domain.notification.message.FcmMulticastMessage;
@@ -22,8 +23,12 @@ public class NotificationMessageFormatter {
 
     public static FcmMessage createMessageWithUrl(String title, String body, String url, Fcm fcm, NotificationType type) {
         Message message = Message.builder()
-                .putData("title", title)
-                .putData("body", body)
+//                .putData("title", title)
+//                .putData("body", body)
+                .setNotification(Notification.builder()
+                        .setTitle(title)
+                        .setBody(body)
+                        .build())
                 .putData("url", url)
                 .setToken(fcm.getToken())
                 .build();
@@ -38,8 +43,12 @@ public class NotificationMessageFormatter {
 
     public static FcmMulticastMessage createMulticastMessageWithUrl(String title, String body, String url, List<Fcm> fcmList, NotificationType type) {
         MulticastMessage multicastMessage = MulticastMessage.builder()
-                .putData("title", title)
-                .putData("body", body)
+//                .putData("title", title)
+//                .putData("body", body)
+                .setNotification(Notification.builder()
+                        .setTitle(title)
+                        .setBody(body)
+                        .build())
                 .putData("url", url)
                 .addAllTokens(fcmList.stream().map(Fcm::getToken).collect(Collectors.toList()))
                 .build();
@@ -70,7 +79,6 @@ public class NotificationMessageFormatter {
         // reservationNotification entity 를 생성하는 팩토리 메서드 호출 -> reservationNotification 반환
         return createMessageWithUrl(title, body, url, fcm, type);
     }
-
 
     // 예약 취소 메세지를 포멧팅하는 메서드
     // 예약 취소 알림은 바로 발송하여 저장하지 않기 때문에 FcmMessage 객체로 반환
