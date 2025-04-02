@@ -1,8 +1,19 @@
+server:
+  tomcat:
+    max-threads: 300   # 동시 처리 쓰레드 수
+    max-connections: 10000  # 최대 연결 수
+
 spring:
   datasource:
     url: ${PROD_DATASOURCE_URL}
     username: ${PROD_DATASOURCE_USERNAME}
     password: ${PROD_DATASOURCE_PASSWORD}
+    hikari:
+      maximum-pool-size: 100
+      minimum-idle: 10
+      idle-timeout: 60000
+      max-lifetime: 1800000
+      connection-timeout: 30000
 ---
 spring:
   jpa:

@@ -15,6 +15,8 @@ import com.trinity.ctc.domain.user.validator.NormalTicketValidator;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
@@ -52,6 +54,7 @@ public class User {
     private Boolean isDeleted = false;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Fetch(FetchMode.SUBSELECT)
     private List<Fcm> fcmList = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")

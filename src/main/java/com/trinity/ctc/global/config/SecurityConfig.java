@@ -33,13 +33,9 @@ import java.util.List;
 public class SecurityConfig {
     private final JWTUtil jwtUtil;
     private final ObjectMapper objectMapper;
-    private final RefreshTokenRepository refreshTokenRepository;
-    private final UserRepository userRepository;
     private final KakaoApiService kakaoApiService;
-    private final AuthService authService;
-
+    private final RefreshTokenRepository refreshTokenRepository;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
-    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
@@ -59,7 +55,8 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)  // POST 테스트 시 CSRF 비활성화
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // CORS 설정
             .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/api/login", "/api/token", "/api/token/reissue", "/users/kakao/login", "/api/fcmTokens/register", "/api/fcmTokens/delete", "/api/data/**", "/api/reservations/preoccupy/test").permitAll()
+                    .requestMatchers("/api/login", "/api/token", "/api/token/reissue", "/users/kakao/login", "/api/fcmTokens/register", "/api/fcmTokens/delete", "/api/data/**", "api/notifications/trigger/**","/api/search/noauthenticaiton/**", "/api/reservations/preoccupy/test").permitAll()
+                    .requestMatchers("/api/users/onboarding").hasRole("TEMPORARILY_UNAVAILABLE")
                     .requestMatchers("/api/users/onboarding/**").hasRole("TEMPORARILY_UNAVAILABLE")
                     .requestMatchers("/api/**", "/api/logout", "/users/kakao/logout").hasRole("AVAILABLE")
                     .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/api-docs/**", "/v3/api-docs/**").permitAll()

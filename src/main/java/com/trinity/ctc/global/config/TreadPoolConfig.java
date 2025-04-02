@@ -18,12 +18,12 @@ public class TreadPoolConfig {
     }
 
 
-    @Bean(name = "reservation-completed-notification")
-    public Executor reservationCompletedNotificationTaskExecutor() {
+    @Bean(name = "confirmation-notification")
+    public Executor confirmationNotificationTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 
         executor.setCorePoolSize(2);
-        executor.setThreadNamePrefix("reservation-complete-notification-");
+        executor.setThreadNamePrefix("confirmation-notification-");
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setThreadPriority(7);
 
@@ -31,40 +31,12 @@ public class TreadPoolConfig {
         return executor;
     }
 
-    @Bean(name = "reservation-canceled-notification")
-    public Executor reservationCanceledNotificationTaskExecutor() {
+    @Bean(name = "reservation-notification")
+    public Executor reservationNotificationTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 
-        executor.setCorePoolSize(2);
-        executor.setThreadNamePrefix("reservation-canceled-notification-");
-        executor.setWaitForTasksToCompleteOnShutdown(true);
-        executor.setThreadPriority(7);
-
-        executor.initialize();
-        return executor;
-    }
-
-    @Bean(name = "daily-reservation-notification")
-    public Executor dailyReservationNotificationTaskExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-
-        executor.setCorePoolSize(20);
-        executor.setThreadNamePrefix("daily-reservation-notification-");
-        executor.setAllowCoreThreadTimeOut(true);
-        executor.setKeepAliveSeconds(60);
-        executor.setWaitForTasksToCompleteOnShutdown(true);
-        executor.setThreadPriority(6);
-
-        executor.initialize();
-        return executor;
-    }
-
-    @Bean(name = "hourly-reservation-notification")
-    public Executor hourlyTaskExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-
-        executor.setCorePoolSize(10);
-        executor.setThreadNamePrefix("daily-reservation-notification-");
+        executor.setCorePoolSize(50);
+        executor.setThreadNamePrefix("reservation-notification-");
         executor.setAllowCoreThreadTimeOut(true);
         executor.setKeepAliveSeconds(60);
         executor.setWaitForTasksToCompleteOnShutdown(true);
@@ -75,10 +47,10 @@ public class TreadPoolConfig {
     }
 
     @Bean(name = "empty-seat-notification")
-    public Executor seatTaskExecutor() {
+    public Executor seatNotificationTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 
-        executor.setCorePoolSize(20);
+        executor.setCorePoolSize(50);
         executor.setThreadNamePrefix("empty-seat-notification-");
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setThreadPriority(10);
@@ -88,10 +60,10 @@ public class TreadPoolConfig {
     }
 
     @Bean(name = "response-handler")
-    public Executor singleResponseTaskExecutor() {
+    public Executor sendingResponseTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 
-        executor.setCorePoolSize(20);
+        executor.setCorePoolSize(100);
         executor.setThreadNamePrefix("response-handler-");
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setThreadPriority(8);
@@ -128,5 +100,55 @@ public class TreadPoolConfig {
 
         executor.initialize();
         return executor;
+    }
+
+    @Bean(name = "notification-thread")
+    public Executor processTaskExecutor() {
+
+        ThreadFactory factory = Thread.ofVirtual()
+                .name("notification-vt-", 0)
+                .factory();
+
+        return Executors.newThreadPerTaskExecutor(factory);
+    }
+
+    @Bean(name = "sending-thread")
+    public Executor sendingTaskExecutor() {
+
+        ThreadFactory factory = Thread.ofVirtual()
+                .name("sending-vt-", 0)
+                .factory();
+
+        return Executors.newThreadPerTaskExecutor(factory);
+    }
+
+    @Bean(name = "response-thread")
+    public Executor responseTaskExecutor() {
+
+        ThreadFactory factory = Thread.ofVirtual()
+                .name("response-vt-", 0)
+                .factory();
+
+        return Executors.newThreadPerTaskExecutor(factory);
+    }
+
+    @Bean(name = "retry-thread")
+    public Executor retryTaskExecutor() {
+
+        ThreadFactory factory = Thread.ofVirtual()
+                .name("retry-vt-", 0)
+                .factory();
+
+        return Executors.newThreadPerTaskExecutor(factory);
+    }
+
+    @Bean(name = "save-thread")
+    public Executor saveTaskExecutor() {
+
+        ThreadFactory factory = Thread.ofVirtual()
+                .name("save-vt-", 0)
+                .factory();
+
+        return Executors.newThreadPerTaskExecutor(factory);
     }
 }

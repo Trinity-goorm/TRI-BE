@@ -2,6 +2,7 @@ package com.trinity.ctc.domain.restaurant.entity;
 
 import com.trinity.ctc.domain.like.entity.Likes;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
+import com.trinity.ctc.domain.restaurant.dto.RestaurantCategoryName;
 import com.trinity.ctc.domain.seat.entity.Seat;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -17,6 +18,8 @@ import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 @Getter
 @Entity
@@ -42,6 +45,7 @@ public class Restaurant {
     private int averagePrice;
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Fetch(FetchMode.SUBSELECT)
     private List<RestaurantImage> imageUrls = new ArrayList<>();
 
     @OneToMany(mappedBy = "restaurant")
@@ -54,9 +58,11 @@ public class Restaurant {
     private List<Seat> seatList = new ArrayList<>();
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Fetch(FetchMode.SUBSELECT)
     private List<RestaurantCategory> restaurantCategoryList = new ArrayList<>();
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Fetch(FetchMode.SUBSELECT)
     private List<Menu> menus = new ArrayList<>();
 
     @Builder
@@ -97,18 +103,24 @@ public class Restaurant {
         return this;
     }
 
-    public List<String> getCategories() {
+    public List<String> getCategories(List<RestaurantCategoryName> rcList) {
         List<String> categories = new ArrayList<>();
-        for (RestaurantCategory restaurantCategory : restaurantCategoryList) {
-            categories.add(restaurantCategory.getCategoryName());
+        for (RestaurantCategoryName rc : rcList) {
+            if (rc.getRestaurantId().equals(this.id)) {
+                categories.add(rc.getCategoryName());
+            }
         }
         return categories;
     }
 
-    public List<String> getRestaurantImageUrls() {
+    public List<String> getRestaurantImageUrls(List<Restaurant> restaurantImages) {
         List<String> images = new ArrayList<>();
-        for (RestaurantImage restaurantImage : this.imageUrls) {
-            images.add(restaurantImage.getUrl());
+        for (Restaurant restaurant : restaurantImages) {
+            if (restaurant.getId().equals(this.id)) {
+                for (RestaurantImage image : restaurant.getImageUrls()) {
+                    images.add(image.getUrl());
+                }
+            }
         }
         return images;
     }

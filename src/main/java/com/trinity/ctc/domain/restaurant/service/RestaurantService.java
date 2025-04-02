@@ -2,33 +2,40 @@ package com.trinity.ctc.domain.restaurant.service;
 
 import com.trinity.ctc.domain.category.entity.Category;
 import com.trinity.ctc.domain.category.repository.CategoryRepository;
-import com.trinity.ctc.domain.like.repository.LikeRepository;
+import com.trinity.ctc.domain.like.service.LikeService;
 import com.trinity.ctc.domain.reservation.dto.ReservationAvailabilityResponse;
+import com.trinity.ctc.domain.restaurant.dto.RestaurantCategoryName;
 import com.trinity.ctc.domain.restaurant.dto.RestaurantDetailResponse;
 import com.trinity.ctc.domain.restaurant.dto.RestaurantPreviewRequest;
 import com.trinity.ctc.domain.restaurant.dto.RestaurantPreviewResponse;
 import com.trinity.ctc.domain.restaurant.entity.Restaurant;
+import com.trinity.ctc.domain.restaurant.repository.RestaurantCategoryRepository;
+import com.trinity.ctc.domain.restaurant.repository.RestaurantImageRepository;
 import com.trinity.ctc.domain.restaurant.repository.RestaurantRepository;
 import com.trinity.ctc.domain.search.sorting.SortingStrategy;
 import com.trinity.ctc.domain.search.sorting.SortingStrategyFactory;
+import com.trinity.ctc.domain.seat.dto.AvailableSeatPerDay;
 import com.trinity.ctc.domain.seat.service.SeatService;
-import com.trinity.ctc.domain.user.dto.CustomUserDetails;
 import com.trinity.ctc.domain.user.entity.User;
 import com.trinity.ctc.domain.user.repository.UserRepository;
 import com.trinity.ctc.global.exception.CustomException;
 import com.trinity.ctc.global.exception.error_code.RestaurantErrorCode;
 import com.trinity.ctc.global.exception.error_code.UserErrorCode;
+import com.trinity.ctc.global.util.validator.SeatAvailabilityValidator;
+import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,8 +48,10 @@ public class RestaurantService {
     private final RestaurantRepository restaurantRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
-    private final LikeRepository likeRepository;
     private final SeatService seatService;
+    private final LikeService likeService;
+    private final RestaurantCategoryRepository restaurantCategoryRepository;
+    private final RestaurantImageRepository restaurantImageRepository;
 
     @Transactional(readOnly = true)
     public List<Restaurant> getAllRestaurants() {
@@ -79,23 +88,49 @@ public class RestaurantService {
         Pageable pageable = PageRequest.of(request.getPage() - 1, 30, sort);
 
         Page<Restaurant> restaurants = restaurantRepository.findByCategory(categoryId, pageable);
-
-        return convertToRestaurantDtoList(restaurants, user);
+        List<Restaurant> restaurantList = restaurants.getContent();
+        return convertTorestaurantDtoList(restaurantList, user);
     }
 
-    public List<RestaurantPreviewResponse> convertToRestaurantDtoList(Page<Restaurant> restaurants, User user) {
-        List<RestaurantPreviewResponse> result = restaurants.stream()
+    public List<RestaurantPreviewResponse> convertTorestaurantDtoList(List<Restaurant> restaurantList, User user) {
+        List<Long> restaurantIds = restaurantList.stream().map(Restaurant::getId).collect(Collectors.toList());
+        Map<Long, Boolean> wishMap = likeService.existsByUserAndRestaurantIds(user, restaurantIds);
+        Map<Long, List<AvailableSeatPerDay>> rawSeatMap = seatService.findAvailableSeatsGrouped(restaurantIds, LocalDate.now(), LocalDate.now().plusDays(14));
+
+        Map<Long, List<ReservationAvailabilityResponse>> reservationMap = rawSeatMap.entrySet().stream()
+            .collect(Collectors.toMap(
+                Entry::getKey,
+                entry -> processAvailabilityPerRestaurant(entry.getValue())
+            ));
+
+        List<RestaurantCategoryName> rcList = restaurantCategoryRepository.findAllWithCategoryByRestaurantIds(restaurantIds);
+        List<Restaurant> restaurantImages = restaurantRepository.findAllWithImagesByIdIn(restaurantIds);
+
+        return restaurantList.stream()
             .map(restaurant -> {
-                boolean isWishlisted = likeRepository.existsByUserAndRestaurant(user, restaurant); // -> id값만으로 가능
-
-                // 14일간 날짜별 예약 가능 여부 조회
-                List<ReservationAvailabilityResponse> reservation = seatService
-                    .getAvailabilityForNext14Days(restaurant.getId()); // -> id값만으로 가능
-
-                log.info("reservation 사이즈: {}", reservation.size());
-                return RestaurantPreviewResponse.fromEntity(user,restaurant, isWishlisted, reservation);
+                Long restaurantId = restaurant.getId();
+                boolean isWishlisted = wishMap.getOrDefault(restaurantId, false);
+                List<ReservationAvailabilityResponse> reservation = reservationMap.getOrDefault(restaurantId, Collections.emptyList());
+                return RestaurantPreviewResponse.fromEntity(user, restaurant, isWishlisted, reservation, rcList, restaurantImages);
             })
             .collect(Collectors.toList());
-        return result;
+    }
+
+    private List<ReservationAvailabilityResponse> processAvailabilityPerRestaurant(List<AvailableSeatPerDay> seats) {
+        Map<LocalDate, List<AvailableSeatPerDay>> byDate = seats.stream()
+            .collect(Collectors.groupingBy(AvailableSeatPerDay::getReservationDate));
+
+        return IntStream.range(0, 14)
+            .mapToObj(i -> {
+                LocalDate date = LocalDate.now().plusDays(i);
+                List<AvailableSeatPerDay> seatList = byDate.getOrDefault(date, Collections.emptyList());
+                boolean isAvailable = SeatAvailabilityValidator.isAnySeatAvailableForSearch(seatList, isToday(date));
+                return new ReservationAvailabilityResponse(date, isAvailable, null);
+            })
+            .collect(Collectors.toList());
+    }
+
+    private boolean isToday(LocalDate date) {
+        return LocalDate.now().equals(date);
     }
 }

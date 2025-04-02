@@ -55,6 +55,4 @@ public class JdbcSeatBatchRepository implements SeatBatchRepository {
             throw e;  // 예외 발생 시 스택 트레이스 출력
         }
     }
-
-
 }

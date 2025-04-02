@@ -56,25 +56,9 @@ public class RestaurantRecommendationService {
         log.info("preferredCategories 가져오기: {}", preferredCategories);
 
 
-        int minPrice = userPreference.getMinPrice();
-        int maxPrice = userPreference.getMaxPrice();
-
-        // 사용자가 찜한 식당 리스트 가져오기
-        List<Long> likeList = likeRepository.findByUser(user).stream()
-                .map(like -> like.getRestaurant().getId())
-                .collect(Collectors.toList());
-
-        // 사용자의 검색 기록 가져오기
-        List<String> searchHistory = user.getSearchHistoryList().stream()
-                .map(search -> search.getKeyword())
-                .collect(Collectors.toList());
-
         AIRecommendationRequest request = new AIRecommendationRequest(
+                userId,
                 preferredCategories
-//            minPrice,
-//            maxPrice,
-//            likeList,
-//            searchHistory
         );
         log.info("AI 추천 요청: {}", userId, request.getPreferredCategories());
 
@@ -90,7 +74,7 @@ public class RestaurantRecommendationService {
 
                     boolean isWishlisted = likeRepository.existsByUserAndRestaurant(user, restaurant);
 
-                    return RestaurantPreviewResponse.fromEntity(user, restaurant, isWishlisted, List.of());
+                    return RestaurantPreviewResponse.fromEntity(user, restaurant, isWishlisted, List.of(), List.of(), List.of());
                 })
                 .collect(Collectors.toList());
     }

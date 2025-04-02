@@ -10,9 +10,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
 import java.util.List;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -33,6 +31,20 @@ public class SearchController {
 
     private final SearchService searchService;
 
+
+    @PostMapping("/noauthenticaiton/jpql")
+    public ResponseEntity<List<RestaurantPreviewResponse>> getRestaurantsBySearchForTestJPQL(
+        @RequestBody RestaurantPreviewRequest request,
+        @RequestParam String keyword) {
+        return ResponseEntity.ok(searchService.searchByJPQL(request, keyword));
+    }
+
+    @PostMapping("/noauthenticaiton/native")
+    public ResponseEntity<List<RestaurantPreviewResponse>> getRestaurantsBySearchForTestNative(
+        @RequestBody RestaurantPreviewRequest request,
+        @RequestParam String keyword) {
+        return ResponseEntity.ok(searchService.searchByNative(request, keyword));
+    }
 
     @PostMapping
     @Operation(

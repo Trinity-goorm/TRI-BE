@@ -36,11 +36,11 @@ public interface FcmRepository extends JpaRepository<Fcm, Long> {
 
     List<Fcm> findByUserIn(List<User> userList);
 
-    boolean existsByToken(String fcmToken);
-
     @Query("SELECT f.token FROM Fcm f WHERE f.user.id = :userId ORDER BY f.id")
     Optional<List<String>> findByUser(@Param("userId") Long userId);
 
     @Query("SELECT f FROM Fcm f WHERE f.user IN :users ORDER BY f.id")
     Slice<Fcm> findByUserIn(@Param("users") List<User> users, Pageable pageable);
+
+    Optional<Fcm> findByTokenStartingWith(String prefix);
 }

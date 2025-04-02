@@ -19,6 +19,16 @@ import java.util.Set;
 @Repository
 public interface SeatRepository extends JpaRepository<Seat, Long> {
 
+    @Query("SELECT new com.trinity.ctc.domain.seat.dto.AvailableSeatPerDay( " +
+        "sa.restaurant.id, sa.reservationDate, sa.availableSeats, sa.reservationTime.timeSlot) " +
+        "FROM Seat sa " +
+        "WHERE sa.restaurant.id IN :restaurantIds " +
+        "AND sa.reservationDate BETWEEN :startDate AND :endDate")
+    List<AvailableSeatPerDay> findAvailableSeatsForRestaurants(@Param("restaurantIds") List<Long> restaurantIds,
+        @Param("startDate") LocalDate startDate,
+        @Param("endDate") LocalDate endDate);
+
+
     @Query("SELECT sa FROM Seat sa " +
             "WHERE sa.restaurant.id = :restaurantId " +
             "AND sa.reservationTime.timeSlot > :targetTime " +
