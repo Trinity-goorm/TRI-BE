@@ -48,7 +48,7 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
      * @param seatTypeId
      * @return 예약데이터
      */
-//    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT sa FROM Seat sa " +
             "WHERE sa.restaurant.id = :restaurantId " +
             "AND sa.reservationDate = :selectedDate " +

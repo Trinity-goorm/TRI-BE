@@ -4,12 +4,12 @@ spring:
     url: ${LOCAL_DATASOURCE_URL}
     username: ${LOCAL_DATASOURCE_USERNAME}
     password: ${LOCAL_DATASOURCE_PASSWORD}
-#    hikari:
-#      maximum-pool-size: 50
-#      minimum-idle: 10
-#      idle-timeout: 60000
-#      max-lifetime: 1800000
-#      connection-timeout: 30000
+    hikari:
+      maximum-pool-size: 100          # ⭐ 최대 연결 수
+      minimum-idle: 20                # 최소 유휴 커넥션
+      idle-timeout: 30000             # 유휴 커넥션 유지 시간 (30초)
+      max-lifetime: 1800000           # 커넥션 최대 생존 시간 (30분)
+      connection-timeout: 30000        # 커넥션 획득 타임아웃 (30초)
 ---
 spring:
   jpa:

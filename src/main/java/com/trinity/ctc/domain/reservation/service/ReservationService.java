@@ -1,7 +1,6 @@
 package com.trinity.ctc.domain.reservation.service;
 
 import com.trinity.ctc.domain.reservation.dto.PreoccupyResponse;
-import com.trinity.ctc.domain.reservation.dto.ReservationRequest;
 import com.trinity.ctc.domain.reservation.dto.ReservationResultResponse;
 import com.trinity.ctc.domain.reservation.entity.Reservation;
 import com.trinity.ctc.domain.reservation.entity.ReservationTime;
@@ -32,8 +31,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static com.trinity.ctc.domain.seat.validator.CapacityValidator.checkEmptySeat;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -92,8 +89,8 @@ public class ReservationService {
      * @return 선점성공여부
      */
     @Transactional
-    public PreoccupyResponse occupyInAdvanceTest(Long kakaoId, Long restaurantId, LocalDate reservationDate,
-                                                 LocalTime reservationTime, Long seatTypeId) {
+    public PreoccupyResponse occupyWithPessimisticLock(Long kakaoId, Long restaurantId, LocalDate reservationDate,
+                                                       LocalTime reservationTime, Long seatTypeId) {
 
         // 사용자 예약이력 검증
         reservationValidator.validateUserReservation(kakaoId, restaurantId, reservationDate, reservationTime, seatTypeId);
@@ -134,7 +131,7 @@ public class ReservationService {
 
         try {
             // 락 시도 (최대 5초 대기, 3초 후 자동 해제)
-            if (!lock.tryLock(5, 3, TimeUnit.SECONDS)) {
+            if (!lock.tryLock(5, -1, TimeUnit.SECONDS)) {
                 throw new CustomException(ReservationErrorCode.PREOCCUPY_FAILED);
             }
 
