@@ -39,7 +39,10 @@ public class ReservationController {
     )
     public ResponseEntity<PreoccupyResponse> preoccupySeat(@RequestBody ReservationRequest reservationRequest) {
         Long kakaoId = Long.parseLong(authService.getAuthenticatedKakaoId());
-        PreoccupyResponse result = reservationService.occupyInAdvance(kakaoId, reservationRequest.getRestaurantId(), reservationRequest.getSelectedDate(), reservationRequest.getReservationTime(), reservationRequest.getSeatTypeId());
+        /* DB 원자적 연산 적용 방법 */
+        PreoccupyResponse result = reservationService.occupyWithAtomicUpdate(kakaoId, reservationRequest.getRestaurantId(),
+                reservationRequest.getSelectedDate(), reservationRequest.getReservationTime(),reservationRequest.getSeatTypeId());
+
         return ResponseEntity.ok(result);
     }
 
