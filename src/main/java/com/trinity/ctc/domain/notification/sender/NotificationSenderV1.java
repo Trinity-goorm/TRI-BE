@@ -45,7 +45,7 @@ public class NotificationSenderV1 implements NotificationSender {
      */
     public CompletableFuture<FcmSendingResultDto> sendSingleNotification(FcmMessage message) {
         // FCM 서버에 메세지 전송 -> 응답을 Future 객체로 반환
-        ApiFuture<String> sendResponse = FirebaseMessaging.getInstance().sendAsync(message.getMessage(), true);
+        ApiFuture<String> sendResponse = FirebaseMessaging.getInstance().sendAsync(message.getMessage());
 
         // 응답에 대한 처리 메서드 호출 -> 전송 결과 DTO 반환(비동기-none blocking 처리)
         return CompletableFuture.supplyAsync(() -> handleSingleResponse(sendResponse, message))
@@ -92,7 +92,7 @@ public class NotificationSenderV1 implements NotificationSender {
         List<Message> messages = messageList.stream().map(FcmMessage::getMessage).toList();
 
         // FCM 서버에 메세지 전송 -> 응답을 Future 객체로 반환
-        ApiFuture<BatchResponse> sendResponseFuture = FirebaseMessaging.getInstance().sendEachAsync(messages, true);
+        ApiFuture<BatchResponse> sendResponseFuture = FirebaseMessaging.getInstance().sendEachAsync(messages);
 
         // 응답에 대한 처리 메서드 호출 -> 전송 결과 DTO 리스트 반환(비동기-none blocking 처리)
         return CompletableFuture.supplyAsync(() -> handleEachResponse(sendResponseFuture, messageList))
@@ -144,7 +144,7 @@ public class NotificationSenderV1 implements NotificationSender {
      */
     public CompletableFuture<List<FcmSendingResultDto>> sendMulticastNotification(FcmMulticastMessage message) {
         // FCM 서버에 메세지 전송 -> 응답을 Future 객체로 반환
-        ApiFuture<BatchResponse> sendResponseFuture = FirebaseMessaging.getInstance().sendEachForMulticastAsync(message.getMulticastMessage(), true);
+        ApiFuture<BatchResponse> sendResponseFuture = FirebaseMessaging.getInstance().sendEachForMulticastAsync(message.getMulticastMessage());
 
         // 응답에 대한 처리 메서드 호출 -> 전송 결과 DTO 리스트 반환(비동기-none blocking 처리)
         return CompletableFuture.supplyAsync(() -> handleMulticastResponse(sendResponseFuture, message))
